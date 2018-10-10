@@ -1,0 +1,690 @@
+
+<!DOCTYPE html>
+<html lang="">
+    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="Jiezhi Blog">
+    <title>解决Gravatar头像在中国不能正常显示的问题 - Jiezhi Blog</title>
+    <meta name="author" content="Jiezhi">
+    
+    
+    
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Jiezhi","sameAs":["https://github.com/Jiezhi","https://stackoverflow.com/users/5425709/jiezhi-g","https://twitter.com/JiezhiG","mailto:Jiezhi.Vip+hexo@gmail.com"],"image":"https://www.gravatar.com/avatar/a987dd393c40cf0645bfb4f07b74b334"},"articleBody":"如果你遇到Gravatar在中国不能正常显示的问题，这篇文章也许可以帮助你。昨天花了大半天时间终于把hexo搭建好了，也挑选了个模板，并进行配置。同时也将之前wp中的一些文章，再次迁移至此。等deploy至github后，用手机访问，发现不能正常显示图片。嗯，在国内你会遇见各种问题。Gravatar已经被墙了。\n搜了下，好像使用SSL访问Gravatar则可以，所以将hexo中头像配置文件修改了一下：\nhexo/node_modules/hexo/lib/plugins/helper/gravatar.js123var str = &apos;https://www.gravatar.com/avatar/&apos; + md5(email.toLowerCase());\n在电脑上试了下是可以的，但在手机上还是无法正确显示头像。。。\n索性直接改为微博头像吧，我的weibo头像地址：http://tp2.sinaimg.cn/1723846713/180/40002045318/1\nhexo/node_modules/hexo/lib/plugins/helper/gravatar.js123456789function gravatarHelper(email, options)&#123;  // use weibo avatar instead of gravatar.  return &apos;http://tp2.sinaimg.cn/1723846713/180/40002045318/1&apos;;&#125;\n改完后重新生成即可。\n1hexo generate\n欢迎关注我的公众号『日技』\n","dateCreated":"2015-09-16T15:14:06+08:00","dateModified":"2018-10-10T17:25:01+08:00","datePublished":"2015-09-16T15:14:06+08:00","description":"如果你遇到Gravatar在中国不能正常显示的问题，这篇文章也许可以帮助你。","headline":"解决Gravatar头像在中国不能正常显示的问题","image":["http://qn-jiezhi.nospider.net/pet-0e24cfd3754db9af5e2f7119f1160964.jpg-cover","http://qn-jiezhi.nospider.net/android12736509,2560,1600.jpg"],"mainEntityOfPage":{"@type":"WebPage","@id":"http://jiezhi.github.io/2015/09/16/解决Gravatar头像在中国不能正常显示的问题/"},"publisher":{"@type":"Organization","name":"Jiezhi","sameAs":["https://github.com/Jiezhi","https://stackoverflow.com/users/5425709/jiezhi-g","https://twitter.com/JiezhiG","mailto:Jiezhi.Vip+hexo@gmail.com"],"image":"https://www.gravatar.com/avatar/a987dd393c40cf0645bfb4f07b74b334","logo":{"@type":"ImageObject","url":"https://www.gravatar.com/avatar/a987dd393c40cf0645bfb4f07b74b334"}},"url":"http://jiezhi.github.io/2015/09/16/解决Gravatar头像在中国不能正常显示的问题/","keywords":"gravatar, hexo","thumbnailUrl":"http://qn-jiezhi.nospider.net/pet-0e24cfd3754db9af5e2f7119f1160964.jpg-cover"}</script>
+    <meta name="description" content="如果你遇到Gravatar在中国不能正常显示的问题，这篇文章也许可以帮助你。">
+<meta name="keywords" content="gravatar,hexo">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="解决Gravatar头像在中国不能正常显示的问题">
+<meta property="og:url" content="http://jiezhi.github.io/2015/09/16/解决Gravatar头像在中国不能正常显示的问题/index.html">
+<meta property="og:site_name" content="Jiezhi Blog">
+<meta property="og:description" content="如果你遇到Gravatar在中国不能正常显示的问题，这篇文章也许可以帮助你。">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="http://qn-jiezhi.nospider.net/qrcode_riji.jpg">
+<meta property="og:updated_time" content="2018-10-10T09:25:01.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="解决Gravatar头像在中国不能正常显示的问题">
+<meta name="twitter:description" content="如果你遇到Gravatar在中国不能正常显示的问题，这篇文章也许可以帮助你。">
+<meta name="twitter:image" content="http://qn-jiezhi.nospider.net/qrcode_riji.jpg">
+<meta name="twitter:creator" content="@JiezhiG">
+    
+        <link rel="publisher" href="https://plus.google.com/103408917271477650000"/>
+    
+    
+        
+    
+    
+        <meta property="og:image" content="https://www.gravatar.com/avatar/d932c72721e71e419028c107423eb812?s=640"/>
+    
+    
+        <meta property="og:image" content="http://qn-jiezhi.nospider.net/pet-0e24cfd3754db9af5e2f7119f1160964.jpg-cover"/>
+        <meta class="swiftype" name="image" data-type="enum" content="http://qn-jiezhi.nospider.net/pet-0e24cfd3754db9af5e2f7119f1160964.jpg-cover" />
+    
+    
+        <meta property="og:image" content="http://qn-jiezhi.nospider.net/android12736509,2560,1600.jpg"/>
+        <meta class="swiftype" name="image" data-type="enum" content="http://qn-jiezhi.nospider.net/android12736509,2560,1600.jpg" />
+    
+    
+    <!--STYLES-->
+    <link rel="stylesheet" href="/assets/css/style-du2xmrqdqrl2ollgeiw050kpl6l4nbyz7bumjuurjgsxyopifvukebxc9lqe.min.css">
+    <!--STYLES END-->
+    
+    <script type="text/javascript">
+        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+        ga('create', 'UA-67636901-1', 'auto');
+        ga('send', 'pageview');
+    </script>
+
+
+    
+</head>
+
+    <body>
+        <div id="blog">
+            <!-- Define author's picture -->
+
+
+    
+        
+    
+
+<header id="header" data-behavior="4">
+    <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+    <div class="header-title">
+        <a class="header-title-link" href="/ ">Jiezhi Blog</a>
+    </div>
+    
+        
+            <a  class="header-right-picture "
+                href="#about">
+        
+        
+            <img class="header-picture" src="https://www.gravatar.com/avatar/d932c72721e71e419028c107423eb812?s=90" alt="Bild des Autors"/>
+        
+        </a>
+    
+</header>
+
+            <!-- Define author's picture -->
+
+
+    
+
+<nav id="sidebar" data-behavior="4">
+    <div class="sidebar-container">
+        
+            <div class="sidebar-profile">
+                <a href="/#about">
+                    <img class="sidebar-profile-picture" src="https://www.gravatar.com/avatar/d932c72721e71e419028c107423eb812?s=110" alt="Bild des Autors"/>
+                </a>
+                <h4 class="sidebar-profile-name">Jiezhi</h4>
+                
+                    <h5 class="sidebar-profile-bio"><p>author.bio</p>
+</h5>
+                
+            </div>
+        
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a  class="sidebar-button-link "
+                             href="/ "
+                            
+                            title="Home"
+                        >
+                    
+                        <i class="sidebar-button-icon fa fa-home" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Home</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a  class="sidebar-button-link "
+                             href="/all-categories"
+                            
+                            title="Kategorien"
+                        >
+                    
+                        <i class="sidebar-button-icon fa fa-bookmark" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Kategorien</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a  class="sidebar-button-link "
+                             href="/all-tags"
+                            
+                            title="Tags"
+                        >
+                    
+                        <i class="sidebar-button-icon fa fa-tags" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tags</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a  class="sidebar-button-link "
+                             href="/all-archives"
+                            
+                            title="Archiv"
+                        >
+                    
+                        <i class="sidebar-button-icon fa fa-archive" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Archiv</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a  class="sidebar-button-link open-algolia-search"
+                             href="#search"
+                            
+                            title="Suche"
+                        >
+                    
+                        <i class="sidebar-button-icon fa fa-search" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Suche</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a  class="sidebar-button-link "
+                             href="#about"
+                            
+                            title="Über"
+                        >
+                    
+                        <i class="sidebar-button-icon fa fa-question" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Über</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a  class="sidebar-button-link " href="https://github.com/Jiezhi" target="_blank" rel="noopener" title="GitHub">
+                    
+                        <i class="sidebar-button-icon fab fa-github" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">GitHub</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a  class="sidebar-button-link " href="https://stackoverflow.com/users/5425709/jiezhi-g" target="_blank" rel="noopener" title="Stack Overflow">
+                    
+                        <i class="sidebar-button-icon fab fa-stack-overflow" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Stack Overflow</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a  class="sidebar-button-link " href="https://twitter.com/JiezhiG" target="_blank" rel="noopener" title="Twitter">
+                    
+                        <i class="sidebar-button-icon fab fa-twitter" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Twitter</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a  class="sidebar-button-link " href="mailto:Jiezhi.Vip+hexo@gmail.com" target="_blank" rel="noopener" title="E-Mail">
+                    
+                        <i class="sidebar-button-icon fa fa-envelope" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">E-Mail</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a  class="sidebar-button-link "
+                             href="/atom.xml"
+                            
+                            title="RSS"
+                        >
+                    
+                        <i class="sidebar-button-icon fa fa-rss" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">RSS</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+    </div>
+</nav>
+
+            
+        <div class="post-header-cover
+                    text-center
+                    "
+             style="background-image:url('http://qn-jiezhi.nospider.net/android12736509,2560,1600.jpg');"
+             data-behavior="4">
+            
+        </div>
+
+            <div id="main" data-behavior="4"
+                 class="hasCover
+                        hasCoverMetaOut
+                        hasCoverCaption">
+                
+<article class="post">
+    
+        <span class="post-header-cover-caption caption">Default Cover Image</span>
+    
+    
+        <div class="post-header main-content-wrap text-center">
+    
+        <h1 class="post-title">
+            解决Gravatar头像在中国不能正常显示的问题
+        </h1>
+    
+    
+        <div class="post-meta">
+    <time datetime="2015-09-16T15:14:06+08:00">
+	
+		    16 Sep 2015
+    	
+    </time>
+    
+        <span>in </span>
+        
+    <a class="category-link" href="/categories/hexo/">hexo</a>
+
+
+    
+</div>
+
+    
+</div>
+
+    
+    <div class="post-content markdown">
+        <div class="main-content-wrap">
+            <p>如果你遇到Gravatar在中国不能正常显示的问题，这篇文章也许可以帮助你。<br><a id="more"></a><br>昨天花了大半天时间终于把hexo搭建好了，也挑选了个模板，并进行配置。同时也将之前wp中的一些文章，再次迁移至此。等deploy至github后，用手机访问，发现不能正常显示图片。嗯，在国内你会遇见各种问题。Gravatar已经被墙了。</p>
+<p>搜了下，好像使用SSL访问Gravatar则可以，所以将hexo中头像配置文件修改了一下：</p>
+<figure class="highlight plain"><figcaption><span>hexo/node_modules/hexo/lib/plugins/helper/gravatar.js</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">var str = &apos;https://www.gravatar.com/avatar/&apos; + md5(email.toLowerCase());</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>在电脑上试了下是可以的，但在手机上还是无法正确显示头像。。。</p>
+<p>索性直接改为微博头像吧，我的weibo头像地址：<a href="http://tp2.sinaimg.cn/1723846713/180/40002045318/1" target="_blank" rel="noopener">http://tp2.sinaimg.cn/1723846713/180/40002045318/1</a></p>
+<figure class="highlight plain"><figcaption><span>hexo/node_modules/hexo/lib/plugins/helper/gravatar.js</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">function gravatarHelper(email, options)&#123;</span><br><span class="line"></span><br><span class="line">  // use weibo avatar instead of gravatar.</span><br><span class="line"></span><br><span class="line">  return &apos;http://tp2.sinaimg.cn/1723846713/180/40002045318/1&apos;;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>改完后重新生成即可。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hexo generate</span><br></pre></td></tr></table></figure>
+<p>欢迎关注我的公众号『日技』<br><img src="http://qn-jiezhi.nospider.net/qrcode_riji.jpg" alt=""></p>
+
+            
+
+        </div>
+    </div>
+    <div id="post-footer" class="post-footer main-content-wrap">
+        
+            <div class="post-footer-tags">
+                <span class="text-color-light text-small">GETAGGT IN</span><br/>
+                
+    <a class="tag tag--primary tag--small t-link" href="/tags/gravatar/">gravatar</a> <a class="tag tag--primary tag--small t-link" href="/tags/hexo/">hexo</a>
+
+            </div>
+        
+        
+            <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                    <a class="post-action-btn btn btn--default tooltip--top" href="/2015/09/25/android-tag-personalized/" data-tooltip="android输出带上当前类名和方法名log" aria-label="FRÜHER: android输出带上当前类名和方法名log">
+                
+                    <i class="fa fa-angle-left" aria-hidden="true"></i>
+                    <span class="hide-xs hide-sm text-small icon-ml">FRÜHER</span>
+                </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                    <a class="post-action-btn btn btn--default tooltip--top" href="/2015/08/28/android-inJustDecodeBounds/" data-tooltip="对inJustDecodeBounds的理解" aria-label="NÄCHSTER: 对inJustDecodeBounds的理解">
+                
+                    <span class="hide-xs hide-sm text-small icon-mr">NÄCHSTER</span>
+                    <i class="fa fa-angle-right" aria-hidden="true"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a class="post-action-btn btn btn--default btn-open-shareoptions" href="#btn-open-shareoptions" aria-label="Diesen Beitrag teilen">
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a class="post-action-btn btn btn--default" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://jiezhi.github.io/2015/09/16/解决Gravatar头像在中国不能正常显示的问题/" title="Teilen auf Facebook">
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a class="post-action-btn btn btn--default" target="new" href="https://twitter.com/intent/tweet?text=http://jiezhi.github.io/2015/09/16/解决Gravatar头像在中国不能正常显示的问题/" title="Teilen auf Twitter">
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a class="post-action-btn btn btn--default" target="new" href="https://plus.google.com/share?url=http://jiezhi.github.io/2015/09/16/解决Gravatar头像在中国不能正常显示的问题/" title="Teilen auf Google Plus">
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a class="post-action-btn btn btn--default" target="new" href="http://service.weibo.com/share/share.php?&amp;title=http://jiezhi.github.io/2015/09/16/解决Gravatar头像在中国不能正常显示的问题/" title="Share on Weibo">
+                    <i class="fab fa-weibo" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a class="post-action-btn btn btn--default" target="new" href="http://connect.qq.com/widget/shareqq/index.html?url=http://jiezhi.github.io/2015/09/16/解决Gravatar头像在中国不能正常显示的问题/&amp;title=解决Gravatar头像在中国不能正常显示的问题" title="Share on QQ">
+                    <i class="fab fa-qq" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a class="post-action-btn btn btn--default" target="new" href="http://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=http://jiezhi.github.io/2015/09/16/解决Gravatar头像在中国不能正常显示的问题/" title="Share on Qzone">
+                    <i class="fa fa-star" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a class="post-action-btn btn btn--default" target="new" href="http://widget.renren.com/dialog/share?resourceUrl=http://jiezhi.github.io/2015/09/16/解决Gravatar头像在中国不能正常显示的问题/" title="Share on Renren">
+                    <i class="fab fa-renren" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+                <li class="post-action">
+                    <a class="post-action-btn btn btn--default" href="#disqus_thread">
+                        <i class="fa fa-comment"></i>
+                    </a>
+                </li>
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="Nach oben">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+        
+        
+            
+                <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+            
+        
+    </div>
+</article>
+
+
+
+                <footer id="footer" class="main-content-wrap">
+    <span class="copyrights">
+        Copyrights &copy; 2018 Jiezhi. All Rights Reserved.
+    </span>
+</footer>
+
+            </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="4">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                    <a class="post-action-btn btn btn--default tooltip--top" href="/2015/09/25/android-tag-personalized/" data-tooltip="android输出带上当前类名和方法名log" aria-label="FRÜHER: android输出带上当前类名和方法名log">
+                
+                    <i class="fa fa-angle-left" aria-hidden="true"></i>
+                    <span class="hide-xs hide-sm text-small icon-ml">FRÜHER</span>
+                </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                    <a class="post-action-btn btn btn--default tooltip--top" href="/2015/08/28/android-inJustDecodeBounds/" data-tooltip="对inJustDecodeBounds的理解" aria-label="NÄCHSTER: 对inJustDecodeBounds的理解">
+                
+                    <span class="hide-xs hide-sm text-small icon-mr">NÄCHSTER</span>
+                    <i class="fa fa-angle-right" aria-hidden="true"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a class="post-action-btn btn btn--default btn-open-shareoptions" href="#btn-open-shareoptions" aria-label="Diesen Beitrag teilen">
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a class="post-action-btn btn btn--default" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://jiezhi.github.io/2015/09/16/解决Gravatar头像在中国不能正常显示的问题/" title="Teilen auf Facebook">
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a class="post-action-btn btn btn--default" target="new" href="https://twitter.com/intent/tweet?text=http://jiezhi.github.io/2015/09/16/解决Gravatar头像在中国不能正常显示的问题/" title="Teilen auf Twitter">
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a class="post-action-btn btn btn--default" target="new" href="https://plus.google.com/share?url=http://jiezhi.github.io/2015/09/16/解决Gravatar头像在中国不能正常显示的问题/" title="Teilen auf Google Plus">
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a class="post-action-btn btn btn--default" target="new" href="http://service.weibo.com/share/share.php?&amp;title=http://jiezhi.github.io/2015/09/16/解决Gravatar头像在中国不能正常显示的问题/" title="Share on Weibo">
+                    <i class="fab fa-weibo" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a class="post-action-btn btn btn--default" target="new" href="http://connect.qq.com/widget/shareqq/index.html?url=http://jiezhi.github.io/2015/09/16/解决Gravatar头像在中国不能正常显示的问题/&amp;title=解决Gravatar头像在中国不能正常显示的问题" title="Share on QQ">
+                    <i class="fab fa-qq" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a class="post-action-btn btn btn--default" target="new" href="http://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=http://jiezhi.github.io/2015/09/16/解决Gravatar头像在中国不能正常显示的问题/" title="Share on Qzone">
+                    <i class="fa fa-star" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a class="post-action-btn btn btn--default" target="new" href="http://widget.renren.com/dialog/share?resourceUrl=http://jiezhi.github.io/2015/09/16/解决Gravatar头像在中国不能正常显示的问题/" title="Share on Renren">
+                    <i class="fab fa-renren" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+                <li class="post-action">
+                    <a class="post-action-btn btn btn--default" href="#disqus_thread">
+                        <i class="fa fa-comment"></i>
+                    </a>
+                </li>
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="Nach oben">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                <div id="share-options-bar" class="share-options-bar" data-behavior="4">
+    <i id="btn-close-shareoptions" class="fa fa-times"></i>
+    <ul class="share-options">
+        
+            
+            
+            <li class="share-option">
+                <a class="share-option-btn" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://jiezhi.github.io/2015/09/16/解决Gravatar头像在中国不能正常显示的问题/">
+                    <i class="fab fa-facebook" aria-hidden="true"></i><span>Teilen auf Facebook</span>
+                </a>
+            </li>
+        
+            
+            
+            <li class="share-option">
+                <a class="share-option-btn" target="new" href="https://twitter.com/intent/tweet?text=http://jiezhi.github.io/2015/09/16/解决Gravatar头像在中国不能正常显示的问题/">
+                    <i class="fab fa-twitter" aria-hidden="true"></i><span>Teilen auf Twitter</span>
+                </a>
+            </li>
+        
+            
+            
+            <li class="share-option">
+                <a class="share-option-btn" target="new" href="https://plus.google.com/share?url=http://jiezhi.github.io/2015/09/16/解决Gravatar头像在中国不能正常显示的问题/">
+                    <i class="fab fa-google-plus" aria-hidden="true"></i><span>Teilen auf Google Plus</span>
+                </a>
+            </li>
+        
+            
+            
+            <li class="share-option">
+                <a class="share-option-btn" target="new" href="http://service.weibo.com/share/share.php?&amp;title=http://jiezhi.github.io/2015/09/16/解决Gravatar头像在中国不能正常显示的问题/">
+                    <i class="fab fa-weibo" aria-hidden="true"></i><span>Share on Weibo</span>
+                </a>
+            </li>
+        
+            
+            
+            <li class="share-option">
+                <a class="share-option-btn" target="new" href="http://connect.qq.com/widget/shareqq/index.html?url=http://jiezhi.github.io/2015/09/16/解决Gravatar头像在中国不能正常显示的问题/&amp;title=解决Gravatar头像在中国不能正常显示的问题">
+                    <i class="fab fa-qq" aria-hidden="true"></i><span>Share on QQ</span>
+                </a>
+            </li>
+        
+            
+            
+            <li class="share-option">
+                <a class="share-option-btn" target="new" href="http://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=http://jiezhi.github.io/2015/09/16/解决Gravatar头像在中国不能正常显示的问题/">
+                    <i class="fa fa-star" aria-hidden="true"></i><span>Share on Qzone</span>
+                </a>
+            </li>
+        
+            
+            
+            <li class="share-option">
+                <a class="share-option-btn" target="new" href="http://widget.renren.com/dialog/share?resourceUrl=http://jiezhi.github.io/2015/09/16/解决Gravatar头像在中国不能正常显示的问题/">
+                    <i class="fab fa-renren" aria-hidden="true"></i><span>Share on Renren</span>
+                </a>
+            </li>
+        
+    </ul>
+</div>
+
+            
+        </div>
+        
+
+
+    
+
+<div id="about">
+    <div id="about-card">
+        <div id="about-btn-close">
+            <i class="fa fa-times"></i>
+        </div>
+        
+            <img id="about-card-picture" src="https://www.gravatar.com/avatar/d932c72721e71e419028c107423eb812?s=110" alt="Bild des Autors"/>
+        
+            <h4 id="about-card-name">Jiezhi</h4>
+        
+            <div id="about-card-bio"><p>author.bio</p>
+</div>
+        
+        
+            <div id="about-card-job">
+                <i class="fa fa-briefcase"></i>
+                <br/>
+                <p>author.job</p>
+
+            </div>
+        
+        
+            <div id="about-card-location">
+                <i class="fa fa-map-marker-alt"></i>
+                <br/>
+                Nanjing China
+            </div>
+        
+    </div>
+</div>
+
+        
+        
+<div id="cover" style="background-image:url('/assets/images/cover.jpg');"></div>
+        <!--SCRIPTS-->
+<script src="/assets/js/script-vufjrm3fmbuttogo1hxuu0w9w0sesk5iyysjuguc2hdhufot9szxg8twijry.min.js"></script>
+<!--SCRIPTS END-->
+
+    
+        <script>
+             var disqus_config = function () {
+                 this.page.url = 'http://jiezhi.github.io/2015/09/16/解决Gravatar头像在中国不能正常显示的问题/';
+                 
+                    this.page.identifier = '2015/09/16/解决Gravatar头像在中国不能正常显示的问题/';
+                 
+             };
+            (function() {
+                var d = document, s = d.createElement('script');
+                var disqus_shortname = 'jiezhi';
+                s.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+
+                s.setAttribute('data-timestamp', +new Date());
+                (d.head || d.body).appendChild(s);
+            })();
+        </script>
+    
+
+
+
+    </body>
+</html>

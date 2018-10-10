@@ -1,0 +1,698 @@
+
+<!DOCTYPE html>
+<html lang="">
+    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="Jiezhi Blog">
+    <title>使用注解改进Android代码 - Jiezhi Blog</title>
+    <meta name="author" content="Jiezhi">
+    
+    
+    
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Jiezhi","sameAs":["https://github.com/Jiezhi","https://stackoverflow.com/users/5425709/jiezhi-g","https://twitter.com/JiezhiG","mailto:Jiezhi.Vip+hexo@gmail.com"],"image":"https://www.gravatar.com/avatar/a987dd393c40cf0645bfb4f07b74b334"},"articleBody":"注解有很多用途。 但是，在这里我们将讨论如何使用注解来改进我们的android编码。\n注解即元数据而元数据是提供有关其他数据的信息的一组数据。\n注解有很多用途。 但是，在这里我们将讨论如何使用注解来改进我们的android编码。\n官方Android已经提供了支持注解，你可以添加如下依赖关系来导入注解：\n\ncompile ‘com.android.support:support-annotations:x.x.x’\n\n每个人都想成为一个好的程序员，每天我也在努力地提高自己。\n\n任何人都可以编写计算机可以理解的代码，而好的程序员编写人可以理解的代码。 - Martin Fowler\n\n让我们一起探索下一些有用的注解空类型注解@Nullable和@NonNull注解用于检查给定的变量、参数甚至是返回值是否为空。\n@Nullable：它表示一个变量、参数或返回值可以为空。\n@NonNUll：它表示不能为空的变量、参数或返回值。\n例如：123456@NonNullpublic View getView(@Nullable String s1, @NonNull String s2) &#123;  // s1 可以为空  // s2 不可以为空  // 该方法必须返回一个不为空的view&#125;\n所以当我们尝试这样调用该方法时：\n1View view = getView(\"Amit\", null);\n在代码检测期间，Android Studio会警告你s2的值不能为空。\n资源注解我们都知道，Android对资源的引用（如drawable和string资源）都是传递int类型的，因此我们必须验证资源类型。假设代码中希望传入特定类型的资源（例如Drawables），这里可以传入引用类型的int值，但实际上却传入了另外类型的资源，例如R.string资源：\n1234public void setText(@StringRes int resId) &#123;  // resId 必须为string类型的id  // resId 不能为常规的int值&#125;\n所以，当你像如下方式调用该方法时：\n1textView.setText(56);\n在代码检测过程中，当传入非string资源的参数时，注解将会生成一个警告。\n线程注解线程注解检查方法是否在其期望的线程被调用。\n支持的注解有：\n@MainThread@UiThread@WorkerThread@BinderThread@AnyThread\n如果你添加如下的注解：1234@WorkerThreadpublic void doSomething()&#123;  // 该方法一定要从worker线程调用&#125;\n如果你从非worker线程调用该方法时，你将会得到一个警告。\n值限定注解有时候，我们必须对参数做一些约束，所以使用@IntRange，@FloatRange和@Size注解来验证传入参数的值。\n当调用该方法的人可能会传递错误的值（超出指定的范围）时，该注解是非常有用的。\n在下面的例子中，@IntRange注解确保传递的整数值必须在0到255之间。\n1public void setAlpha(@IntRange(from=0,to=255) int alpha) &#123;&#125;\n权限注解使用@RequiresPermission注解来验证调用者的权限。\n以下示例注解setWallpaper()方法来确保方法的调用者具有permission.SET_WALLPAPERS权限：\n12@RequiresPermission(Manifest.permission.SET_WALLPAPER)public abstract void setWallpaper(Bitmap bitmap) throws IOException;\n如果在调用该方法时没有在manifest文件中添加需要的权限，代码检测器将会给你一个警告。\n听首音乐放松一下：\n\n\n\nauthor: Jiezhi.Gemail: Jiezhi.G@gmail.com\n\n欢迎关注我的公众号『日技』\n","dateCreated":"2017-05-07T20:38:31+08:00","dateModified":"2018-10-10T17:25:01+08:00","datePublished":"2017-05-07T20:38:31+08:00","description":"注解有很多用途。 但是，在这里我们将讨论如何使用注解来改进我们的android编码。","headline":"使用注解改进Android代码","image":["http://qn-jiezhi.nospider.net/pet-0e24cfd3754db9af5e2f7119f1160964.jpg-thumb1"],"mainEntityOfPage":{"@type":"WebPage","@id":"http://jiezhi.github.io/2017/05/07/annotations/"},"publisher":{"@type":"Organization","name":"Jiezhi","sameAs":["https://github.com/Jiezhi","https://stackoverflow.com/users/5425709/jiezhi-g","https://twitter.com/JiezhiG","mailto:Jiezhi.Vip+hexo@gmail.com"],"image":"https://www.gravatar.com/avatar/a987dd393c40cf0645bfb4f07b74b334","logo":{"@type":"ImageObject","url":"https://www.gravatar.com/avatar/a987dd393c40cf0645bfb4f07b74b334"}},"url":"http://jiezhi.github.io/2017/05/07/annotations/","thumbnailUrl":"http://qn-jiezhi.nospider.net/pet-0e24cfd3754db9af5e2f7119f1160964.jpg-thumb1"}</script>
+    <meta name="description" content="注解有很多用途。 但是，在这里我们将讨论如何使用注解来改进我们的android编码。">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="使用注解改进Android代码">
+<meta property="og:url" content="http://jiezhi.github.io/2017/05/07/annotations/index.html">
+<meta property="og:site_name" content="Jiezhi Blog">
+<meta property="og:description" content="注解有很多用途。 但是，在这里我们将讨论如何使用注解来改进我们的android编码。">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="https://cdn-images-1.medium.com/max/800/1*gxjdLI-WsXSPWPvAyBAMaQ.png">
+<meta property="og:image" content="http://qn-jiezhi.nospider.net/qrcode_riji.jpg">
+<meta property="og:updated_time" content="2018-10-10T09:25:01.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="使用注解改进Android代码">
+<meta name="twitter:description" content="注解有很多用途。 但是，在这里我们将讨论如何使用注解来改进我们的android编码。">
+<meta name="twitter:image" content="https://cdn-images-1.medium.com/max/800/1*gxjdLI-WsXSPWPvAyBAMaQ.png">
+<meta name="twitter:creator" content="@JiezhiG">
+    
+        <link rel="publisher" href="https://plus.google.com/103408917271477650000"/>
+    
+    
+        
+    
+    
+        <meta property="og:image" content="https://www.gravatar.com/avatar/d932c72721e71e419028c107423eb812?s=640"/>
+    
+    
+        <meta property="og:image" content="http://qn-jiezhi.nospider.net/pet-0e24cfd3754db9af5e2f7119f1160964.jpg-thumb1"/>
+        <meta class="swiftype" name="image" data-type="enum" content="http://qn-jiezhi.nospider.net/pet-0e24cfd3754db9af5e2f7119f1160964.jpg-thumb1" />
+    
+    
+    
+    <!--STYLES-->
+    <link rel="stylesheet" href="/assets/css/style-du2xmrqdqrl2ollgeiw050kpl6l4nbyz7bumjuurjgsxyopifvukebxc9lqe.min.css">
+    <!--STYLES END-->
+    
+    <script type="text/javascript">
+        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+        ga('create', 'UA-67636901-1', 'auto');
+        ga('send', 'pageview');
+    </script>
+
+
+    
+</head>
+
+    <body>
+        <div id="blog">
+            <!-- Define author's picture -->
+
+
+    
+        
+    
+
+<header id="header" data-behavior="4">
+    <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+    <div class="header-title">
+        <a class="header-title-link" href="/ ">Jiezhi Blog</a>
+    </div>
+    
+        
+            <a  class="header-right-picture "
+                href="#about">
+        
+        
+            <img class="header-picture" src="https://www.gravatar.com/avatar/d932c72721e71e419028c107423eb812?s=90" alt="Bild des Autors"/>
+        
+        </a>
+    
+</header>
+
+            <!-- Define author's picture -->
+
+
+    
+
+<nav id="sidebar" data-behavior="4">
+    <div class="sidebar-container">
+        
+            <div class="sidebar-profile">
+                <a href="/#about">
+                    <img class="sidebar-profile-picture" src="https://www.gravatar.com/avatar/d932c72721e71e419028c107423eb812?s=110" alt="Bild des Autors"/>
+                </a>
+                <h4 class="sidebar-profile-name">Jiezhi</h4>
+                
+                    <h5 class="sidebar-profile-bio"><p>author.bio</p>
+</h5>
+                
+            </div>
+        
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a  class="sidebar-button-link "
+                             href="/ "
+                            
+                            title="Home"
+                        >
+                    
+                        <i class="sidebar-button-icon fa fa-home" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Home</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a  class="sidebar-button-link "
+                             href="/all-categories"
+                            
+                            title="Kategorien"
+                        >
+                    
+                        <i class="sidebar-button-icon fa fa-bookmark" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Kategorien</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a  class="sidebar-button-link "
+                             href="/all-tags"
+                            
+                            title="Tags"
+                        >
+                    
+                        <i class="sidebar-button-icon fa fa-tags" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tags</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a  class="sidebar-button-link "
+                             href="/all-archives"
+                            
+                            title="Archiv"
+                        >
+                    
+                        <i class="sidebar-button-icon fa fa-archive" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Archiv</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a  class="sidebar-button-link open-algolia-search"
+                             href="#search"
+                            
+                            title="Suche"
+                        >
+                    
+                        <i class="sidebar-button-icon fa fa-search" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Suche</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a  class="sidebar-button-link "
+                             href="#about"
+                            
+                            title="Über"
+                        >
+                    
+                        <i class="sidebar-button-icon fa fa-question" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Über</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a  class="sidebar-button-link " href="https://github.com/Jiezhi" target="_blank" rel="noopener" title="GitHub">
+                    
+                        <i class="sidebar-button-icon fab fa-github" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">GitHub</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a  class="sidebar-button-link " href="https://stackoverflow.com/users/5425709/jiezhi-g" target="_blank" rel="noopener" title="Stack Overflow">
+                    
+                        <i class="sidebar-button-icon fab fa-stack-overflow" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Stack Overflow</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a  class="sidebar-button-link " href="https://twitter.com/JiezhiG" target="_blank" rel="noopener" title="Twitter">
+                    
+                        <i class="sidebar-button-icon fab fa-twitter" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Twitter</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a  class="sidebar-button-link " href="mailto:Jiezhi.Vip+hexo@gmail.com" target="_blank" rel="noopener" title="E-Mail">
+                    
+                        <i class="sidebar-button-icon fa fa-envelope" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">E-Mail</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a  class="sidebar-button-link "
+                             href="/atom.xml"
+                            
+                            title="RSS"
+                        >
+                    
+                        <i class="sidebar-button-icon fa fa-rss" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">RSS</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+    </div>
+</nav>
+
+            
+            <div id="main" data-behavior="4"
+                 class="
+                        hasCoverMetaIn
+                        ">
+                
+<article class="post">
+    
+    
+        <div class="post-header main-content-wrap text-center">
+    
+        <h1 class="post-title">
+            使用注解改进Android代码
+        </h1>
+    
+    
+        <div class="post-meta">
+    <time datetime="2017-05-07T20:38:31+08:00">
+	
+		    07 May 2017
+    	
+    </time>
+    
+</div>
+
+    
+</div>
+
+    
+    <div class="post-content markdown">
+        <div class="main-content-wrap">
+            <p>注解有很多用途。 但是，在这里我们将讨论如何使用注解来改进我们的android编码。<br><a id="more"></a><br><img src="https://cdn-images-1.medium.com/max/800/1*gxjdLI-WsXSPWPvAyBAMaQ.png" alt=""></p>
+<h2 id="注解即元数据"><a href="#注解即元数据" class="headerlink" title="注解即元数据"></a>注解即元数据</h2><p>而元数据是提供有关其他数据的信息的一组数据。</p>
+<p>注解有很多用途。 但是，在这里我们将讨论如何使用注解来改进我们的android编码。</p>
+<p>官方Android已经提供了支持注解，你可以添加如下依赖关系来导入注解：</p>
+<blockquote>
+<p>compile ‘com.android.support:support-annotations:x.x.x’</p>
+</blockquote>
+<p>每个人都想成为一个好的程序员，每天我也在努力地提高自己。</p>
+<blockquote>
+<p>任何人都可以编写计算机可以理解的代码，而好的程序员编写人可以理解的代码。 - Martin Fowler</p>
+</blockquote>
+<h2 id="让我们一起探索下一些有用的注解"><a href="#让我们一起探索下一些有用的注解" class="headerlink" title="让我们一起探索下一些有用的注解"></a>让我们一起探索下一些有用的注解</h2><h3 id="空类型注解"><a href="#空类型注解" class="headerlink" title="空类型注解"></a>空类型注解</h3><p><strong>@Nullable</strong>和<strong>@NonNull</strong>注解用于检查给定的变量、参数甚至是返回值是否为空。</p>
+<p><strong>@Nullable</strong>：它表示一个变量、参数或返回值可以为空。</p>
+<p><strong>@NonNUll</strong>：它表示不能为空的变量、参数或返回值。</p>
+<p>例如：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@NonNull</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> View <span class="title">getView</span><span class="params">(@Nullable String s1, @NonNull String s2)</span> </span>&#123;</span><br><span class="line">  <span class="comment">// s1 可以为空</span></span><br><span class="line">  <span class="comment">// s2 不可以为空</span></span><br><span class="line">  <span class="comment">// 该方法必须返回一个不为空的view</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>所以当我们尝试这样调用该方法时：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">View view = getView(<span class="string">"Amit"</span>, <span class="keyword">null</span>);</span><br></pre></td></tr></table></figure>
+<p>在代码检测期间，Android Studio会警告你s2的值不能为空。</p>
+<h2 id="资源注解"><a href="#资源注解" class="headerlink" title="资源注解"></a>资源注解</h2><p>我们都知道，Android对资源的引用（如drawable和string资源）都是传递int类型的，因此我们必须验证资源类型。假设代码中希望传入特定类型的资源（例如Drawables），这里可以传入引用类型的<strong>int</strong>值，但实际上却传入了另外类型的资源，例如R.string资源：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setText</span><span class="params">(@StringRes <span class="keyword">int</span> resId)</span> </span>&#123;</span><br><span class="line">  <span class="comment">// resId 必须为string类型的id</span></span><br><span class="line">  <span class="comment">// resId 不能为常规的int值</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>所以，当你像如下方式调用该方法时：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">textView.setText(<span class="number">56</span>);</span><br></pre></td></tr></table></figure>
+<p>在代码检测过程中，当传入非string资源的参数时，注解将会生成一个警告。</p>
+<h2 id="线程注解"><a href="#线程注解" class="headerlink" title="线程注解"></a>线程注解</h2><p>线程注解检查方法是否在其期望的线程被调用。</p>
+<p>支持的注解有：</p>
+<p><strong>@MainThread</strong><br><strong>@UiThread</strong><br><strong>@WorkerThread</strong><br><strong>@BinderThread</strong><br><strong>@AnyThread</strong></p>
+<p>如果你添加如下的注解：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@WorkerThread</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">doSomething</span><span class="params">()</span></span>&#123;</span><br><span class="line">  <span class="comment">// 该方法一定要从worker线程调用</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>如果你从非worker线程调用该方法时，你将会得到一个警告。</p>
+<h2 id="值限定注解"><a href="#值限定注解" class="headerlink" title="值限定注解"></a>值限定注解</h2><p>有时候，我们必须对参数做一些约束，所以使用<strong>@IntRange</strong>，<strong>@FloatRange</strong>和<strong>@Size</strong>注解来验证传入参数的值。</p>
+<p>当调用该方法的人可能会传递错误的值（超出指定的范围）时，该注解是非常有用的。</p>
+<p>在下面的例子中，@IntRange注解确保传递的整数值必须在0到255之间。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setAlpha</span><span class="params">(@IntRange(from=<span class="number">0</span>,to=<span class="number">255</span>)</span> <span class="keyword">int</span> alpha) </span>&#123;&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="权限注解"><a href="#权限注解" class="headerlink" title="权限注解"></a>权限注解</h2><p>使用<strong>@RequiresPermission</strong>注解来验证调用者的权限。</p>
+<p>以下示例注解<strong>setWallpaper()</strong>方法来确保方法的调用者具有<strong>permission.SET_WALLPAPERS</strong>权限：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RequiresPermission</span>(Manifest.permission.SET_WALLPAPER)</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">void</span> <span class="title">setWallpaper</span><span class="params">(Bitmap bitmap)</span> <span class="keyword">throws</span> IOException</span>;</span><br></pre></td></tr></table></figure>
+<p>如果在调用该方法时没有在manifest文件中添加需要的权限，代码检测器将会给你一个警告。</p>
+<p><em>听首音乐放松一下</em>：</p>
+<iframe frameborder="no" border="0" marginwidth="0" marginheight="0" width="330" height="86" src="http://music.163.com/outchain/player?type=2&id=26092806&auto=0&height=66"></iframe>
+
+<blockquote>
+<p>author: Jiezhi.G<br>email: <a href="mailto:Jiezhi.G@gmail.com" target="_blank" rel="noopener">Jiezhi.G@gmail.com</a></p>
+</blockquote>
+<p>欢迎关注我的公众号『日技』<br><img src="http://qn-jiezhi.nospider.net/qrcode_riji.jpg" alt=""></p>
+
+            
+
+        </div>
+    </div>
+    <div id="post-footer" class="post-footer main-content-wrap">
+        
+        
+            <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                    <a class="post-action-btn btn btn--default tooltip--top" href="/2017/10/18/gradle-in-android/" data-tooltip="Android中app.build配置" aria-label="FRÜHER: Android中app.build配置">
+                
+                    <i class="fa fa-angle-left" aria-hidden="true"></i>
+                    <span class="hide-xs hide-sm text-small icon-ml">FRÜHER</span>
+                </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                    <a class="post-action-btn btn btn--default tooltip--top" href="/2017/03/30/android-arraymap-vs-sparsearray/" data-tooltip="android中的ArrayMap和SparseArray" aria-label="NÄCHSTER: android中的ArrayMap和SparseArray">
+                
+                    <span class="hide-xs hide-sm text-small icon-mr">NÄCHSTER</span>
+                    <i class="fa fa-angle-right" aria-hidden="true"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a class="post-action-btn btn btn--default btn-open-shareoptions" href="#btn-open-shareoptions" aria-label="Diesen Beitrag teilen">
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a class="post-action-btn btn btn--default" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://jiezhi.github.io/2017/05/07/annotations/" title="Teilen auf Facebook">
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a class="post-action-btn btn btn--default" target="new" href="https://twitter.com/intent/tweet?text=http://jiezhi.github.io/2017/05/07/annotations/" title="Teilen auf Twitter">
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a class="post-action-btn btn btn--default" target="new" href="https://plus.google.com/share?url=http://jiezhi.github.io/2017/05/07/annotations/" title="Teilen auf Google Plus">
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a class="post-action-btn btn btn--default" target="new" href="http://service.weibo.com/share/share.php?&amp;title=http://jiezhi.github.io/2017/05/07/annotations/" title="Share on Weibo">
+                    <i class="fab fa-weibo" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a class="post-action-btn btn btn--default" target="new" href="http://connect.qq.com/widget/shareqq/index.html?url=http://jiezhi.github.io/2017/05/07/annotations/&amp;title=使用注解改进Android代码" title="Share on QQ">
+                    <i class="fab fa-qq" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a class="post-action-btn btn btn--default" target="new" href="http://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=http://jiezhi.github.io/2017/05/07/annotations/" title="Share on Qzone">
+                    <i class="fa fa-star" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a class="post-action-btn btn btn--default" target="new" href="http://widget.renren.com/dialog/share?resourceUrl=http://jiezhi.github.io/2017/05/07/annotations/" title="Share on Renren">
+                    <i class="fab fa-renren" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+                <li class="post-action">
+                    <a class="post-action-btn btn btn--default" href="#disqus_thread">
+                        <i class="fa fa-comment"></i>
+                    </a>
+                </li>
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="Nach oben">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+        
+        
+            
+                <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+            
+        
+    </div>
+</article>
+
+
+
+                <footer id="footer" class="main-content-wrap">
+    <span class="copyrights">
+        Copyrights &copy; 2018 Jiezhi. All Rights Reserved.
+    </span>
+</footer>
+
+            </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="4">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                    <a class="post-action-btn btn btn--default tooltip--top" href="/2017/10/18/gradle-in-android/" data-tooltip="Android中app.build配置" aria-label="FRÜHER: Android中app.build配置">
+                
+                    <i class="fa fa-angle-left" aria-hidden="true"></i>
+                    <span class="hide-xs hide-sm text-small icon-ml">FRÜHER</span>
+                </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                    <a class="post-action-btn btn btn--default tooltip--top" href="/2017/03/30/android-arraymap-vs-sparsearray/" data-tooltip="android中的ArrayMap和SparseArray" aria-label="NÄCHSTER: android中的ArrayMap和SparseArray">
+                
+                    <span class="hide-xs hide-sm text-small icon-mr">NÄCHSTER</span>
+                    <i class="fa fa-angle-right" aria-hidden="true"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a class="post-action-btn btn btn--default btn-open-shareoptions" href="#btn-open-shareoptions" aria-label="Diesen Beitrag teilen">
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a class="post-action-btn btn btn--default" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://jiezhi.github.io/2017/05/07/annotations/" title="Teilen auf Facebook">
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a class="post-action-btn btn btn--default" target="new" href="https://twitter.com/intent/tweet?text=http://jiezhi.github.io/2017/05/07/annotations/" title="Teilen auf Twitter">
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a class="post-action-btn btn btn--default" target="new" href="https://plus.google.com/share?url=http://jiezhi.github.io/2017/05/07/annotations/" title="Teilen auf Google Plus">
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a class="post-action-btn btn btn--default" target="new" href="http://service.weibo.com/share/share.php?&amp;title=http://jiezhi.github.io/2017/05/07/annotations/" title="Share on Weibo">
+                    <i class="fab fa-weibo" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a class="post-action-btn btn btn--default" target="new" href="http://connect.qq.com/widget/shareqq/index.html?url=http://jiezhi.github.io/2017/05/07/annotations/&amp;title=使用注解改进Android代码" title="Share on QQ">
+                    <i class="fab fa-qq" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a class="post-action-btn btn btn--default" target="new" href="http://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=http://jiezhi.github.io/2017/05/07/annotations/" title="Share on Qzone">
+                    <i class="fa fa-star" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a class="post-action-btn btn btn--default" target="new" href="http://widget.renren.com/dialog/share?resourceUrl=http://jiezhi.github.io/2017/05/07/annotations/" title="Share on Renren">
+                    <i class="fab fa-renren" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+                <li class="post-action">
+                    <a class="post-action-btn btn btn--default" href="#disqus_thread">
+                        <i class="fa fa-comment"></i>
+                    </a>
+                </li>
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="Nach oben">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                <div id="share-options-bar" class="share-options-bar" data-behavior="4">
+    <i id="btn-close-shareoptions" class="fa fa-times"></i>
+    <ul class="share-options">
+        
+            
+            
+            <li class="share-option">
+                <a class="share-option-btn" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://jiezhi.github.io/2017/05/07/annotations/">
+                    <i class="fab fa-facebook" aria-hidden="true"></i><span>Teilen auf Facebook</span>
+                </a>
+            </li>
+        
+            
+            
+            <li class="share-option">
+                <a class="share-option-btn" target="new" href="https://twitter.com/intent/tweet?text=http://jiezhi.github.io/2017/05/07/annotations/">
+                    <i class="fab fa-twitter" aria-hidden="true"></i><span>Teilen auf Twitter</span>
+                </a>
+            </li>
+        
+            
+            
+            <li class="share-option">
+                <a class="share-option-btn" target="new" href="https://plus.google.com/share?url=http://jiezhi.github.io/2017/05/07/annotations/">
+                    <i class="fab fa-google-plus" aria-hidden="true"></i><span>Teilen auf Google Plus</span>
+                </a>
+            </li>
+        
+            
+            
+            <li class="share-option">
+                <a class="share-option-btn" target="new" href="http://service.weibo.com/share/share.php?&amp;title=http://jiezhi.github.io/2017/05/07/annotations/">
+                    <i class="fab fa-weibo" aria-hidden="true"></i><span>Share on Weibo</span>
+                </a>
+            </li>
+        
+            
+            
+            <li class="share-option">
+                <a class="share-option-btn" target="new" href="http://connect.qq.com/widget/shareqq/index.html?url=http://jiezhi.github.io/2017/05/07/annotations/&amp;title=使用注解改进Android代码">
+                    <i class="fab fa-qq" aria-hidden="true"></i><span>Share on QQ</span>
+                </a>
+            </li>
+        
+            
+            
+            <li class="share-option">
+                <a class="share-option-btn" target="new" href="http://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=http://jiezhi.github.io/2017/05/07/annotations/">
+                    <i class="fa fa-star" aria-hidden="true"></i><span>Share on Qzone</span>
+                </a>
+            </li>
+        
+            
+            
+            <li class="share-option">
+                <a class="share-option-btn" target="new" href="http://widget.renren.com/dialog/share?resourceUrl=http://jiezhi.github.io/2017/05/07/annotations/">
+                    <i class="fab fa-renren" aria-hidden="true"></i><span>Share on Renren</span>
+                </a>
+            </li>
+        
+    </ul>
+</div>
+
+            
+        </div>
+        
+
+
+    
+
+<div id="about">
+    <div id="about-card">
+        <div id="about-btn-close">
+            <i class="fa fa-times"></i>
+        </div>
+        
+            <img id="about-card-picture" src="https://www.gravatar.com/avatar/d932c72721e71e419028c107423eb812?s=110" alt="Bild des Autors"/>
+        
+            <h4 id="about-card-name">Jiezhi</h4>
+        
+            <div id="about-card-bio"><p>author.bio</p>
+</div>
+        
+        
+            <div id="about-card-job">
+                <i class="fa fa-briefcase"></i>
+                <br/>
+                <p>author.job</p>
+
+            </div>
+        
+        
+            <div id="about-card-location">
+                <i class="fa fa-map-marker-alt"></i>
+                <br/>
+                Nanjing China
+            </div>
+        
+    </div>
+</div>
+
+        
+        
+<div id="cover" style="background-image:url('/assets/images/cover.jpg');"></div>
+        <!--SCRIPTS-->
+<script src="/assets/js/script-vufjrm3fmbuttogo1hxuu0w9w0sesk5iyysjuguc2hdhufot9szxg8twijry.min.js"></script>
+<!--SCRIPTS END-->
+
+    
+        <script>
+             var disqus_config = function () {
+                 this.page.url = 'http://jiezhi.github.io/2017/05/07/annotations/';
+                 
+                    this.page.identifier = '2017/05/07/annotations/';
+                 
+             };
+            (function() {
+                var d = document, s = d.createElement('script');
+                var disqus_shortname = 'jiezhi';
+                s.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+
+                s.setAttribute('data-timestamp', +new Date());
+                (d.head || d.body).appendChild(s);
+            })();
+        </script>
+    
+
+
+
+    </body>
+</html>

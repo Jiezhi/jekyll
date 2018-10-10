@@ -1,0 +1,676 @@
+
+<!DOCTYPE html>
+<html lang="">
+    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="Jiezhi Blog">
+    <title>Android读取内存信息 - Jiezhi Blog</title>
+    <meta name="author" content="Jiezhi">
+    
+    
+    
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Jiezhi","sameAs":["https://github.com/Jiezhi","https://stackoverflow.com/users/5425709/jiezhi-g","https://twitter.com/JiezhiG","mailto:Jiezhi.Vip+hexo@gmail.com"],"image":"https://www.gravatar.com/avatar/a987dd393c40cf0645bfb4f07b74b334"},"articleBody":"通过adb命令获取设备内存信息在adb shell的情况下执行命令：1234567891011121314151617181920212223242526272829303132333435363738shell@maguro:/ $ cat /proc/meminfo  MemTotal:         710960 kB  MemFree:          136148 kB  Buffers:            3400 kB  Cached:           228768 kB  SwapCached:            0 kB  Active:           266960 kB  Inactive:         158372 kB  Active(anon):     193608 kB  Inactive(anon):     1552 kB  Active(file):      73352 kB  Inactive(file):   156820 kB  Unevictable:         412 kB  Mlocked:               0 kB  HighTotal:        598016 kB  HighFree:          85216 kB  LowTotal:         112944 kB  LowFree:           50932 kB  SwapTotal:             0 kB  SwapFree:              0 kB  Dirty:                 0 kB  Writeback:             0 kB  AnonPages:        193552 kB  Mapped:           164744 kB  Shmem:              1584 kB  Slab:              19668 kB  SReclaimable:       7920 kB  SUnreclaim:        11748 kB  KernelStack:        4208 kB  PageTables:         6540 kB  NFS_Unstable:          0 kB  Bounce:                0 kB  WritebackTmp:          0 kB  CommitLimit:      355480 kB  Committed_AS:    3875984 kB  VmallocTotal:     778240 kB  VmallocUsed:       55432 kB  VmallocChunk:     686020 kB\ndmupsys:12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152535455565758596061626364656667686970717273shell@maguro:/ $ dumpsys meminfoApplications Memory Usage (kB):Uptime: 4699227 Realtime: 6241493Total PSS by process:    57336 kB: com.android.launcher (pid 625)    55811 kB: system (pid 379)    33484 kB: com.android.systemui (pid 463)    23032 kB: com.baidu.appsearch (pid 941)    17931 kB: com.android.phasebeam (pid 547)    17042 kB: com.lbe.security:service (pid 910)    16522 kB: com.baidu.appsearch:bdservice_v1 (pid 1239)    11232 kB: com.tencent.mobileqq:MSF (pid 2159)    10447 kB: com.baidu.BaiduMap:bdservice_v1 (pid 1217)     8220 kB: com.android.phone (pid 600)     7185 kB: com.baidu.BaiduMap:MapCoreService (pid 2223)     6628 kB: com.tencent.mobileqq (pid 2176)     5703 kB: com.android.inputmethod.latin (pid 574)     5115 kB: android.process.media (pid 2673)     4694 kB: com.android.nfc (pid 611)     3106 kB: com.android.nfc:handover (pid 665)     2769 kB: com.android.musicfx (pid 1736)     2763 kB: com.android.smspush (pid 705)        0 kB: com.qihoo.permmgr (pid 751)        0 kB: com.baidu.BaiduMap (pid 1405)Total PSS by OOM adjustment:    55811 kB: System               55811 kB: system (pid 379)    46398 kB: Persistent               33484 kB: com.android.systemui (pid 463)                8220 kB: com.android.phone (pid 600)                4694 kB: com.android.nfc (pid 611)    57336 kB: Foreground               57336 kB: com.android.launcher (pid 625)    23800 kB: Visible               17931 kB: com.android.phasebeam (pid 547)                3106 kB: com.android.nfc:handover (pid 665)                2763 kB: com.android.smspush (pid 705)    62299 kB: Perceptible               23032 kB: com.baidu.appsearch (pid 941)               17042 kB: com.lbe.security:service (pid 910)               16522 kB: com.baidu.appsearch:bdservice_v1 (pid 1239)                5703 kB: com.android.inputmethod.latin (pid 574)    15562 kB: A Services               10447 kB: com.baidu.BaiduMap:bdservice_v1 (pid 1217)                5115 kB: android.process.media (pid 2673)    27814 kB: Background               11232 kB: com.tencent.mobileqq:MSF (pid 2159)                7185 kB: com.baidu.BaiduMap:MapCoreService (pid 2223)                6628 kB: com.tencent.mobileqq (pid 2176)                2769 kB: com.android.musicfx (pid 1736)                   0 kB: com.qihoo.permmgr (pid 751)                   0 kB: com.baidu.BaiduMap (pid 1405)Total PSS by category:   109517 kB: Dalvik    75944 kB: Other dev    39041 kB: Unknown    31896 kB: .dex mmap    24323 kB: .so mmap     5692 kB: .apk mmap     1360 kB: .ttf mmap      655 kB: Other mmap      540 kB: Stack       28 kB: Ashmem       20 kB: .jar mmap        4 kB: Cursor        0 kB: NativeTotal PSS: 289020 kB      KSM: 0 kB saved from shared 0 kB           0 kB unshared; 0 kB volatile\n指定pid信息：123456789101112131415161718192021222324252627282930313233343536373839shell@maguro:/ $ dumpsys meminfo 625Applications Memory Usage (kB):Uptime: 4872829 Realtime: 6415095** MEMINFO in pid 625 [com.android.launcher] **                         Shared  Private     Heap     Heap     Heap                   Pss    Dirty    Dirty     Size    Alloc     Free                ------   ------   ------   ------   ------   ------       Native        0        0        0    16752     8417     1926       Dalvik    15581    12884    14852    21608    19175     2433        Stack       40        8       40       Cursor        0        0        0       Ashmem        0        0        0    Other dev    30451     1412    18692     .so mmap     1890     2652      884    .jar mmap        0        0        0    .apk mmap     1459        0        0    .ttf mmap      470        0        0    .dex mmap     1122     2832      104   Other mmap       23        8        8      Unknown     6305      432     6296        TOTAL    57341    20228    40876    38360    27592     4359 Objects               Views:      261         ViewRootImpl:        1         AppContexts:        9           Activities:        1              Assets:        4        AssetManagers:        4       Local Binders:       14        Proxy Binders:       29    Death Recipients:        0     OpenSSL Sockets:        0 SQL         MEMORY_USED:      547  PAGECACHE_OVERFLOW:      393          MALLOC_SIZE:       62 DATABASES      pgsz     dbsz   Lookaside(b)          cache  Dbname         4       68             79        37/20/6  /data/user/0/com.android.launcher/databases/launcher.db         4      312             23       251/16/2  /data/user/0/com.android.launcher/cache/widgetpreviews.db\n听首音乐放松一下：\n\n\n\n欢迎关注我的公众号『日技』\n","dateCreated":"2015-06-01T11:17:00+08:00","dateModified":"2018-10-10T17:25:01+08:00","datePublished":"2015-06-01T11:17:00+08:00","description":"通过adb命令获取设备内存信息","headline":"Android读取内存信息","image":["http://qn-jiezhi.nospider.net/android1119002570721cd2c8o.jpg-thumb1"],"mainEntityOfPage":{"@type":"WebPage","@id":"http://jiezhi.github.io/2015/06/01/android_read_memory_info/"},"publisher":{"@type":"Organization","name":"Jiezhi","sameAs":["https://github.com/Jiezhi","https://stackoverflow.com/users/5425709/jiezhi-g","https://twitter.com/JiezhiG","mailto:Jiezhi.Vip+hexo@gmail.com"],"image":"https://www.gravatar.com/avatar/a987dd393c40cf0645bfb4f07b74b334","logo":{"@type":"ImageObject","url":"https://www.gravatar.com/avatar/a987dd393c40cf0645bfb4f07b74b334"}},"url":"http://jiezhi.github.io/2015/06/01/android_read_memory_info/","keywords":"android, memory","thumbnailUrl":"http://qn-jiezhi.nospider.net/android1119002570721cd2c8o.jpg-thumb1"}</script>
+    <meta name="description" content="通过adb命令获取设备内存信息">
+<meta name="keywords" content="android,memory">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="Android读取内存信息">
+<meta property="og:url" content="http://jiezhi.github.io/2015/06/01/android_read_memory_info/index.html">
+<meta property="og:site_name" content="Jiezhi Blog">
+<meta property="og:description" content="通过adb命令获取设备内存信息">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="http://qn-jiezhi.nospider.net/qrcode_riji.jpg">
+<meta property="og:updated_time" content="2018-10-10T09:25:01.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android读取内存信息">
+<meta name="twitter:description" content="通过adb命令获取设备内存信息">
+<meta name="twitter:image" content="http://qn-jiezhi.nospider.net/qrcode_riji.jpg">
+<meta name="twitter:creator" content="@JiezhiG">
+    
+        <link rel="publisher" href="https://plus.google.com/103408917271477650000"/>
+    
+    
+        
+    
+    
+        <meta property="og:image" content="https://www.gravatar.com/avatar/d932c72721e71e419028c107423eb812?s=640"/>
+    
+    
+        <meta property="og:image" content="http://qn-jiezhi.nospider.net/android1119002570721cd2c8o.jpg-thumb1"/>
+        <meta class="swiftype" name="image" data-type="enum" content="http://qn-jiezhi.nospider.net/android1119002570721cd2c8o.jpg-thumb1" />
+    
+    
+    
+    <!--STYLES-->
+    <link rel="stylesheet" href="/assets/css/style-du2xmrqdqrl2ollgeiw050kpl6l4nbyz7bumjuurjgsxyopifvukebxc9lqe.min.css">
+    <!--STYLES END-->
+    
+    <script type="text/javascript">
+        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+        ga('create', 'UA-67636901-1', 'auto');
+        ga('send', 'pageview');
+    </script>
+
+
+    
+</head>
+
+    <body>
+        <div id="blog">
+            <!-- Define author's picture -->
+
+
+    
+        
+    
+
+<header id="header" data-behavior="4">
+    <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+    <div class="header-title">
+        <a class="header-title-link" href="/ ">Jiezhi Blog</a>
+    </div>
+    
+        
+            <a  class="header-right-picture "
+                href="#about">
+        
+        
+            <img class="header-picture" src="https://www.gravatar.com/avatar/d932c72721e71e419028c107423eb812?s=90" alt="Bild des Autors"/>
+        
+        </a>
+    
+</header>
+
+            <!-- Define author's picture -->
+
+
+    
+
+<nav id="sidebar" data-behavior="4">
+    <div class="sidebar-container">
+        
+            <div class="sidebar-profile">
+                <a href="/#about">
+                    <img class="sidebar-profile-picture" src="https://www.gravatar.com/avatar/d932c72721e71e419028c107423eb812?s=110" alt="Bild des Autors"/>
+                </a>
+                <h4 class="sidebar-profile-name">Jiezhi</h4>
+                
+                    <h5 class="sidebar-profile-bio"><p>author.bio</p>
+</h5>
+                
+            </div>
+        
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a  class="sidebar-button-link "
+                             href="/ "
+                            
+                            title="Home"
+                        >
+                    
+                        <i class="sidebar-button-icon fa fa-home" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Home</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a  class="sidebar-button-link "
+                             href="/all-categories"
+                            
+                            title="Kategorien"
+                        >
+                    
+                        <i class="sidebar-button-icon fa fa-bookmark" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Kategorien</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a  class="sidebar-button-link "
+                             href="/all-tags"
+                            
+                            title="Tags"
+                        >
+                    
+                        <i class="sidebar-button-icon fa fa-tags" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tags</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a  class="sidebar-button-link "
+                             href="/all-archives"
+                            
+                            title="Archiv"
+                        >
+                    
+                        <i class="sidebar-button-icon fa fa-archive" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Archiv</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a  class="sidebar-button-link open-algolia-search"
+                             href="#search"
+                            
+                            title="Suche"
+                        >
+                    
+                        <i class="sidebar-button-icon fa fa-search" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Suche</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a  class="sidebar-button-link "
+                             href="#about"
+                            
+                            title="Über"
+                        >
+                    
+                        <i class="sidebar-button-icon fa fa-question" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Über</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a  class="sidebar-button-link " href="https://github.com/Jiezhi" target="_blank" rel="noopener" title="GitHub">
+                    
+                        <i class="sidebar-button-icon fab fa-github" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">GitHub</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a  class="sidebar-button-link " href="https://stackoverflow.com/users/5425709/jiezhi-g" target="_blank" rel="noopener" title="Stack Overflow">
+                    
+                        <i class="sidebar-button-icon fab fa-stack-overflow" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Stack Overflow</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a  class="sidebar-button-link " href="https://twitter.com/JiezhiG" target="_blank" rel="noopener" title="Twitter">
+                    
+                        <i class="sidebar-button-icon fab fa-twitter" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Twitter</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a  class="sidebar-button-link " href="mailto:Jiezhi.Vip+hexo@gmail.com" target="_blank" rel="noopener" title="E-Mail">
+                    
+                        <i class="sidebar-button-icon fa fa-envelope" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">E-Mail</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a  class="sidebar-button-link "
+                             href="/atom.xml"
+                            
+                            title="RSS"
+                        >
+                    
+                        <i class="sidebar-button-icon fa fa-rss" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">RSS</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+    </div>
+</nav>
+
+            
+            <div id="main" data-behavior="4"
+                 class="
+                        hasCoverMetaIn
+                        ">
+                
+<article class="post">
+    
+    
+        <div class="post-header main-content-wrap text-center">
+    
+        <h1 class="post-title">
+            Android读取内存信息
+        </h1>
+    
+    
+        <div class="post-meta">
+    <time datetime="2015-06-01T11:17:00+08:00">
+	
+		    01 Jun 2015
+    	
+    </time>
+    
+        <span>in </span>
+        
+    <a class="category-link" href="/categories/Android/">Android</a>
+
+
+    
+</div>
+
+    
+</div>
+
+    
+    <div class="post-content markdown">
+        <div class="main-content-wrap">
+            <p>通过adb命令获取设备内存信息<br><a id="more"></a><br>在adb shell的情况下执行命令：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">shell@maguro:/ $ cat /proc/meminfo  </span><br><span class="line">MemTotal:         710960 kB  </span><br><span class="line">MemFree:          136148 kB  </span><br><span class="line">Buffers:            3400 kB  </span><br><span class="line">Cached:           228768 kB  </span><br><span class="line">SwapCached:            0 kB  </span><br><span class="line">Active:           266960 kB  </span><br><span class="line">Inactive:         158372 kB  </span><br><span class="line">Active(anon):     193608 kB  </span><br><span class="line">Inactive(anon):     1552 kB  </span><br><span class="line">Active(file):      73352 kB  </span><br><span class="line">Inactive(file):   156820 kB  </span><br><span class="line">Unevictable:         412 kB  </span><br><span class="line">Mlocked:               0 kB  </span><br><span class="line">HighTotal:        598016 kB  </span><br><span class="line">HighFree:          85216 kB  </span><br><span class="line">LowTotal:         112944 kB  </span><br><span class="line">LowFree:           50932 kB  </span><br><span class="line">SwapTotal:             0 kB  </span><br><span class="line">SwapFree:              0 kB  </span><br><span class="line">Dirty:                 0 kB  </span><br><span class="line">Writeback:             0 kB  </span><br><span class="line">AnonPages:        193552 kB  </span><br><span class="line">Mapped:           164744 kB  </span><br><span class="line">Shmem:              1584 kB  </span><br><span class="line">Slab:              19668 kB  </span><br><span class="line">SReclaimable:       7920 kB  </span><br><span class="line">SUnreclaim:        11748 kB  </span><br><span class="line">KernelStack:        4208 kB  </span><br><span class="line">PageTables:         6540 kB  </span><br><span class="line">NFS_Unstable:          0 kB  </span><br><span class="line">Bounce:                0 kB  </span><br><span class="line">WritebackTmp:          0 kB  </span><br><span class="line">CommitLimit:      355480 kB  </span><br><span class="line">Committed_AS:    3875984 kB  </span><br><span class="line">VmallocTotal:     778240 kB  </span><br><span class="line">VmallocUsed:       55432 kB  </span><br><span class="line">VmallocChunk:     686020 kB</span><br></pre></td></tr></table></figure></p>
+<p>dmupsys:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><span class="line">shell@maguro:/ $ dumpsys meminfo</span><br><span class="line">Applications Memory Usage (kB):</span><br><span class="line">Uptime: 4699227 Realtime: 6241493</span><br><span class="line"></span><br><span class="line">Total PSS by process:</span><br><span class="line">    57336 kB: com.android.launcher (pid 625)</span><br><span class="line">    55811 kB: system (pid 379)</span><br><span class="line">    33484 kB: com.android.systemui (pid 463)</span><br><span class="line">    23032 kB: com.baidu.appsearch (pid 941)</span><br><span class="line">    17931 kB: com.android.phasebeam (pid 547)</span><br><span class="line">    17042 kB: com.lbe.security:service (pid 910)</span><br><span class="line">    16522 kB: com.baidu.appsearch:bdservice_v1 (pid 1239)</span><br><span class="line">    11232 kB: com.tencent.mobileqq:MSF (pid 2159)</span><br><span class="line">    10447 kB: com.baidu.BaiduMap:bdservice_v1 (pid 1217)</span><br><span class="line">     8220 kB: com.android.phone (pid 600)</span><br><span class="line">     7185 kB: com.baidu.BaiduMap:MapCoreService (pid 2223)</span><br><span class="line">     6628 kB: com.tencent.mobileqq (pid 2176)</span><br><span class="line">     5703 kB: com.android.inputmethod.latin (pid 574)</span><br><span class="line">     5115 kB: android.process.media (pid 2673)</span><br><span class="line">     4694 kB: com.android.nfc (pid 611)</span><br><span class="line">     3106 kB: com.android.nfc:handover (pid 665)</span><br><span class="line">     2769 kB: com.android.musicfx (pid 1736)</span><br><span class="line">     2763 kB: com.android.smspush (pid 705)</span><br><span class="line">        0 kB: com.qihoo.permmgr (pid 751)</span><br><span class="line">        0 kB: com.baidu.BaiduMap (pid 1405)</span><br><span class="line"></span><br><span class="line">Total PSS by OOM adjustment:</span><br><span class="line">    55811 kB: System</span><br><span class="line">               55811 kB: system (pid 379)</span><br><span class="line">    46398 kB: Persistent</span><br><span class="line">               33484 kB: com.android.systemui (pid 463)</span><br><span class="line">                8220 kB: com.android.phone (pid 600)</span><br><span class="line">                4694 kB: com.android.nfc (pid 611)</span><br><span class="line">    57336 kB: Foreground</span><br><span class="line">               57336 kB: com.android.launcher (pid 625)</span><br><span class="line">    23800 kB: Visible</span><br><span class="line">               17931 kB: com.android.phasebeam (pid 547)</span><br><span class="line">                3106 kB: com.android.nfc:handover (pid 665)</span><br><span class="line">                2763 kB: com.android.smspush (pid 705)</span><br><span class="line">    62299 kB: Perceptible</span><br><span class="line">               23032 kB: com.baidu.appsearch (pid 941)</span><br><span class="line">               17042 kB: com.lbe.security:service (pid 910)</span><br><span class="line">               16522 kB: com.baidu.appsearch:bdservice_v1 (pid 1239)</span><br><span class="line">                5703 kB: com.android.inputmethod.latin (pid 574)</span><br><span class="line">    15562 kB: A Services</span><br><span class="line">               10447 kB: com.baidu.BaiduMap:bdservice_v1 (pid 1217)</span><br><span class="line">                5115 kB: android.process.media (pid 2673)</span><br><span class="line">    27814 kB: Background</span><br><span class="line">               11232 kB: com.tencent.mobileqq:MSF (pid 2159)</span><br><span class="line">                7185 kB: com.baidu.BaiduMap:MapCoreService (pid 2223)</span><br><span class="line">                6628 kB: com.tencent.mobileqq (pid 2176)</span><br><span class="line">                2769 kB: com.android.musicfx (pid 1736)</span><br><span class="line">                   0 kB: com.qihoo.permmgr (pid 751)</span><br><span class="line">                   0 kB: com.baidu.BaiduMap (pid 1405)</span><br><span class="line"></span><br><span class="line">Total PSS by category:</span><br><span class="line">   109517 kB: Dalvik</span><br><span class="line">    75944 kB: Other dev</span><br><span class="line">    39041 kB: Unknown</span><br><span class="line">    31896 kB: .dex mmap</span><br><span class="line">    24323 kB: .so mmap</span><br><span class="line">     5692 kB: .apk mmap</span><br><span class="line">     1360 kB: .ttf mmap</span><br><span class="line">      655 kB: Other mmap</span><br><span class="line">      540 kB: Stack</span><br><span class="line">       28 kB: Ashmem</span><br><span class="line">       20 kB: .jar mmap</span><br><span class="line">        4 kB: Cursor</span><br><span class="line">        0 kB: Native</span><br><span class="line"></span><br><span class="line">Total PSS: 289020 kB</span><br><span class="line">      KSM: 0 kB saved from shared 0 kB</span><br><span class="line">           0 kB unshared; 0 kB volatile</span><br></pre></td></tr></table></figure></p>
+<p>指定pid信息：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">shell@maguro:/ $ dumpsys meminfo 625</span><br><span class="line">Applications Memory Usage (kB):</span><br><span class="line">Uptime: 4872829 Realtime: 6415095</span><br><span class="line"></span><br><span class="line">** MEMINFO in pid 625 [com.android.launcher] **</span><br><span class="line">                         Shared  Private     Heap     Heap     Heap</span><br><span class="line">                   Pss    Dirty    Dirty     Size    Alloc     Free</span><br><span class="line">                ------   ------   ------   ------   ------   ------</span><br><span class="line">       Native        0        0        0    16752     8417     1926</span><br><span class="line">       Dalvik    15581    12884    14852    21608    19175     2433</span><br><span class="line">        Stack       40        8       40</span><br><span class="line">       Cursor        0        0        0</span><br><span class="line">       Ashmem        0        0        0</span><br><span class="line">    Other dev    30451     1412    18692</span><br><span class="line">     .so mmap     1890     2652      884</span><br><span class="line">    .jar mmap        0        0        0</span><br><span class="line">    .apk mmap     1459        0        0</span><br><span class="line">    .ttf mmap      470        0        0</span><br><span class="line">    .dex mmap     1122     2832      104</span><br><span class="line">   Other mmap       23        8        8</span><br><span class="line">      Unknown     6305      432     6296</span><br><span class="line">        TOTAL    57341    20228    40876    38360    27592     4359</span><br><span class="line"></span><br><span class="line"> Objects</span><br><span class="line">               Views:      261         ViewRootImpl:        1</span><br><span class="line">         AppContexts:        9           Activities:        1</span><br><span class="line">              Assets:        4        AssetManagers:        4</span><br><span class="line">       Local Binders:       14        Proxy Binders:       29</span><br><span class="line">    Death Recipients:        0</span><br><span class="line">     OpenSSL Sockets:        0</span><br><span class="line"></span><br><span class="line"> SQL</span><br><span class="line">         MEMORY_USED:      547</span><br><span class="line">  PAGECACHE_OVERFLOW:      393          MALLOC_SIZE:       62</span><br><span class="line"></span><br><span class="line"> DATABASES</span><br><span class="line">      pgsz     dbsz   Lookaside(b)          cache  Dbname</span><br><span class="line">         4       68             79        37/20/6  /data/user/0/com.android.launcher/databases/launcher.db</span><br><span class="line">         4      312             23       251/16/2  /data/user/0/com.android.launcher/cache/widgetpreviews.db</span><br></pre></td></tr></table></figure></p>
+<p><em>听首音乐放松一下</em>：</p>
+<iframe frameborder="no" border="0" marginwidth="0" marginheight="0" width="330" height="86" src="http://music.163.com/outchain/player?type=2&id=5032385&auto=0&height=66"></iframe>
+
+
+<p>欢迎关注我的公众号『日技』<br><img src="http://qn-jiezhi.nospider.net/qrcode_riji.jpg" alt=""></p>
+
+            
+
+        </div>
+    </div>
+    <div id="post-footer" class="post-footer main-content-wrap">
+        
+            <div class="post-footer-tags">
+                <span class="text-color-light text-small">GETAGGT IN</span><br/>
+                
+    <a class="tag tag--primary tag--small t-link" href="/tags/android/">android</a> <a class="tag tag--primary tag--small t-link" href="/tags/memory/">memory</a>
+
+            </div>
+        
+        
+            <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                    <a class="post-action-btn btn btn--default tooltip--top" href="/2015/06/07/Regular_Expressions常用转义字符/" data-tooltip="Regular Expressions常用转义字符" aria-label="FRÜHER: Regular Expressions常用转义字符">
+                
+                    <i class="fa fa-angle-left" aria-hidden="true"></i>
+                    <span class="hide-xs hide-sm text-small icon-ml">FRÜHER</span>
+                </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                    <a class="post-action-btn btn btn--default tooltip--top" href="/2015/05/26/用dialog给Bash穿上衣服/" data-tooltip="用dialog给Bash穿上衣服" aria-label="NÄCHSTER: 用dialog给Bash穿上衣服">
+                
+                    <span class="hide-xs hide-sm text-small icon-mr">NÄCHSTER</span>
+                    <i class="fa fa-angle-right" aria-hidden="true"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a class="post-action-btn btn btn--default btn-open-shareoptions" href="#btn-open-shareoptions" aria-label="Diesen Beitrag teilen">
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a class="post-action-btn btn btn--default" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://jiezhi.github.io/2015/06/01/android_read_memory_info/" title="Teilen auf Facebook">
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a class="post-action-btn btn btn--default" target="new" href="https://twitter.com/intent/tweet?text=http://jiezhi.github.io/2015/06/01/android_read_memory_info/" title="Teilen auf Twitter">
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a class="post-action-btn btn btn--default" target="new" href="https://plus.google.com/share?url=http://jiezhi.github.io/2015/06/01/android_read_memory_info/" title="Teilen auf Google Plus">
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a class="post-action-btn btn btn--default" target="new" href="http://service.weibo.com/share/share.php?&amp;title=http://jiezhi.github.io/2015/06/01/android_read_memory_info/" title="Share on Weibo">
+                    <i class="fab fa-weibo" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a class="post-action-btn btn btn--default" target="new" href="http://connect.qq.com/widget/shareqq/index.html?url=http://jiezhi.github.io/2015/06/01/android_read_memory_info/&amp;title=Android读取内存信息" title="Share on QQ">
+                    <i class="fab fa-qq" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a class="post-action-btn btn btn--default" target="new" href="http://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=http://jiezhi.github.io/2015/06/01/android_read_memory_info/" title="Share on Qzone">
+                    <i class="fa fa-star" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a class="post-action-btn btn btn--default" target="new" href="http://widget.renren.com/dialog/share?resourceUrl=http://jiezhi.github.io/2015/06/01/android_read_memory_info/" title="Share on Renren">
+                    <i class="fab fa-renren" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+                <li class="post-action">
+                    <a class="post-action-btn btn btn--default" href="#disqus_thread">
+                        <i class="fa fa-comment"></i>
+                    </a>
+                </li>
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="Nach oben">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+        
+        
+            
+                <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+            
+        
+    </div>
+</article>
+
+
+
+                <footer id="footer" class="main-content-wrap">
+    <span class="copyrights">
+        Copyrights &copy; 2018 Jiezhi. All Rights Reserved.
+    </span>
+</footer>
+
+            </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="4">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                    <a class="post-action-btn btn btn--default tooltip--top" href="/2015/06/07/Regular_Expressions常用转义字符/" data-tooltip="Regular Expressions常用转义字符" aria-label="FRÜHER: Regular Expressions常用转义字符">
+                
+                    <i class="fa fa-angle-left" aria-hidden="true"></i>
+                    <span class="hide-xs hide-sm text-small icon-ml">FRÜHER</span>
+                </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                    <a class="post-action-btn btn btn--default tooltip--top" href="/2015/05/26/用dialog给Bash穿上衣服/" data-tooltip="用dialog给Bash穿上衣服" aria-label="NÄCHSTER: 用dialog给Bash穿上衣服">
+                
+                    <span class="hide-xs hide-sm text-small icon-mr">NÄCHSTER</span>
+                    <i class="fa fa-angle-right" aria-hidden="true"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a class="post-action-btn btn btn--default btn-open-shareoptions" href="#btn-open-shareoptions" aria-label="Diesen Beitrag teilen">
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a class="post-action-btn btn btn--default" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://jiezhi.github.io/2015/06/01/android_read_memory_info/" title="Teilen auf Facebook">
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a class="post-action-btn btn btn--default" target="new" href="https://twitter.com/intent/tweet?text=http://jiezhi.github.io/2015/06/01/android_read_memory_info/" title="Teilen auf Twitter">
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a class="post-action-btn btn btn--default" target="new" href="https://plus.google.com/share?url=http://jiezhi.github.io/2015/06/01/android_read_memory_info/" title="Teilen auf Google Plus">
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a class="post-action-btn btn btn--default" target="new" href="http://service.weibo.com/share/share.php?&amp;title=http://jiezhi.github.io/2015/06/01/android_read_memory_info/" title="Share on Weibo">
+                    <i class="fab fa-weibo" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a class="post-action-btn btn btn--default" target="new" href="http://connect.qq.com/widget/shareqq/index.html?url=http://jiezhi.github.io/2015/06/01/android_read_memory_info/&amp;title=Android读取内存信息" title="Share on QQ">
+                    <i class="fab fa-qq" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a class="post-action-btn btn btn--default" target="new" href="http://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=http://jiezhi.github.io/2015/06/01/android_read_memory_info/" title="Share on Qzone">
+                    <i class="fa fa-star" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a class="post-action-btn btn btn--default" target="new" href="http://widget.renren.com/dialog/share?resourceUrl=http://jiezhi.github.io/2015/06/01/android_read_memory_info/" title="Share on Renren">
+                    <i class="fab fa-renren" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+                <li class="post-action">
+                    <a class="post-action-btn btn btn--default" href="#disqus_thread">
+                        <i class="fa fa-comment"></i>
+                    </a>
+                </li>
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="Nach oben">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                <div id="share-options-bar" class="share-options-bar" data-behavior="4">
+    <i id="btn-close-shareoptions" class="fa fa-times"></i>
+    <ul class="share-options">
+        
+            
+            
+            <li class="share-option">
+                <a class="share-option-btn" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://jiezhi.github.io/2015/06/01/android_read_memory_info/">
+                    <i class="fab fa-facebook" aria-hidden="true"></i><span>Teilen auf Facebook</span>
+                </a>
+            </li>
+        
+            
+            
+            <li class="share-option">
+                <a class="share-option-btn" target="new" href="https://twitter.com/intent/tweet?text=http://jiezhi.github.io/2015/06/01/android_read_memory_info/">
+                    <i class="fab fa-twitter" aria-hidden="true"></i><span>Teilen auf Twitter</span>
+                </a>
+            </li>
+        
+            
+            
+            <li class="share-option">
+                <a class="share-option-btn" target="new" href="https://plus.google.com/share?url=http://jiezhi.github.io/2015/06/01/android_read_memory_info/">
+                    <i class="fab fa-google-plus" aria-hidden="true"></i><span>Teilen auf Google Plus</span>
+                </a>
+            </li>
+        
+            
+            
+            <li class="share-option">
+                <a class="share-option-btn" target="new" href="http://service.weibo.com/share/share.php?&amp;title=http://jiezhi.github.io/2015/06/01/android_read_memory_info/">
+                    <i class="fab fa-weibo" aria-hidden="true"></i><span>Share on Weibo</span>
+                </a>
+            </li>
+        
+            
+            
+            <li class="share-option">
+                <a class="share-option-btn" target="new" href="http://connect.qq.com/widget/shareqq/index.html?url=http://jiezhi.github.io/2015/06/01/android_read_memory_info/&amp;title=Android读取内存信息">
+                    <i class="fab fa-qq" aria-hidden="true"></i><span>Share on QQ</span>
+                </a>
+            </li>
+        
+            
+            
+            <li class="share-option">
+                <a class="share-option-btn" target="new" href="http://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=http://jiezhi.github.io/2015/06/01/android_read_memory_info/">
+                    <i class="fa fa-star" aria-hidden="true"></i><span>Share on Qzone</span>
+                </a>
+            </li>
+        
+            
+            
+            <li class="share-option">
+                <a class="share-option-btn" target="new" href="http://widget.renren.com/dialog/share?resourceUrl=http://jiezhi.github.io/2015/06/01/android_read_memory_info/">
+                    <i class="fab fa-renren" aria-hidden="true"></i><span>Share on Renren</span>
+                </a>
+            </li>
+        
+    </ul>
+</div>
+
+            
+        </div>
+        
+
+
+    
+
+<div id="about">
+    <div id="about-card">
+        <div id="about-btn-close">
+            <i class="fa fa-times"></i>
+        </div>
+        
+            <img id="about-card-picture" src="https://www.gravatar.com/avatar/d932c72721e71e419028c107423eb812?s=110" alt="Bild des Autors"/>
+        
+            <h4 id="about-card-name">Jiezhi</h4>
+        
+            <div id="about-card-bio"><p>author.bio</p>
+</div>
+        
+        
+            <div id="about-card-job">
+                <i class="fa fa-briefcase"></i>
+                <br/>
+                <p>author.job</p>
+
+            </div>
+        
+        
+            <div id="about-card-location">
+                <i class="fa fa-map-marker-alt"></i>
+                <br/>
+                Nanjing China
+            </div>
+        
+    </div>
+</div>
+
+        
+        
+<div id="cover" style="background-image:url('/assets/images/cover.jpg');"></div>
+        <!--SCRIPTS-->
+<script src="/assets/js/script-vufjrm3fmbuttogo1hxuu0w9w0sesk5iyysjuguc2hdhufot9szxg8twijry.min.js"></script>
+<!--SCRIPTS END-->
+
+    
+        <script>
+             var disqus_config = function () {
+                 this.page.url = 'http://jiezhi.github.io/2015/06/01/android_read_memory_info/';
+                 
+                    this.page.identifier = '2015/06/01/android_read_memory_info/';
+                 
+             };
+            (function() {
+                var d = document, s = d.createElement('script');
+                var disqus_shortname = 'jiezhi';
+                s.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+
+                s.setAttribute('data-timestamp', +new Date());
+                (d.head || d.body).appendChild(s);
+            })();
+        </script>
+    
+
+
+
+    </body>
+</html>
