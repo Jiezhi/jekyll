@@ -98,19 +98,19 @@
 
 
 
-  <meta name="description" content="有 SQL 基础的话，差不多一天可以看完。面试前一天看了这本书，不怎么熟悉 HIVE 的我也能回答出大部分基础的 HIVE 面试题。这里把我看这本书做的笔记分享一下（从 Notion 里迁移出来）">
+  <meta name="description" content="有 SQL 基础的话，差不多一天可以看完。这里把我看这本书做的笔记分享一下（从 Notion 里迁移出来）">
 <meta name="keywords" content="Note,Hive,Big Data">
 <meta property="og:type" content="article">
 <meta property="og:title" content="《Apache Hive Cookbook》读书笔记">
 <meta property="og:url" content="http://jiezhi.github.io/2019/02/19/note-hive-cookbook/index.html">
 <meta property="og:site_name" content="Jiezhi Blog">
-<meta property="og:description" content="有 SQL 基础的话，差不多一天可以看完。面试前一天看了这本书，不怎么熟悉 HIVE 的我也能回答出大部分基础的 HIVE 面试题。这里把我看这本书做的笔记分享一下（从 Notion 里迁移出来）">
+<meta property="og:description" content="有 SQL 基础的话，差不多一天可以看完。这里把我看这本书做的笔记分享一下（从 Notion 里迁移出来）">
 <meta property="og:locale" content="zh-cn">
 <meta property="og:image" content="http://jiezhi.github.io/2019/02/19/note-hive-cookbook/1.png">
-<meta property="og:updated_time" content="2019-02-19T11:38:40.485Z">
+<meta property="og:updated_time" content="2019-02-26T06:25:21.509Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="《Apache Hive Cookbook》读书笔记">
-<meta name="twitter:description" content="有 SQL 基础的话，差不多一天可以看完。面试前一天看了这本书，不怎么熟悉 HIVE 的我也能回答出大部分基础的 HIVE 面试题。这里把我看这本书做的笔记分享一下（从 Notion 里迁移出来）">
+<meta name="twitter:description" content="有 SQL 基础的话，差不多一天可以看完。这里把我看这本书做的笔记分享一下（从 Notion 里迁移出来）">
 <meta name="twitter:image" content="http://jiezhi.github.io/2019/02/19/note-hive-cookbook/1.png">
 
 
@@ -278,7 +278,7 @@
       
     
 
-    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br/>Categories<span class="badge">25</span></a>
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br/>Categories<span class="badge">26</span></a>
 
   </li>
         
@@ -297,7 +297,7 @@
       
     
 
-    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br/>Archives<span class="badge">65</span></a>
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br/>Archives<span class="badge">66</span></a>
 
   </li>
 
@@ -401,12 +401,24 @@
                 
               
 
-              <time title="Created: 2019-02-19 17:26:42 / Modified: 19:38:40" itemprop="dateCreated datePublished" datetime="2019-02-19T17:26:42+08:00">2019-02-19</time>
+              <time title="Created: 2019-02-19 17:26:42" itemprop="dateCreated datePublished" datetime="2019-02-19T17:26:42+08:00">2019-02-19</time>
             
 
             
               
 
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Edited on</span>
+                
+                <time title="Modified: 2019-02-26 14:25:21" itemprop="dateModified" datetime="2019-02-26T14:25:21+08:00">2019-02-26</time>
               
             
           </span>
@@ -469,7 +481,7 @@
       
 
       
-        <p>有 SQL 基础的话，差不多一天可以看完。面试前一天看了这本书，不怎么熟悉 HIVE 的我也能回答出大部分基础的 HIVE 面试题。<br>这里把我看这本书做的笔记分享一下（从 <a href="https://www.notion.so/?r=507f808e5cb544809dfe98d930ee2cae" target="_blank" rel="noopener">Notion</a> 里迁移出来）</p>
+        <p>有 SQL 基础的话，差不多一天可以看完。<br>这里把我看这本书做的笔记分享一下（从 <a href="https://www.notion.so/?r=507f808e5cb544809dfe98d930ee2cae" target="_blank" rel="noopener">Notion</a> 里迁移出来）</p>
 <a id="more"></a>
 <h1 id="Developing-Hive"><a href="#Developing-Hive" class="headerlink" title="Developing Hive"></a>Developing Hive</h1><h2 id="Deploying-Hive-Metastore"><a href="#Deploying-Hive-Metastore" class="headerlink" title="Deploying Hive Metastore"></a>Deploying Hive Metastore</h2><ul>
 <li>The Hive table and database definitions and mapping to the data in HDFS is stored in a metastore.</li>
@@ -887,7 +899,7 @@ insert into table sales_buck select * from sales;
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">65</span>
+                    <span class="site-state-item-count">66</span>
                     <span class="site-state-item-name">posts</span>
                   </a>
                 </div>
@@ -950,7 +962,9 @@ insert into table sales_buck select * from sales;
                     
                       
                     
-                    <span class="site-state-item-count">23</span>
+                      
+                    
+                    <span class="site-state-item-count">24</span>
                     <span class="site-state-item-name">categories</span>
                   </a>
                 </div>
