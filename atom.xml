@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://jiezhi.github.io/"/>
-  <updated>2019-03-04T02:32:24.703Z</updated>
+  <updated>2019-03-07T01:41:05.651Z</updated>
   <id>http://jiezhi.github.io/</id>
   
   <author>
@@ -15,6 +15,32 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>解决 macos systemuiserver 无响应的问题</title>
+    <link href="http://jiezhi.github.io/2019/03/07/macos-systemuiserver-not-responding/"/>
+    <id>http://jiezhi.github.io/2019/03/07/macos-systemuiserver-not-responding/</id>
+    <published>2019-03-07T01:28:50.000Z</published>
+    <updated>2019-03-07T01:41:05.651Z</updated>
+    
+    <content type="html"><![CDATA[<p>把 MBP 升级到最新系统（10.14.3）后，发现休眠后再打开电脑，点击无线网或切换wifi 的时候，系统开始转菊花，系统设置也无响应了，去Activity Monitor 里会发现 <strong>systemuiserver not responding</strong>，貌似除了重启别无他法。</p><p>当然除了重启，你只需要在命令行里执行一个命令就可以了。</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo <span class="built_in">kill</span> -9 `ps aux | grep -v grep | grep /usr/libexec/airportd | awk <span class="string">'&#123;print $2&#125;'</span>`</span><br></pre></td></tr></table></figure><a id="more"></a><p>这行命令的意思是强行杀死airportd的进程，然后会导致相关进程重启。虽说没有从根本上解决问题，但比重启系统好多了。</p>]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;把 MBP 升级到最新系统（10.14.3）后，发现休眠后再打开电脑，点击无线网或切换wifi 的时候，系统开始转菊花，系统设置也无响应了，去Activity Monitor 里会发现 &lt;strong&gt;systemuiserver not responding&lt;/strong&gt;，貌似除了重启别无他法。&lt;/p&gt;
+&lt;p&gt;当然除了重启，你只需要在命令行里执行一个命令就可以了。&lt;/p&gt;
+&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;sudo &lt;span class=&quot;built_in&quot;&gt;kill&lt;/span&gt; -9 `ps aux | grep -v grep | grep /usr/libexec/airportd | awk &lt;span class=&quot;string&quot;&gt;&#39;&amp;#123;print $2&amp;#125;&#39;&lt;/span&gt;`&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+    
+    </summary>
+    
+      <category term="MacOS" scheme="http://jiezhi.github.io/categories/MacOS/"/>
+    
+    
+      <category term="Macos" scheme="http://jiezhi.github.io/tags/Macos/"/>
+    
+      <category term="Bug" scheme="http://jiezhi.github.io/tags/Bug/"/>
+    
+  </entry>
   
   <entry>
     <title>Flink编程模型</title>
@@ -36,9 +62,9 @@
     
       <category term="Apache" scheme="http://jiezhi.github.io/tags/Apache/"/>
     
-      <category term="Big Data" scheme="http://jiezhi.github.io/tags/Big-Data/"/>
-    
       <category term="Flink" scheme="http://jiezhi.github.io/tags/Flink/"/>
+    
+      <category term="Big Data" scheme="http://jiezhi.github.io/tags/Big-Data/"/>
     
   </entry>
   
@@ -112,9 +138,9 @@
     
       <category term="Note" scheme="http://jiezhi.github.io/tags/Note/"/>
     
-      <category term="Hive" scheme="http://jiezhi.github.io/tags/Hive/"/>
-    
       <category term="Big Data" scheme="http://jiezhi.github.io/tags/Big-Data/"/>
+    
+      <category term="Hive" scheme="http://jiezhi.github.io/tags/Hive/"/>
     
   </entry>
   
@@ -203,9 +229,9 @@
       <category term="Life" scheme="http://jiezhi.github.io/categories/Life/"/>
     
     
-      <category term="2017" scheme="http://jiezhi.github.io/tags/2017/"/>
-    
       <category term="总结" scheme="http://jiezhi.github.io/tags/%E6%80%BB%E7%BB%93/"/>
+    
+      <category term="2017" scheme="http://jiezhi.github.io/tags/2017/"/>
     
   </entry>
   
@@ -427,26 +453,6 @@
       &lt;p&gt;想自己实现一个DHT爬虫，这里先收集一些资源&lt;br&gt;
     
     </summary>
-    
-    
-  </entry>
-  
-  <entry>
-    <title>tmux初步入门</title>
-    <link href="http://jiezhi.github.io/2016/09/29/hello-tmux/"/>
-    <id>http://jiezhi.github.io/2016/09/29/hello-tmux/</id>
-    <published>2016-09-29T07:04:17.000Z</published>
-    <updated>2019-02-19T08:39:25.565Z</updated>
-    
-    <content type="html"><![CDATA[<p>记录一下常用的tmux命令<br><a id="more"></a></p><ul><li><p>Create Named Sessions</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">tmux new-session -s basic</span><br><span class="line"></span><br><span class="line">or</span><br><span class="line"></span><br><span class="line">tmux new -s basic</span><br></pre></td></tr></table></figure></li><li><p>detach session</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">PREFIX d</span><br></pre></td></tr></table></figure></li><li><p>Retattaching to Existing Sessions</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">tmux list-sessions</span><br><span class="line"></span><br><span class="line">or</span><br><span class="line"></span><br><span class="line">tmux ls</span><br></pre></td></tr></table></figure></li><li><p>Attach to Sessions</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tmux attach -t basic</span><br></pre></td></tr></table></figure></li></ul>]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;记录一下常用的tmux命令&lt;br&gt;
-    
-    </summary>
-    
-      <category term="tools" scheme="http://jiezhi.github.io/categories/tools/"/>
     
     
   </entry>
