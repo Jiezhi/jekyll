@@ -251,7 +251,7 @@
       
     
 
-    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>Tags<span class="badge">83</span></a>
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>Tags<span class="badge">86</span></a>
 
   </li>
         
@@ -270,7 +270,7 @@
       
     
 
-    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>Categories<span class="badge">28</span></a>
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>Categories<span class="badge">30</span></a>
 
   </li>
         
@@ -924,7 +924,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://jiezhi.github.io/2009/11/17/noip_2006_作业调度方案_jsp/">
+    <link itemprop="mainEntityOfPage" href="http://jiezhi.github.io/2009/11/17/NOIP_2006_作业调度方案_jsp/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Jiezhi.G">
@@ -944,7 +944,7 @@
           <h2 class="post-title" itemprop="name headline">
                 
                 
-                <a href="/2009/11/17/noip_2006_作业调度方案_jsp/" class="post-title-link" itemprop="url">noip 2006 作业调度方案 jsp</a>
+                <a href="/2009/11/17/NOIP_2006_作业调度方案_jsp/" class="post-title-link" itemprop="url">noip 2006 作业调度方案 jsp</a>
               
             
           </h2>
@@ -986,7 +986,7 @@
                 
                   <span class="post-meta-item-text">Edited on</span>
                 
-                <time title="Modified: 2019-02-19 16:40:57" itemprop="dateModified" datetime="2019-02-19T16:40:57+08:00">2019-02-19</time>
+                <time title="Modified: 2019-03-08 18:04:47" itemprop="dateModified" datetime="2019-03-08T18:04:47+08:00">2019-03-08</time>
               
             
           </span>
@@ -1022,8 +1022,8 @@
                 </span>
             
                 <span class="post-meta-item-text">Comments: </span>
-                <a href="/2009/11/17/noip_2006_作业调度方案_jsp/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2009/11/17/noip_2006_作业调度方案_jsp/" itemprop="commentCount"></span>
+                <a href="/2009/11/17/NOIP_2006_作业调度方案_jsp/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2009/11/17/NOIP_2006_作业调度方案_jsp/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -1052,15 +1052,21 @@
 
       
         
-          
-            <p>作业调度方案</p>
+          <p>作业调度方案</p>
 <p>本来想用记录p=record u,b,e:integer;   end; （u为第几道工序，b为开始时间，e为结束时间）</p>
-<p>来实现的，直接排还是挺方便的，但有些地方不好实现就没做下去……<br>直接排：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">for I:=1 to m*n do begin</span><br><span class="line"></span><br><span class="line">j:=1;</span><br><span class="line"></span><br><span class="line">while p[I,j].e&lt;&gt;0 do inc(j);&#123;p[I,j].e=0意味着p[I,j]已被安排过了，下一道工序&#125;</span><br><span class="line"></span><br><span class="line">p[I,j].b:=p[I-1,j].e;&#123;在同一个机器上的上一道工序结束时间&#125;</span><br><span class="line"></span><br><span class="line">p[I,j].e:=p[I,j].b+t[I,j];&#123;t[I,j]为该道工序所占时间&#125;</span><br><span class="line"></span><br><span class="line">end;</span><br></pre></td></tr></table></figure></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br></pre></td><td class="code"><pre><span class="line">program jsp;</span><br><span class="line"></span><br><span class="line">const nn=20;</span><br><span class="line"></span><br><span class="line">var f:array[1..nn,0..nn*nn]of boolean;//each machine condition;</span><br><span class="line"></span><br><span class="line">    t:array[1..nn,1..nn]of integer;//cover time;</span><br><span class="line"></span><br><span class="line">       e:array[1..nn,0..nn]of integer;//end time;</span><br><span class="line"></span><br><span class="line">       a:array[1..nn*nn]of integer;//following;</span><br><span class="line"></span><br><span class="line">       b:array[1..nn,1..nn]of integer;//belong to machine</span><br><span class="line"></span><br><span class="line">       g:array[1..nn*nn]of integer;//dealing with;</span><br><span class="line"></span><br><span class="line">       flag:boolean;</span><br><span class="line"></span><br><span class="line">       i,j,m,n,k,best,nt,nm:integer;</span><br><span class="line"></span><br><span class="line">begin</span><br><span class="line"></span><br><span class="line">assign(input,&amp;#39;jsp.in&amp;#39;);reset(input);</span><br><span class="line"></span><br><span class="line">assign(output,&amp;#39;&amp;#39;);rewrite(output);</span><br><span class="line"></span><br><span class="line">readln(m,n);</span><br><span class="line"></span><br><span class="line">fillchar(a,sizeof(a),0);</span><br><span class="line"></span><br><span class="line">fillchar(e,sizeof(e),0);</span><br><span class="line"></span><br><span class="line">fillchar(f,sizeof(f),true);</span><br><span class="line"></span><br><span class="line">fillchar(g,sizeof(g),0);</span><br><span class="line"></span><br><span class="line">for i:=1 to m*n do read(a[i]);readln;</span><br><span class="line"></span><br><span class="line">for i:=1 to n do begin</span><br><span class="line"></span><br><span class="line">       for j:=1 to m do</span><br><span class="line"></span><br><span class="line">              read(b[i,j]);</span><br><span class="line"></span><br><span class="line">end;</span><br><span class="line"></span><br><span class="line">for i:=1 to n do begin</span><br><span class="line"></span><br><span class="line">       for j:=1 to m do</span><br><span class="line"></span><br><span class="line">              read(t[i,j]);</span><br><span class="line"></span><br><span class="line">       readln;</span><br><span class="line"></span><br><span class="line">end;</span><br><span class="line"></span><br><span class="line">for i:=1 to m*n do begin</span><br><span class="line"></span><br><span class="line">       inc(g[a[i]]);</span><br><span class="line"></span><br><span class="line">      nt:=t[a[i],g[a[i]]];</span><br><span class="line"></span><br><span class="line">      nm:=b[a[i],g[a[i]]];&#123;nt：needtime；nm：machine&#125;</span><br><span class="line"></span><br><span class="line">      for j:=e[a[i],g[a[i]]-1]to 400 do begin&#123;从该工件的上一个工序结束时间开始搜索&#125;</span><br><span class="line"></span><br><span class="line">              flag:=true;</span><br><span class="line"></span><br><span class="line">             for k:=j to j+nt do</span><br><span class="line"></span><br><span class="line">                     if k&amp;amp;lt;=400 then</span><br><span class="line"></span><br><span class="line">                            flag:=flag and f[nm,k];</span><br><span class="line"></span><br><span class="line">              if flag then begin&#123;如果搜索成功&#125;</span><br><span class="line"></span><br><span class="line">                     e[a[i],g[a[i]]]:=j+nt;&#123;记下结束时间&#125;</span><br><span class="line"></span><br><span class="line">                    for k:=j+1 to j+nt-1 do f[nm,k]:=false;</span><br><span class="line"></span><br><span class="line">                     break;&#123;减少搜索&#125;</span><br><span class="line"></span><br><span class="line">              end;</span><br><span class="line"></span><br><span class="line">       end;</span><br><span class="line"></span><br><span class="line">end;</span><br><span class="line"></span><br><span class="line">       best:=0;</span><br><span class="line"></span><br><span class="line">       for i:=1 to n do &#123;从每道工序入手，但如果从每个机器入手呢？&#125;</span><br><span class="line"></span><br><span class="line">              if best&amp;amp;lt;e[i,m]then best:=e[i,m];</span><br><span class="line"></span><br><span class="line">       writeln(best);</span><br><span class="line"></span><br><span class="line">       close(input);close(output);</span><br><span class="line"></span><br><span class="line">end.</span><br></pre></td></tr></table></figure>
+<p>来实现的，直接排还是挺方便的，但有些地方不好实现就没做下去……<br>
+          <!--noindex-->
           
+            <div class="post-button text-center">
+              <a class="btn" href="/2009/11/17/NOIP_2006_作业调度方案_jsp/" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          
+          <!--/noindex-->
         
       
-    </div>
+    </p></div>
 
     
 
@@ -1112,7 +1118,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://jiezhi.github.io/2009/11/17/noip_2006_能量项链_energy/">
+    <link itemprop="mainEntityOfPage" href="http://jiezhi.github.io/2009/11/17/NOIP_2006_能量项链_energy/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Jiezhi.G">
@@ -1132,7 +1138,7 @@
           <h2 class="post-title" itemprop="name headline">
                 
                 
-                <a href="/2009/11/17/noip_2006_能量项链_energy/" class="post-title-link" itemprop="url">noip 2006 能量项链 energy</a>
+                <a href="/2009/11/17/NOIP_2006_能量项链_energy/" class="post-title-link" itemprop="url">noip 2006 能量项链 energy</a>
               
             
           </h2>
@@ -1174,7 +1180,7 @@
                 
                   <span class="post-meta-item-text">Edited on</span>
                 
-                <time title="Modified: 2019-02-19 16:41:05" itemprop="dateModified" datetime="2019-02-19T16:41:05+08:00">2019-02-19</time>
+                <time title="Modified: 2019-03-08 18:04:56" itemprop="dateModified" datetime="2019-03-08T18:04:56+08:00">2019-03-08</time>
               
             
           </span>
@@ -1210,8 +1216,8 @@
                 </span>
             
                 <span class="post-meta-item-text">Comments: </span>
-                <a href="/2009/11/17/noip_2006_能量项链_energy/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2009/11/17/noip_2006_能量项链_energy/" itemprop="commentCount"></span>
+                <a href="/2009/11/17/NOIP_2006_能量项链_energy/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2009/11/17/NOIP_2006_能量项链_energy/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -1241,7 +1247,8 @@
       
         
           
-            <p>能量项链</p>
+            <a id="more"></a>
+<p>能量项链</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><span class="line">rogram energy;</span><br><span class="line"></span><br><span class="line">&#123;20:02 &#125;</span><br><span class="line"></span><br><span class="line">var</span><br><span class="line"></span><br><span class="line">    a1,a2:array[1..200]of integer;</span><br><span class="line"></span><br><span class="line">    q:array[1..200,1..200]of longint;</span><br><span class="line"></span><br><span class="line">         i,j,n,k,m,p:integer;</span><br><span class="line"></span><br><span class="line">         best:longint;</span><br><span class="line"></span><br><span class="line">begin</span><br><span class="line"></span><br><span class="line">assign(input,&apos;energy.in&apos;);reset(input);</span><br><span class="line"></span><br><span class="line">assign(output,&apos;energy.ans&apos;);rewrite(output);</span><br><span class="line"></span><br><span class="line">readln(n);</span><br><span class="line"></span><br><span class="line">for i:=1 to n do read(a1[i]);</span><br><span class="line"></span><br><span class="line">readln;</span><br><span class="line"></span><br><span class="line">for i:=1 to n-1 do a2[i]:=a1[i+1];</span><br><span class="line"></span><br><span class="line">a2[n]:=a1[1];</span><br><span class="line"></span><br><span class="line">m:=n*2-1;</span><br><span class="line"></span><br><span class="line">for i:=n+1 to m do begin</span><br><span class="line"></span><br><span class="line">         a1[i]:=a1[i-n];a2[i]:=a2[i-n]</span><br><span class="line"></span><br><span class="line">end;</span><br><span class="line"></span><br><span class="line">//for i:=1 to m do writeln(a1[i],&apos; &apos;,a2[i],&apos; &apos;);</span><br><span class="line"></span><br><span class="line">fillchar(q,sizeof(q),0);</span><br><span class="line"></span><br><span class="line">for p:=1 to n-1 do</span><br><span class="line"></span><br><span class="line">         for i:=1 to m-1 do</span><br><span class="line"></span><br><span class="line">                   begin</span><br><span class="line"></span><br><span class="line">                 j:=i+p;</span><br><span class="line"></span><br><span class="line">                 if j&gt;m then break;</span><br><span class="line"></span><br><span class="line">                            for k:=i to j-1 do begin</span><br><span class="line"></span><br><span class="line">                            if q[i,j]&lt;q[i,k]+q[k+1,j]+a1[i]*a2[k]*a2[j]</span><br><span class="line"></span><br><span class="line">                               then q[i,j]:=q[i,k]+q[k+1,j]+a1[i]*a2[k]*a2[j];</span><br><span class="line"></span><br><span class="line">                            end;</span><br><span class="line"></span><br><span class="line">               end;</span><br><span class="line"></span><br><span class="line">best:=0;</span><br><span class="line"></span><br><span class="line">for i:=1 to n do</span><br><span class="line"></span><br><span class="line">         if best&lt;q[i,i+n-1]then best:=q[i,i+n-1];</span><br><span class="line"></span><br><span class="line">writeln(best);</span><br><span class="line"></span><br><span class="line">close(input);close(output);</span><br><span class="line"></span><br><span class="line">end.</span><br></pre></td></tr></table></figure>
           
         
@@ -1298,7 +1305,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://jiezhi.github.io/2009/11/17/noip_2006_金明的预算方案_budget/">
+    <link itemprop="mainEntityOfPage" href="http://jiezhi.github.io/2009/11/17/NOIP_2006_金明的预算方案_budget/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Jiezhi.G">
@@ -1318,7 +1325,7 @@
           <h2 class="post-title" itemprop="name headline">
                 
                 
-                <a href="/2009/11/17/noip_2006_金明的预算方案_budget/" class="post-title-link" itemprop="url">noip 2006 金明的预算方案 budget</a>
+                <a href="/2009/11/17/NOIP_2006_金明的预算方案_budget/" class="post-title-link" itemprop="url">noip 2006 金明的预算方案 budget</a>
               
             
           </h2>
@@ -1360,7 +1367,7 @@
                 
                   <span class="post-meta-item-text">Edited on</span>
                 
-                <time title="Modified: 2019-02-19 16:41:10" itemprop="dateModified" datetime="2019-02-19T16:41:10+08:00">2019-02-19</time>
+                <time title="Modified: 2019-03-08 18:03:38" itemprop="dateModified" datetime="2019-03-08T18:03:38+08:00">2019-03-08</time>
               
             
           </span>
@@ -1396,8 +1403,8 @@
                 </span>
             
                 <span class="post-meta-item-text">Comments: </span>
-                <a href="/2009/11/17/noip_2006_金明的预算方案_budget/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2009/11/17/noip_2006_金明的预算方案_budget/" itemprop="commentCount"></span>
+                <a href="/2009/11/17/NOIP_2006_金明的预算方案_budget/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2009/11/17/NOIP_2006_金明的预算方案_budget/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -1547,7 +1554,7 @@
                 
                   <span class="post-meta-item-text">Edited on</span>
                 
-                <time title="Modified: 2019-02-19 16:40:49" itemprop="dateModified" datetime="2019-02-19T16:40:49+08:00">2019-02-19</time>
+                <time title="Modified: 2019-03-08 18:04:37" itemprop="dateModified" datetime="2019-03-08T18:04:37+08:00">2019-03-08</time>
               
             
           </span>
@@ -1613,14 +1620,19 @@
 
       
         
+          <p>就像解题报告中说的超简单，但还是出了许多小毛病,如刚开始将sum同avi,paper等定义在一起，而我为了省空间将它们限制在0..100，故算出来的sum错误无疑了；用字符读入数据时忘了空格……最后在比较时本想输出sum同最先出现的人却费事的用downto，结果没用‘&lt;=’反画蛇添足了……唉……太粗心了……<br>
+          <!--noindex-->
           
-            <p>就像解题报告中说的超简单，但还是出了许多小毛病,如刚开始将sum同avi,paper等定义在一起，而我为了省空间将它们限制在0..100，故算出来的sum错误无疑了；用字符读入数据时忘了空格……最后在比较时本想输出sum同最先出现的人却费事的用downto，结果没用‘&lt;=’反画蛇添足了……唉……太粗心了……</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br></pre></td><td class="code"><pre><span class="line">program scholar;</span><br><span class="line"></span><br><span class="line">type node=record</span><br><span class="line"></span><br><span class="line">       name:string[20];</span><br><span class="line"></span><br><span class="line">      avi,ping,paper:0..100;</span><br><span class="line"></span><br><span class="line">      bu,west:boolean;</span><br><span class="line"></span><br><span class="line">      sum:integer;</span><br><span class="line"></span><br><span class="line">    end;</span><br><span class="line"></span><br><span class="line">var stu:array [0..100] of node;</span><br><span class="line"></span><br><span class="line">    i,n,max:integer;</span><br><span class="line"></span><br><span class="line">    sumup:longint;</span><br><span class="line"></span><br><span class="line">    c:char;</span><br><span class="line"></span><br><span class="line">begin</span><br><span class="line"></span><br><span class="line">assign(input,&apos;scholar1.in&apos;);reset(input);</span><br><span class="line"></span><br><span class="line">assign(output,&apos;&apos;);rewrite(output);</span><br><span class="line"></span><br><span class="line">readln(n);</span><br><span class="line"></span><br><span class="line">for i:=0 to 100 do</span><br><span class="line"></span><br><span class="line">       with stu[i] do begin</span><br><span class="line"></span><br><span class="line">              name:=&apos;&apos;;</span><br><span class="line"></span><br><span class="line">           avi:=0;ping:=0;paper:=0;sum:=0;</span><br><span class="line"></span><br><span class="line">           bu:=false;west:=false;</span><br><span class="line"></span><br><span class="line">      end;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">for i:=1 to n do</span><br><span class="line"></span><br><span class="line">       with stu[i] do begin</span><br><span class="line"></span><br><span class="line">       read(c);</span><br><span class="line"></span><br><span class="line">      while c&lt;&gt;&apos; &apos; do begin name:=name+c;read(c);end;</span><br><span class="line"></span><br><span class="line">       read(avi);read(ping);</span><br><span class="line"></span><br><span class="line">       read(c);</span><br><span class="line"></span><br><span class="line">       read(c);if c=&apos;Y&apos;then bu:=true else bu:=false;</span><br><span class="line"></span><br><span class="line">       read(c);</span><br><span class="line"></span><br><span class="line">       read(c);if c=&apos;Y&apos;then west:=true else west:=false;</span><br><span class="line"></span><br><span class="line">       readln(paper);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">       if (avi&gt;80)and(paper&gt;0)then inc(sum,8000);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">       if (avi&gt;85)and(ping&gt;80) then inc(sum,4000);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">       if avi&gt;90 then inc(sum,2000);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">       if (avi&gt;85)and west then inc(sum,1000);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">       if (ping&gt;80)and bu then inc(sum,850);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">end;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">sumup:=0;max:=0;</span><br><span class="line"></span><br><span class="line">for i:=1 to n do begin</span><br><span class="line"></span><br><span class="line">       sumup:=sumup+stu[i].sum;</span><br><span class="line"></span><br><span class="line">       if max&lt;stu[i].sum then begin</span><br><span class="line"></span><br><span class="line">              max:=stu[i].sum;stu[0]:=stu[i];</span><br><span class="line"></span><br><span class="line">       end;</span><br><span class="line"></span><br><span class="line">end;</span><br><span class="line"></span><br><span class="line">writeln(stu[0].name);writeln(stu[0].sum);writeln(sumup);</span><br><span class="line"></span><br><span class="line">close(input);close(output);</span><br><span class="line"></span><br><span class="line">end.</span><br></pre></td></tr></table></figure>
-
+            <div class="post-button text-center">
+              <a class="btn" href="/2009/11/17/NOIP_2005_谁拿了最多奖学金/" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
           
+          <!--/noindex-->
         
       
-    </div>
+    </p></div>
 
     
 
@@ -1920,7 +1932,7 @@
                 
                   <span class="post-meta-item-text">Edited on</span>
                 
-                <time title="Modified: 2019-02-19 16:40:35" itemprop="dateModified" datetime="2019-02-19T16:40:35+08:00">2019-02-19</time>
+                <time title="Modified: 2019-03-08 18:03:57" itemprop="dateModified" datetime="2019-03-08T18:03:57+08:00">2019-03-08</time>
               
             
           </span>
@@ -1987,7 +1999,8 @@
       
         
           
-            <p>首先快排是要的，下面就是计算最小的体力耗费值了，其中我用到了冒泡排序，具体见下：</p>
+            <a id="more"></a>
+<p>首先快排是要的，下面就是计算最小的体力耗费值了，其中我用到了冒泡排序，具体见下：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br></pre></td><td class="code"><pre><span class="line">program fruit;</span><br><span class="line"></span><br><span class="line">var a:array [0..10001]of longint;</span><br><span class="line"></span><br><span class="line">       i,j,k,n:integer;</span><br><span class="line"></span><br><span class="line">          t,s:longint;</span><br><span class="line"></span><br><span class="line">          flag:boolean;</span><br><span class="line"></span><br><span class="line">procedure fastsort(l,r:integer);</span><br><span class="line"></span><br><span class="line">var lx,rx,pi:integer;</span><br><span class="line"></span><br><span class="line">begin</span><br><span class="line"></span><br><span class="line">lx:=l;rx:=r;pi:=a[l];</span><br><span class="line"></span><br><span class="line">while lx&lt;rx do begin</span><br><span class="line"></span><br><span class="line">    while a[rx]&gt;pi do dec(rx);</span><br><span class="line"></span><br><span class="line">    if lx&lt;rx then begin</span><br><span class="line"></span><br><span class="line">           t:=a[rx];a[rx]:=a[lx];a[lx]:=t;inc(lx);</span><br><span class="line"></span><br><span class="line">    end;</span><br><span class="line"></span><br><span class="line">    while a[lx]&lt;pi do inc(lx);</span><br><span class="line"></span><br><span class="line">    if lx&lt;rx then begin</span><br><span class="line"></span><br><span class="line">           t:=a[rx];a[rx]:=a[lx];a[lx]:=t;dec(rx);</span><br><span class="line"></span><br><span class="line">    end;</span><br><span class="line"></span><br><span class="line">end;</span><br><span class="line"></span><br><span class="line">       if l&lt;lx-1 then fastsort(l,lx-1);</span><br><span class="line"></span><br><span class="line">       if r&gt;rx+1 then fastsort(rx+1,r);</span><br><span class="line"></span><br><span class="line">end;</span><br><span class="line"></span><br><span class="line">begin</span><br><span class="line"></span><br><span class="line">assign(input,&apos;fruit.in&apos;);reset(input);</span><br><span class="line"></span><br><span class="line">assign(output,&apos;fruit.ans&apos;);rewrite(output);</span><br><span class="line"></span><br><span class="line">readln(n);</span><br><span class="line"></span><br><span class="line">for i:=1 to n do read(a[i]);</span><br><span class="line"></span><br><span class="line">fastsort(1,n);</span><br><span class="line"></span><br><span class="line">s:=0;a[0]:=0;</span><br><span class="line"></span><br><span class="line">for i:=1 to n do begin</span><br><span class="line"></span><br><span class="line">       s:=s+a[i]+a[i-1];a[i]:=a[i-1]+a[i];</span><br><span class="line"></span><br><span class="line">              for k:=i to n-1 do</span><br><span class="line"></span><br><span class="line">                     if a[k]&gt;a[k+1] then begin</span><br><span class="line"></span><br><span class="line">                            t:=a[k];a[k]:=a[k+1];a[k+1]:=t;</span><br><span class="line"></span><br><span class="line">                     end;</span><br><span class="line"></span><br><span class="line">end;</span><br><span class="line"></span><br><span class="line">       dec(s,a[1]);</span><br><span class="line"></span><br><span class="line">       writeln(s);</span><br><span class="line"></span><br><span class="line">close(input);close(output);</span><br><span class="line"></span><br><span class="line">end.</span><br></pre></td></tr></table></figure>
 <p>其中还有许多可以优化的地方，如：可以用t:=a[i];a[i]:=a[n];a[n]:=t;来减少后面的排序次数，又数组已是有序的了故还可在冒泡排序上优化，可置一布尔型变量flag来提前结束排序.</p>
 <p>但十个测试点都过了就不做了.</p>
@@ -2096,6 +2109,10 @@
                     
                   
                     
+                    
+                      
+                    
+                      
                     
                       
                     
@@ -2336,7 +2353,13 @@
                     
                       
                     
-                    <span class="site-state-item-count">82</span>
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">85</span>
                     <span class="site-state-item-name">tags</span>
                   </a>
                 </div>
