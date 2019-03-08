@@ -1,0 +1,771 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  <entry>
+    <title><![CDATA[Flink 分布式运行时环境（Distributed Runtime Environment）]]></title>
+    <url>%2F2019%2F03%2F08%2Fflink-distributed-runtime-environment%2F</url>
+    <content type="text"><![CDATA[本篇文章介绍 Flink 的分布式运行时环境相关的概念。 本文译自Flink官网 任务和操作链对于分布式的执行，Flink将操作子任务链接(chain)到任务(task)中。每个任务由一个线程执行。将操作链接到任务是一项有用的优化：它可以减少线程到线程切换和缓冲的开销，并在降低延迟的同时提高整体吞吐量。链接行为可以配置;有关详细信息，请参阅链接文档。 下图中的示例数据流由五个子任务执行，因此具有五个并行线程。 操作链接导任务 作业管理器，任务管理器和客户端Flink运行时包含两种类型的进程： 作业管理器（JobManagers，也称为master）协调分布式执行。他们安排任务，协调检查点，协调故障恢复等。 至少有一个Job Manager。设置高可用（HA, High-Availability）的话将具有多个JobManagers，其中一个始终是领导者(leader)，其它的处于待机状态(standby)。 任务管理器（TaskManagers，也称为worker）执行数据流的任务（或更具体地说，子任务），并缓冲和交换数据流。 必须始终至少有一个TaskManager。 JobManagers和TaskManagers可以通过多种方式启动：独立集群直接在机器里启动，或在容器中，或由YARN或Mesos等资源框架来管理。 TaskManagers连接到JobManagers，通知自己可用，然后被分配任务。 客户端不是运行时和程序执行的一部分，而是被用于准备数据流并将数据流发送到JobManager。之后，客户端可以断开连接或保持连接以接收进度报告。客户端要么作为触发执行的Java / Scala程序的一部分运行，要么是在命令行进程中运行 ./bin/flink run …. 执行Flink数据流所涉及的过程 任务槽和资源每个worker（TaskManager）都是一个JVM进程，可以在不同的线程中执行一个或多个子任务。为了控制worker接受的任务数量，worker中有任务槽（task slots）（至少一个）。 每个任务槽代表TaskManager的固定资源子集。例如，具有三个任务槽的TaskManager会将其1/3的托管内存分配到每个插槽。切换资源意味着子任务不会与来自其他作业的子任务竞争托管内存，而是竞争具有一定量的保留托管内存。请注意，这里没有CPU隔离;当前任务槽只分离任务的托管内存。 通过调整任务槽的数量，用户可以定义子任务之间如何相互隔离。每个TaskManager有一个插槽意味着每个任务组在一个单独的JVM中运行（例如，可以在一个单独的容器中启动）。拥有多个插槽意味着更多子任务共享同一个JVM。同一JVM中的任务共享TCP连接（通过多路复用）和心跳消息。它们还可以共享数据集和数据结构，从而减少每任务开销。 具有任务槽和任务的TaskManager 默认情况下，Flink允许子任务共享插槽，即使它们是不同任务的子任务，只要它们来自同一个作业。结果就是，一个槽可以保存作业的整个管道。允许此插槽共享有两个主要好处： Flink集群需要的任务槽数量与作业中使用的最高并行度的任务槽一样多。无需计算程序总共包含多少任务（具有不同的并行性）。 更容易获得更好的资源利用率。没有插槽共享，非密集的source/ map()子任务将占用与资源密集型窗口子任务一样多的资源。通过插槽共享，将示例中的基本并行性从2增加到6可以充分利用时隙资源，同时确保繁重的子任务在TaskManagers之间公平分配。 具有共享任务槽的TaskManagers API还包括资源组机制，可用于防止意外的插槽共享。 根据经验，一个很好的默认任务槽数就是CPU核心数。使用超线程，每个插槽然后需要2个或更多硬件线程。 State Backends(状态后端?)存储键/值索引的确切数据结构取决于所选的state backend。一个state backend将数据存储在内存中的哈希映射中，另一个state backend使用RocksDB作为键/值存储。除了定义保存状态的数据结构之外，state backend还实现了获取键/值状态的时间点快照，并将该快照存储为检查点的一部分的逻辑。 检查点和快照 保存点（Savepoints）用Data Stream API编写的程序可以从保存点中恢复执行。保存点允许更新程序和Flink群集，而不会丢失任何状态。 保存点是手动触发的检查点，它可以生成一个程序的快照并把它写到state backend。 他们依靠常规的检查点机制。 在执行期间，程序会定期在工作节点上创建快照并生成检查点。 对于程序恢复，仅需要最后完成的检查点，并且一旦完成新检查点，就可以安全地丢弃旧检查点。 保存点与这些定期检查点类似，不同之处在于它们由用户触发，并且在较新的检查点完成时不会自动过期。 可以从命令行创建保存点，也可以通过REST API取消作业。]]></content>
+      <categories>
+        <category>Flink</category>
+      </categories>
+      <tags>
+        <tag>Flink</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[解决 macos systemuiserver 无响应的问题]]></title>
+    <url>%2F2019%2F03%2F07%2Fmacos-systemuiserver-not-responding%2F</url>
+    <content type="text"><![CDATA[把 MBP 升级到最新系统（10.14.3）后，发现休眠后再打开电脑，点击无线网或切换wifi 的时候，系统开始转菊花，系统设置也无响应了，去Activity Monitor 里会发现 systemuiserver not responding，貌似除了重启别无他法。 当然除了重启，你只需要在命令行里执行一个命令就可以了。 1sudo kill -9 `ps aux | grep -v grep | grep /usr/libexec/airportd | awk '&#123;print $2&#125;'` 这行命令的意思是强行杀死airportd的进程，然后会导致相关进程重启。虽说没有从根本上解决问题，但比重启系统好多了。]]></content>
+      <categories>
+        <category>MacOS</category>
+      </categories>
+      <tags>
+        <tag>Macos</tag>
+        <tag>Bug</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[Flink编程模型]]></title>
+    <url>%2F2019%2F03%2F04%2Fflink-concepts-programming-model%2F</url>
+    <content type="text"><![CDATA[Flink 的编程模型为数据流编程模型（Dataflow Programming Model），这里介绍编程模型里面的几个概念。 本文译自Flink官网：Apache Flink 1.7 Documentation: Dataflow Programming Model 数据流编程模型（Dataflow Programming Model） 抽象层次（Levels of Abstraction）Flink 提供几种不同层次的抽象来开发 流/批（streaming/batch）程序 最低级的抽象仅提供状态流（stateful streaming），它通过 Process Function （处理函数）内嵌在 DataStream API 中。它容许用户自由地处理来自一个或多个流的事件，并且使用一致的容错状态。此外，用户也可以给事件时间和处理时间注册回调，使得程序可以实现复杂的计算。 实践中，多数的应用程序不需要使用上述的低级的抽象，仅需要使用核心接口（Core API）来编码，比如 DataStream API (数据流接口，有界/无界流) 和 DataSet API （数据集接口，有界数据集）。这些流畅的接口为数据处理提供了通用构建流程，诸如用户指定的转换（transformation）、连接（join）、聚合（aggregation）、窗口（window）、状态（state）等不同形式。这些接口处理的数据类型在不同的编程语言中以类（class）的形式呈现。 低层次的处理函数（Process Function）与数据流接口（DataStream API）的交互，使得某些特定的操作可以抽象为更低的层次成为可能。数据集接口（DataSet API）在有界的数据集上提供额外的原始操作，例如循环和迭代（loops/iterations）。 表接口（Table API）使以表为中心的声明性 DSL，可以动态地改变表（当展示流的时候）。Table API遵循（扩展）关系型模型：表附加了一个模式(schema)（类似于关系型数据库中的表），此API提供了可比较的操作，例如select，project，join，group-by，aggregate等。Table API程序以声明方式定义应该执行的逻辑操作，而不是准确地指定操作代码。 尽管Table API可以通过各种类型的用户定义函数进行扩展，但它的表现力不如Core API，但使用起来更简洁（编写的代码更少）。 此外，Table API程序还会通过优化程序，在执行之前应用优化规则。 可以在表和DataStream/ DataSet之间无缝转换，允许在程序中混合Table API以及DataStream和DataSet API。 Flink提供的最高级抽象是SQL。 这种抽象在语义和表达方面类似于Table API，但是将程序表示为SQL查询表达式。 SQL抽象与Table API紧密交互，SQL查询可以在Table API中定义的表上执行。 程序和数据流（Programs and Dataflows）Flink程序的基本构建块是流（streams）和转换（transformations）。 （请注意，Flink的DataSet API中使用的DataSet也是内部流，稍后会详细介绍。）从概念上讲，流是（可能永无止境的）数据记录流，而转换是将一个或多个流作为输入，并产生一个或多个输出流的操作。 执行时，Flink程序映射到流数据流（streaming dataflows），由流(streams)和转换运算符(operators)组成。 每个数据流都以一个或多个源(sources)开头，并以一个或多个接收器(sinks)结束。 数据流类似于任意有向无环图（DAGs, Directed acyclic graphs）。 尽管通过迭代结构允许特殊形式的循环，但为了简单起见，我们将在大多数情况下对其进行掩饰简化。 通常，程序中的转换与数据流中的运算符之间存在一对一的对应关系。 但是，有时一个转换可能包含多个转换运算符。 源（soruces）和接收器（sinks）被记录在流连接器和批处理连接器文档中。 转换（transformation）被记录在DataStream运算符和DataSet转换中。 并行数据流Flink中的程序本质上是并行（parallel）和分布式的（distributed）。 在执行期间，流具有一个或多个流分区（stream partitions），并且每个运算符具有一个或多个运算子任务(operator subtasks)。 运算子任务彼此独立，并且可以在不同的线程中执行，也可能是在不同的机器或容器上执行。 运算子任务的数量就是某个特定运算符的并行度（parallelism）。 流的并行度始终是其生成的运算符的并行度。 同一程序的不同运算符可能具有不同的并行级别。 流可以以一对一（或转发）的模式或以重新分发的模式在两个运算符之间传输数据： 一对一（One-to-one）流（例如，在上图中的Source和map()运算符之间）保留元素的分区和排序。这意味着map()运算符的subtask[1]看到的元素与Source运算符的subtask[1]生成的元素顺序相同。 重新分发（Redistributing）流（在上面的map()和keyBy/window之间，以及keyBy/window和Sink之间）重新分配流的分区。每个运算子任务将数据发送到不同的目标子任务，具体取决于所选的转换。示例是keyBy()（通过散列键重新分区），broadcast()或rebalance()（随机重新分区）。在重新分发的交换中，元素之间的排序仅保留在每对发送和接收子任务中（例如，map()的subtask[1]和keyBy/window的subtask[2]）。因此，在此示例中，保留了每个键的排序，但并行度确实带来了不同键的聚合结果到达sink的顺序的不确定性。 有关配置和控制并行性的详细信息，请参阅并行执行的文档。 窗口（Windows）聚合事件（如，counts，sums）在流上的工作方式与批处理方式不同。 例如，不可能计算流中的所有元素，因为流通常是无限的（无界）。 相反，流上的聚合（counts，sums等）由窗口(windows)限定，例如“在最后5分钟内计数”或“最后100个元素的总和”。 Windows可以是时间驱动的（例如：每30秒）或数据驱动（例如：每100个元素）。 人们通常区分不同类型的窗口，例如翻滚窗口(tumbling windows)（没有重叠），滑动窗口(sliding windows)（具有重叠）和会话窗口(session windows)（由不活动间隙打断）。 可以在此博客文章中找到更多窗口示例。 更多详细信息可参阅窗口文档。 时间（Time）当在流程序中引用时间（例如定义窗口）时，可以参考不同的时间概念： 事件时间（Event Time）是创建事件的时间。 它通常由事件中的时间戳描述，例如由生产传感器或生产服务生成。 Flink通过时间戳分配器（timestamp assigners）访问事件时间戳。 接收时间(Ingestion Time)是事件在源操作符处进入Flink数据流的时间。 处理时间（Processing Time）是每个操作符执行基于时间的操作时的本地时间。 事件时间，接收时间和处理时间 有关如何处理时间的更多详细信息，请参阅事件时间文档。 状态运算（Stateful Operations）虽然数据流中的许多运算只是一次查看一个单独的事件（例如事件解析器），但某些运算会记住多个事件（例如窗口运算符）的信息。这些操作称为stateful。 状态运算的状态可以被认为是由内嵌的键/值存储来维护。状态和状态运算符读取的流被严格地分区和分发。因此，只有在keyBy()函数之后才能在keyed stream上访问键/值状态，并且限制为与当前事件的键相关联的值。对齐流和状态的键可确保所有状态更新都是本地操作，从而保证一致性而无需事务开销。对齐操作还允许Flink重新分配状态并透明地调整流分区。 状态和分区 有关更多信息，请参阅有关状态的文档。 容错检查点(Checkpoints for Fault Tolerance)Flink使用stream replay和检查点(checkpointng)的组合来实现容错。检查点与每个输入流中的特定点以及每个运算符的对应状态相关。通过恢复运算符的状态并从检查点重新执行（replay）事件，可以从检查点恢复流数据流并保持一致性（exactly-once processing semantics）。 检查点间隔是执行期间的容错和恢复时间（需要重放的事件的数量）之间的折衷方法。 容错的内部机制中的描述提供了有关Flink如何管理检查点和相关主题的更多信息。有关启用和配置检查点的详细信息，请参阅检查点API文档。 批处理流Flink执行批处理程序作为流程序的一种特殊情况，即流是有界的（有限数量的元素）。 DataSet在内部被视为数据流。因此，上述概念以相同的方式应用于批处理程序，并且它们适用于流程序，除了少数例外： 批处理程序的容错不使用检查点。通过完全重新执行流来进行恢复，因为输入是有限的。这会使资源更多地用于恢复，且使得常规处理资源消耗更少，因为它避免了检查点。 DataSet API中的有状态操作（stateful operations）使用简化的内存/核外(in-memory/out-of-core)数据结构，而不是键/值索引。 DataSet API引入了特殊的同步（ superstep-based）迭代，这些迭代只能在有界流上进行。有关详细信息，请查看迭代文档。]]></content>
+      <categories>
+        <category>Flink</category>
+      </categories>
+      <tags>
+        <tag>Apache</tag>
+        <tag>Flink</tag>
+        <tag>Big Data</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[分享学习大数据相关笔记，并邀请您加入]]></title>
+    <url>%2F2019%2F02%2F26%2Fjoin-bigdata-group%2F</url>
+    <content type="text"><![CDATA[用 Notion 有一段时间了，也积累了不少技术知识点和读书笔记。这里创建了『大数据』相关的 WORKSPACE，希望有志同道合的朋友一起加入，互相学习，共同进步。 项目地址www.notion.so/data365 项目里目前主要分为两块： Inbox 项目成员可以添加任何大数据相关的信息（包括但不局限于架构、调优、博客、笔记等） Big Data 经过分类编辑后的内容，目标是保证可读，并且有用 账号注册首先你需要有 Notion 的账号，如果没有可以先注册 （有aff） Notion 入门Guides &amp; FAQs 强烈建议阅读官方入门文档。 加入 Workspace欢迎各位对大数据感兴趣的朋友加入，加入方式： 可以发邮件给我 电报我 加入Slack 群组，(通过 slack 可以及时得到项目相关的通知)： 电报群（没法私信我的，可以先加群，然后我私信你） 权限说明Notion支持几种不同的权限，分别如下： 默认群组里成员在 Inbox 里拥有权限为『Full Access』 默认群组在 Big Data 里的权限为『Can Comment』，你可以阅读和评论但不能编辑。 如有改动，可查看最新信息]]></content>
+      <categories>
+        <category>BigData</category>
+      </categories>
+      <tags>
+        <tag>Note</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[CAP定理与BASE理论]]></title>
+    <url>%2F2019%2F02%2F25%2Fcap-with-base%2F</url>
+    <content type="text"><![CDATA[CAP: 是指 Consistency(一致性), Availability(可用性) 和 Partition Tolerance(可用性).BASE: Basically Available（基本可用）, Soft state（软状态）和 Eventually consistent（最终一致性） CAP 定理 Consistency 一致性（节点或系统中所有可用数据） 在分布式环境下，一致性是指数据在多个副本之间能否保持一致的特性。在一致性的需求下，当一个系统在数据一致的状态下执行更新操作后，应该保证系统的数据仍然处于一直的状态。 Availability 可用性（每个请求会得到一个回应） 可用性是指系统提供的服务必须一直处于可用的状态，对于用户的每一个操作请求总是能够在有限的时间内返回结果。这里的重点是”有限时间内”和”返回结果”。 Partition Tolerance 分区容错性（系统运作将不管可用性、分区、数据或通信的丢失） 分区容错性约束了一个分布式系统具有如下特性：分布式系统在遇到任何网络分区故障的时候，仍然需要能够保证对外提供满足一致性和可用性的服务，除非是整个网络环境都发生了故障。 BASE Basically Available（基本可用） 分布式系统在出现不可预知故障的时候，允许损失部分可用性 Soft state（软状态） 软状态也称为弱状态，和硬状态相对，是指允许系统中的数据存在中间状态，并认为该中间状态的存在不会影响系统的整体可用性，即允许系统在不同节点的数据副本之间进行数据听不的过程存在延时。 Eventually consistent（最终一致性） 最终一致性强调的是系统中所有的数据副本，在经过一段时间的同步后，最终能够达到一个一致的状态。因此，最终一致性的本质是需要系统保证最终数据能够达到一致，而不需要实时保证系统数据的强一致性 CAP 与 BASE 关系为： 在分布式的数据系统中，你能保证下面三个要求中的两个：一致性，可用性，以及分区容错性。在此模型上构建的系统将称作 BASE(基本上可用软状态最终一致)架构，不满足 ACID 性质。 ACID Atomicity 原子性 一个事务必须被视为一个不可分割的最小工作单元。 Consistency 一致性 数据库总是从一个一致性的状态转换到另外一个一致性的状态。 Isolation 隔离性 通常来说，一个事务所做的修改在最终提交之前，对其他事物是不可见的。 Durability 持久性 一旦事务提交，则其所做的修改就会永久保存到数据库中。 举例 HBase、HyperTable 和 BigTable，满足 CP 性质。 Cassandra、Dynamo 和 Voldemort，满足 AP性质。 Reference： 《高性能MySQL》 《大数据与数据仓库》 CAP原则(CAP定理)、BASE理论 - duanxz - 博客园 CAP和BASE理论的关系 - leooooo的个人空间 - 开源中国]]></content>
+      <categories>
+        <category>NoSQL</category>
+      </categories>
+      <tags>
+        <tag>NoSQL</tag>
+        <tag>CAP</tag>
+        <tag>BASE</tag>
+        <tag>ACID</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[《Apache Hive Cookbook》读书笔记]]></title>
+    <url>%2F2019%2F02%2F19%2Fnote-hive-cookbook%2F</url>
+    <content type="text"><![CDATA[有 SQL 基础的话，差不多一天可以看完。这里把我看这本书做的笔记分享一下（从 Notion 里迁移出来） Developing HiveDeploying Hive Metastore The Hive table and database definitions and mapping to the data in HDFS is stored in a metastore. A metastore is a central repository for Hive metadata. Consists two main components: Services to which the client connects and queries the metastore A backing database to store the metadata Configure: An embedded metastore A local metastore A remote metastore HIVE Service JVM Services in HiveHiveServer2 HiveServer2 is an enhancement of HiveServer provided in earlier versions of Hive.HiveServer’s limitations of concurrency and authentication is resolved in HiveServer2. HiveServer2 is based on Thrift RPC.It supports multiple types of clients, including JDBC and ODBC. HiveServer2 High Availability ZooKeeper Hive metastore service In Hive, the data is stored in HDFS and the table, database, schema, and the HQL definitions are stored in a metastore. The metastore could be any RDBMS database, such as MYSQL or Oracle. Hive creates a database and a set of tables in metastore to store HiveQL definitions. HueUnderstanding the Hive Data ModelIntruduction Data types Primitive data types Numeric data types String data types Date/Time data type Miscellaneous data types Boolean Binary Complex data types STRUCT MAP ARRAY Partitioning Partitioning in Hive is used to increase query performance. Mnaged table In a managed table, if you delete a talbe, then the data of that table will also get deleted. Similarly, if you delete a partition, then the data of that partition will also get deleted. CREATE TABLE customer(id STRING, name STRING, gender STRING) PARTITIONED BY (country STRING, state STRING); By setting the value of hive.mapred.mode to strict, it will prevent running risky queries. Loading data in a managed partitioned table Static Partitioning Dynamic Partitioning External table Patitioning external tables works in the same way as in managed tables. Except this in the external table, when you delete a partition, the data file doesn’t get deleted. Bucketing Bucketing is a technique that allows you to decompose your data into more manageable parts, that is, fix the number of buckets. Usually, partitioning provides a way of segregating the data of a Hive table into multiple files or directories. Partitioning doesn’t perform well if there is a large number of partitions. Bucketing concept is based on the hashing principle, where same type of keys are always sent to the same bucket. Bucket number = hash_function(bucketing_column) mod num_buckets set hive.enforce.bucketing=true; Two bullet points: In partitioning, a column defined as a partitioned column is not included in a schema columns of a Hive table. But in bucketing, a column defined as a bucketed column is included in the schema columns of the Hive table. We cannot use the LOAD DATA statement to load the data into the bucketed table as we do in partitioned table. Rather, we have to use the INSERT statements to insert data by selecting data from some other table. Hive Data Definition Language(DDL)Creating tables The LIKE clause in a create table command creates a copy of an existing table with a different name and without the data. It just creates a structure like that of an existing table without copying its data. Parameters: [TEMPORARY] [EXTERNAL] [IF NOT EXISTS] [PARTITIONED BY] [CLUSTERED BY] [SKEWED BY]: 解决数据倾斜问题，较多的值被分隔成多个文件，其余的值分到其他文件中。 … Creating views A view is a virtual table that acts as a window to the dat for the underlying table commonly known as the base table. It consists of rows and columns but no physical data. So when a view is accessed, the underlying base table is queried for the output. HCatalog HCatalog is a storage management tool that enables framworks other than Hive to leverage a data model to read and write data. HCatalog tables provide an abstraction on the data format in HDFS and allow frameworks such as PIG and MapReduce to use the data without being concerned about the data format, such as RC, ORC, and text files. HCatInputFormat and HCatOutputFormat, which are the implementations of Hadoop InputFormat and OutputFormat, are the interfaces provided to PIG and MapReduce. WebHCat WebHCat, formerly called Templeton, allow access to the HCatalog service using REST APIs. Hive Data Manipulation Language(DML)Hive Extensibility FeaturesSerialization and deserialization formats and data types LazySimpleSerDe, the default SerDes format of Hive. RegexSerDe AvroSerDe OrcSerDe ParquetHiveSerDe JSONSerDe CSVSerDe Exploring views A view is treated as a table in Hive Exploring indexes Indexes are useful for increasing the performance of frequent queries based on certain columns. Hive partitioning Static partitioning Dynamic partitioning Creating buckets in HiveCREATE table sales_buck (id int, fname string, ...) clustered by (id) into 50 buckets row format delimited fields terminated by &apos;\t&apos;; set hive.enforce.bucketing=true; insert into table sales_buck select * from sales; Analytics functions in Hivesee page 122 RANK It is similar to ROW_NUMBER, but the equal rows are ranked with the same number. DENSE_RANK In a normal RANK function, we see a gap between the numbers in rows. DENSE_RANK is a function with no gap. ROW_NUMBER This function will provide a unique number to each row in resultset based on the ORDER BY clause within the PARTITION. PERCENT_RANK It is very similar to the CUME_DIST function. It returns a value from 0 to 1 inclusive. CUME_DIST(Cumulative distribution) It computes the relative postion of a column value in a group. NTILE NTILE distributes the number of rows in a partition into a certain number of groups. Windowing in Hivesee page 126 Windowing in Hive allows an analyst to creagte a window of data to operate aggregation and other analytical functions, such as LEAD and LAG. Partition specification It includes a column reference from the table. It could not be any aggregation or other window specification. Order specification It comprises a combination of one or more columns. Handling NULLs There is no support for Nulls first or last specification. In Hive, Nulls are returned first. Window frame A frame has a start boundary and an optional end boundary: Frame Type ROW RANGE Frame boundary Effective window frames Source name for window definition LEAD The LEAD function is used to return the data from the next set of rows. LAG The LAG function is used to return the data from the previous set of rows. FIRST_VALUE LAST_VALUE File formats TEXTFILE, default format SEQUENCEFILE If you want to save disk storage while keeping large datasets RCFILE Also known as Record Columnar File, stores data in a compressed format on the disk. It provides the following features of storage and processing optimization: Fast storage of data Optimized storage utilization Better query processing The RCFILE format flattens the data in terms of both rows and columns. If you need a certain column for analytics, it would not scan the complete data; instead, it would return the required columns. ORC Optimized Row Columnar This is a highly efficient way of storing and processing data in Hive. Data stored in the ORC format improves performance in reading, writing, and processing data with Hive. PARQUET This is a column-oriented storage format that is efficient at querying particular columns in the table. AVRO Joins and Join OptimizationUsing a skew joinA skew join is used when there is a table with skew data in the joining column. A skew table is a table that is having values that are present in large numbers in the table compared to other data. Skew data is stored in a separate file while the rest of the data is stored in a separate file. If there is a need to perform a join on a column of a table that is appearing quite often in the table, the data for that particular column will go to a single reducer, which will become a bottleneck while performing the join. To reduce this, a skew join is used. Statics in HiveAnalyzeANALYZE TABLE sales COMPUTE STATISTICS; Functions in HiveHive TuningEnabling predicate pushdown optimiztions in HivePredicate pushdown is a traditional RDBMS term, whereas in Hive, it works as predicate pushup. hvie.optimize.ppd=true; Optimizations to reduce the number of mapSampling Sampling in Hive is a way to wirte queries on a small chunk of data instead of the entire table. Hive SecurityHive Integration with Other FrameworksWorking with Apache SparkWorking with AccumuloWorking with HBase (Google Drill)]]></content>
+      <categories>
+        <category>Hive</category>
+      </categories>
+      <tags>
+        <tag>Note</tag>
+        <tag>Big Data</tag>
+        <tag>Hive</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[GraphQL简介]]></title>
+    <url>%2F2018%2F06%2F10%2Fgraphql%2F</url>
+    <content type="text"><![CDATA[GraphQL会是取代REST API的下一代标准么？ 什么是GraphQL GraphQL是比REST更高效、强大和灵活的新一代API标准。Facebook开发了GraphQL并且将其开源，目前其由一大群来自全球各地的公司和个人维护。 注意到GraphQL是API标准，不要看到QL结尾就以为其是一种数据库技术。 比REST更灵活的一种选择REST是目前比较流行的一种暴露服务端数据的常见方式，其简化了客户端尤其是移动端和服务器交互的流程。但是随着业务变得复杂，有些情况变得棘手： 移动端数量的增多，对数据的效率要求变高移动端和PC端相比，是需要提高对数据获取的效率的，这个效率就是说要减少网络请求、要减少无用数据的传输。 应对复杂的前端框架和平台现在的情况是仅维护一套API来应对不同框架和平台的请求。PC端一个页面比移动端一个页面展示的内容要多很多，之前后端提供给PC端的API如果直接提供给移动端来使用势必造成资源浪费。所以移动端的人会去找后端的人干一架，结果要么是后端再给移动端单独写一套API，要么就是移动端忍受着API请求返回数据中存在大量冗余的数据。 需要更快速地迭代更新互联网时代最大的特色除了加班也许就是快了。好多公司在喊着小步快跑、快速试错，毕竟市场不等人。然而REST标准的API似乎很难快速地跟上这快跑的节奏。也许一个API刚出来，产品那边已经改了原型，界面重新设计了。这时候就要麻烦后端同学加个班把接口改一下吧。 谁在用GraphQL一个产品的流行，肯定是解决了目前的某些痛点。虽然GraqhQL目前在国内还不算流行，可是在美利坚已经有不少巨头在使用了： GraphQL vs REST我们来看一下对于不同API标准下，从服务端获取数据的区别。比如在REST API标准下，有三个接口： /users/该接口返回某用户基本信息 /users//posts该接口返回某用户所有的文章 /users//followers该接口返回某用户所有的关注者 如图所示，要通过三个不同的请求才能获得某用户及其文章和关注者的信息，其中还存在很多不需要的信息。 再看一下GraphQL API的实现：客户端声明自己想要的信息，然后服务端根据请求返回相应的数据 目前可见的优点： 避免了REST API中常见的信息过多或过少的问题信息过多是指，接口中总会存在客户端不需要的信息，信息过少是指单条接口无法满足客户端需求，需要请求多个接口才能满足需要 前端可以快速迭代在REST API中，一般都是后端定义好了API，返回固定的数据格式。当前端业务或需求发生变化时，后端很难跟上变动的节奏。如今，业务变化已经难以避免，所以当前端和后端都要相应地作出改动，这样效率势必降低。就我们公司业务来讲，很多情况下，前端一两天的改动如果再拉上后端，人多肯定要开会再加上沟通成本的问题，这个需求没个一周两周很难搞定。设想一下，如果在GraphQL标准下，除非大的改版，后端基本不用出人力来跟着一起需求评审，前端自己定义查询的内容就搞定了。 更深层次地进行分析当客户端可以选择自己想请求数据的内容时，这时候就可以分析出哪些信息是用户感兴趣的，也可以更深层次地分析现有数据是如何被应用的。此外，也可以分析出哪些信息用户不再感兴趣了。 Schema &amp; Type系统的优点GraphQL使用一种强类型系统来定义API，所有的API都通过GraphQL模式定义语言（Schema Definition Language，SDL）来暴露类型数据。而这个模式就是服务端和客户端之间的协议，通过此模式我们可以知道服务端可以提供哪些数据，而客户端又可以获取哪些数据。 一旦模式定义好了，前后端就可以据此独立进行开发了。 核心概念模式定义语言（The Schema Definition Language，SDL）比如这里定义了一个Person类型： 1234type Person &#123; name: String! age: Int!&#125; Person类型又两个字段，name和age，分别为String和Int类型。!表示该字段是必须的。 同时，两种类型之间可以有关联，比如Person可以和Post关联： 1234type Post &#123; title: String! author: Person!&#125; 相应的，Person中也可以关联Post类型： 12345type Person &#123; name: String! age: Int! posts: [Post!]!&#125; 其中Person和Post是一对多的关系 通过Queries获取数据在请求数据之前，你需要GraphQL-IDE来模拟下面的请求，有Web版 也有客户端 如果你选择了客户端，在启动页面打开这个地址： https://api.graph.cool/simple/v1/cjhvs1vtt4ahm012322aexl4n/ 让我们来一个最简单的请求： 12345&#123; allPersons &#123; name &#125;&#125; 可以看到返回的结果： 123456789101112131415161718192021&#123; &quot;data&quot;: &#123; &quot;allPersons&quot;: [ &#123; &quot;name&quot;: &quot;Johnny&quot; &#125;, &#123; &quot;name&quot;: &quot;Sarah&quot; &#125;, &#123; &quot;name&quot;: &quot;Alice&quot; &#125;, &#123; &quot;name&quot;: &quot;Bob&quot; &#125;, &#123; &quot;name&quot;: &quot;Alice&quot; &#125; ] &#125;&#125; 如果我们想在结果里带上age的话： 123456&#123; allPersons &#123; name age &#125;&#125; 带参请求同样没问题，可以看到只返回了最后两条数据： 修改数据这里说的修改包含三种操作： 创建数据 更新数据 删除数据 这里以创建数据为例 123456mutation &#123; createPerson(name: &quot;Bob&quot;, age: 36) &#123; name age &#125;&#125; 订阅实时更新GraphQL提供了subscriptions的概念来提供给客户端订阅事件。当客户端订阅某事件后，其将会和服务端保持一个稳定的链接。当特定事件触发时，服务端会推送对应的数据给客户端。 比如我们想订阅新建Person类型事件： 123456subscription &#123; newPerson &#123; name age &#125;&#125; 当有新的Person类型被创建时，客户端就能接收到更新的数据了。 定义模式模式是GraphQL API中最重要概念之一，其定义了API能提供哪些数据，以及客户端如何获取这些数据。 有几个特殊的类型被称之为root类型： 123type Query &#123; ... &#125;type Mutation &#123; ... &#125;type Subscription &#123; ... &#125; 本文中用到的完整模式定义如下： 12345678910111213141516171819202122type Query &#123; allPersons(last: Int): [Person!]!&#125;type Mutation &#123; createPerson(name: String!, age: Int!): Person!&#125;type Subscription &#123; newPerson: Person!&#125;type Person &#123; name: String! age: Int! posts: [Post!]!&#125;type Post &#123; title: String! author: Person!&#125; 结语至此，大家应该对GraphQL有一个感性的认识了吧。如果不想仅停留在概念层面，你可以到这里找到目前已经实现的框架。（反正我已经用起来了:P） 更多内容可访问以下网站： https://www.graphql.org/https://www.howtographql.com/]]></content>
+  </entry>
+  <entry>
+    <title><![CDATA[我与阅读]]></title>
+    <url>%2F2018%2F03%2F25%2Fbook-app%2F</url>
+    <content type="text"><![CDATA[记录一下自己读书历程，并推荐一下自己用得比较多的阅读相关的APP。 从小到大就自诩自己是个喜欢阅读的人，一方面可能是我们家族在村子里算是有文化的人吧，遗传了一点（听说我爷爷的爷爷是私塾老师，现在大家子里当老师的也挺多的），另一方面可能因为小时候偏内向，所以较多的时候都是个安静的男孩子，就喜欢翻翻书什么的。 记得小学的时候就喜欢找那些初中生的那些阅读课本看，实在没得看就翻成语词典或新华字典了。到了中学，因为镇上没有书店，就经常坐公交去县城买书看。那时候公交车单程要3块钱，对于一周也才几块钱零花钱的我压力实在不小，然后就会顺路帮同学们买点资料什么的，顺便把路费给平摊了。那时候有个『龙门书局』的出版社，感觉挺酷的，就给自己起了个『星星书局』，并用橡皮刻了章，然后印在了每一本书上。 高中进了县城去了，高一时语文老师给我们解释了什么是『语文』： 语为心声，文以载道 正好那时候学校给每个年级配备了阅览室，里面有不少的杂志和文学书籍可以在里面看。那时候我下课就会跑过去，阅览室的老师对我这个为数不多的读者印象很好，就特批我可以把书带回去看，时间长了甚至让我帮她看着阅览室。这种有特权的感觉让我这个大男孩有点小骄傲，所以更是经常跑去借书看了。由于新校区才建立不久，所以没有图书馆。那时候最大的愿望就是能天天泡图书馆，听说大学里图书馆特别多，所以还是比较期待上大学的。 嗯，上了大学，还没拿到学生卡就开始往图书馆跑了，想着大学4年一定要看多少多少的书来着。天有不测风云，谁能想到，我看的书基本都是计算机类的书了。由于学校是医药类学校，虽然有信息学院，但可以肯定的是，真正对计算机感兴趣的实在不多。所以据我不完全观察，TP类书架大部分时间只有我一个人在那里看书。偶尔有几个妹子走那里停留，不用想是在找计算机等级考试的参考资料。就这样，在毕业的时候，学校第一次评选书虫奖，忘了自己读了多少书了，反正排在那一届第9名，平均一周一本书的进度吧（具体数据要等我找到当时的证书再修正）。 总体看来，对我影响比较大的老师基本都是语文老师，小学时被语文老师夸知道的成语多，然后我就使劲得翻成语词典；初中时被语文老师夸读的课外书多，我就使劲地找课外书读；高中时被语文老师夸…想不起来了，但是我使劲地背古诗词了，然后也写了几篇诗词，也模仿过汪曾祺先生写过几篇文章。至于大学时嘛，由于没有语文老师，然后我就基本上泡图书馆看计算机的书了。 对于用APP看书，一开始我是排斥的，觉得没有纸质书有感觉，也少了厚重感。那时候被人推荐关注了冯大辉，可能由于他也是医药类专业然后转行搞IT的原因吧。然后用上了他推荐了彼时还没被小米收购的『多看阅读』，在然后买了人生中第一本电子书《海底捞你学不会》：然后这是当年的评价：那时候才知道电子书除了txt还有epub格式的，还可以有像纸质书一样的排版，里面除了有文字还可以有图片甚至是视频。此后就走上了买电子书的不归路。 真正体会到电子书的好处，当然还是毕业后搬家了，有过几次搬家，没啥家当图书要占一大半，关键是看起来还不方便。后来我就逢人就推荐看电子书了，开始大部分人都和我当年一样觉得看纸质书有感觉，也以为电子书就是txt，也都不知道电子书是要买的。当然现在还是有不少人，即使工资已经很高了，说到电子书立马去找盗版资源。。。 废话不多说了，列举一些目前我在用的一些APP： 多看说实话对多看是有特殊感情的，毕竟大部分书就是在多看买的，那时候多看还不是小米系的，那时候排版是最好的，那时候根本没有网文，那时候kindle还可以刷多看的。目前除了看《知乎周刊》和一些理财类的杂志，基本上就是看以前买的书了。 蜗牛读书 每天免费读书一小时 后起之秀，通过每天免费1小时的创新吸引了不少人，里面也有不少的好书，比如中信出版社的。如果我想看的书在这里有的话就在这里看了，而且虽然每天只能免费1小时，但我相信能满足90%的人了。 微信阅读 微信读书让阅读不再孤独. 微信出什么估计都能引起很大的轰动，腾讯利用熟人社交尝到了太多的甜头，微信阅读也不例外。之前多看也想基于阅读做关于读书的圈子，但没多久就做不下去了。对于微信阅读，刚推出的时候排版差、大量重复的段落等让我用了几天就抛之脑后了。但是等过一阶段再去看看，发现情况已经有了很大的改善。此外还有一个特点是每周可以用阅读时间来换取书币，每周最多10个吧。 上面这几个是目前用的比较多的，此外还有『京东阅读』、『百度阅读』等。 对于纸质书的话，也有不少APP可以记录阅读状态的，相当于在线书签了。]]></content>
+  </entry>
+  <entry>
+    <title><![CDATA[Docker中Django处理消息队列遇到的坑]]></title>
+    <url>%2F2018%2F01%2F05%2Fdjango-with-mq-in-docker%2F</url>
+    <content type="text"><![CDATA[早上过来发现昨天上线的代码还是有个问题，好在很快解决了，觉得有必要做个小总结了。 python实现mq消息接收处理框架选择因为想不到怎么在Django里加上mq消息处理，所以就暴露出一个接口直接来调用。公司使用的是activemq，其支持4种协议： OpenWire for high performance clients in Java, C, C++, C# Stomp support so that clients can be written easily in C, Ruby, Perl, Python, PHP, ActionScript/Flash, Smalltalk to talk to ActiveMQ as well as any other popular Message Broker AMQP v1.0 support MQTT v3.1 support allowing for connections in an IoT environment. 从中可以看到，最适合python的就是Stomp协议了。在客户端列表中可以找到不同实现语言对应的客户端，这里我选择了stomp.py，谁让他排在搜索页面前面呢（其名称就是一种很好的SEO方式）。 mq客户端的实现这里曾经遇到困扰好几天的坑： 协议的选择 之前没接触过消息队列这块，天真地以为activemq就是mq的一种协议。豆油给我一个mq服务器地址和端口号（61616）后，使用stomp.py连接总是出错，连接时可以收到mq服务器返回的消息，解析却总是出错： 12345678910111213Exception in thread StompReceiverThread-1:Traceback (most recent call last): File "/usr/local/Cellar/python3/3.6.1/Frameworks/Python.framework/Versions/3.6/lib/python3.6/threading.py", line 916, in _bootstrap_inner self.run() File "/usr/local/Cellar/python3/3.6.1/Frameworks/Python.framework/Versions/3.6/lib/python3.6/threading.py", line 864, in run self._target(*self._args, **self._kwargs) File "path/of/project/lib/python3.6/site-packages/stomp.py-4.1.19-py3.6.egg/stomp/transport.py", line 332, in __receiver_loop f = utils.parse_frame(frame) File "path/of/project/lib/python3.6/site-packages/stomp.py-4.1.19-py3.6.egg/stomp/utils.py", line 138, in parse_frame preamble = decode(frame[0:preamble_end]) File "path/of/project/lib/python3.6/site-packages/stomp.py-4.1.19-py3.6.egg/stomp/backward3.py", line 29, in decode return byte_data.decode()UnicodeDecodeError: 'utf-8' codec can't decode byte 0xf0 in position 0: invalid continuation byte ​ 调试几天都是不行，就去提了个issue。 后来才发现是activemq实现了四种协议的服务，而不同协议开放的端口号不一样。stomp默认端口号为61613，端口号一换立马可以接收到消息。连接问题解决。 ​ 如何加入到Django里 被这个问题也是困扰了好久，单独的一个脚本到底如何加入到django里。曾经想过在启动django里随即运行该脚本，却一直找不到方法。因为我想把更多的精力放到对客户分数的处理上，而不是花太多的时间来处理后端的问题。所以比较急着想把这个问题解决，然而越急越无法找到实现的办法，也舍不得花时间来思考是不是这条路是不是对的路。正所谓我们都在不断赶路忘记了出路。 久久无果后，索性第一个版本就没加入消息队列的处理，回头处理数据去！ 这两天忽然想到要不就把接收消息的代码单独拎出来运行，接收到消息就直接调用本地接口就可以了。然后直接用python启动就好了，调用本地接口也OK。 有时候，被一个问题困扰太久就容易陷进去，不可自拔。 又出问题了 然后把这个接收消息的脚本scp到服务器再运行又出现了2个问题： 服务器没有python3 还要安装各种依赖库（会出现各种问题） 没办法要为这个单独的脚本制作一个docker镜像了，有点高射炮打蚊子的感觉。但是好在可以做到平台无关性，不用去解决各种依赖的问题。 折腾一通后，可以正常启动运行了。然而天有不测风云，在本地可以正常运行的脚本，到了这里却出错了： 123456789&gt; r = requests.delete('http://0.0.0.0:8000/credit/apply-del/ED201******53')Traceback (most recent call last): File "/usr/local/lib/python3.6/site-packages/urllib3/connection.py", line 141, in _new_conn (self.host, self.port), self.timeout, **extra_kw) File "/usr/local/lib/python3.6/site-packages/urllib3/util/connection.py", line 83, in create_connection raise err File "/usr/local/lib/python3.6/site-packages/urllib3/util/connection.py", line 73, in create_connection sock.connect(sa)ConnectionRefusedError: [Errno 111] Connection refused 悲剧（被拒）了。 一开始以为是不是iptables配置的问题，可是没听说过iptables用来防本地访问的呀，在终端里用curl执行了一下： 12$ curl -X "DELETE" "http://0.0.0.0:8000/credit/apply-del/ED201******53"&#123;"detail":"Not found.","status_code":404&#125; 没问题（忽略404），也就是不是防火墙的问题之类的。又怀疑是requests库的问题，又进这个镜像里用python3自带的urllib.request执行也是被拒。正想着难道非要执行curl命令才行？不合常理呀。 这时候机智的我灵光一现，难不成是在docker里运行的问题？docker就算是一个轻量级的虚拟机了，网络应该默认是bridge形式的。 嗯，改为–net=host，搞定！ 最后附上处理消息队列的脚本(关键地方已经打码)： 123456789101112131415161718192021222324252627282930313233343536373839404142434445464748495051525354555657585960616263646566676869707172737475767778798081828384#!/usr/bin/env python"""Created on 04/12/2017@author: 'Jiezhi.G@gmail.com'Reference:"""from json import JSONDecodeErrorimport stompimport timeimport jsonimport requestsimport logginglogging.basicConfig(filename='credit_message.log', level=logging.DEBUG, format='%(asctime)s %(message)s')class MyListener(stomp.ConnectionListener): def on_error(self, headers, body): logging.error('received an error "%s"' % body) print('received an error "%s"' % body) def on_message(self, headers, body): logging.info('\n') logging.info('received a message "%s"' % body) print('received a message "%s"' % body) # print(body['apply_id']) try: data = json.loads(body) if data['applyId']: delete_url = 'http://0.0.0.0:8000/credit/apply-del/' + data['applyId'] r = requests.delete(delete_url) print(r.status_code) print(r.content) except KeyError: logging.error('KeyError process error: %s' % body) except JSONDecodeError: logging.error('JSONDecodeError process error: %s' % body) print('error:', body) logging.info('-' * 80) logging.info('\n') print('-' * 80) def on_connected(self, headers, body): logging.info('Connected') print('Connected') def on_connecting(self, host_and_port): logging.info('Connecting') print('connecting', host_and_port) def on_disconnected(self): logging.info('disconnected') print('disconnected') def on_heartbeat(self): logging.info('heartbeat') print('heartbeat')def connect_mq_server(): # conn = stomp.Connection([('127.0.0.1', 61616)]) # conn = stomp.Connection11([('192.168.*.*', 61613)]) conn = stomp.Connection11([('*.1.*.2', 61613)]) conn.set_listener('', MyListener()) conn.start() conn.connect('admin', 'password', wait=True) conn.subscribe(destination='queue.bc.rgb.cs.commit.risk', id='1', ack='auto') # conn.send(body='Hello world', destination='/queue/test') while True: time.sleep(5) # conn.disconnect()if __name__ == '__main__': connect_mq_server() 以及启动脚本： 123456789#!/bin/bashdocker run \ -d \ --name credit_mq \ --net=host \ -v /home/docker/credit_message.log:/app/credit_message.log \ credit_mq:v1 \ python handle_message_queue.py 算了Dockerfile也放出来吧： 12345678910FROM python:3RUN mkdir /appWORKDIR /appCOPY requirements.txt /app/requirements.txtRUN pip install -r requirements.txt --trusted-host pypi.douban.com -i http://pypi.douban.com/simpleCOPY . /appCMD python handle_message_queue.py]]></content>
+      <categories>
+        <category>python</category>
+      </categories>
+      <tags>
+        <tag>python</tag>
+        <tag>Docker</tag>
+        <tag>Django</tag>
+        <tag>mq</tag>
+        <tag>stomp</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[2017年总结]]></title>
+    <url>%2F2018%2F01%2F01%2F2017-summary%2F</url>
+    <content type="text"><![CDATA[一年一度的总结来了，赶在了2018年到来之前。 总的来说今年是比较曲折的一年，体会了得与失，也是工作转型的一年。 2017年个人总结计划完成情况去年的总结写得有点迟，都忘记给自己定计划了。这里翻出了15年14年给自己定的计划： 一个月一本书（非技术类） 坚持锻炼（起码隔三差五） 坚持记账 一个月一本书由于沉迷王者荣耀，一个月一本非技术类的书是远没有达到，这里手指掰一下也就基本《禅与摩托车维修艺术》、《动物农场》、《文明之光（第一册）》、《征信与大数据》、《蚂蚁金服》。 这里自我批评一下，差点上了『奶头乐』的当，还好现在对王者荣耀没那么大的兴趣了，现在比较火的吃鸡游戏也没兴趣，总算是可以挤出时间继续看书了（在内心里摸了摸还在办公桌上吃灰的Kindle）。 坚持锻炼这个似乎从15年就开始松懈了，天天加班到吐再也没心思想什么锻炼的事，所以拖到了现在的公司，天不冷的时候基本会打一两次的篮球。 到9月份的时候开始和小伙伴下班后绕着园区一起跑步，然后先后相约参加了南京马拉松迷你跑、无锡半程马拉松和苏州半程马拉松。 此外，近两个月也去了几次健身房做一些力量型的训练。 总体来说，锻炼方面比之前有长进，希望可以再接再厉。 坚持记账这个的话，坚持有3年了，但是基本是在月底花一个晚上汇总所有的账单。仅仅是记录但是并没有复盘，也没有及时更新预算表，所以那只是一堆数据放在那里，并没有起到太大的作用。所以准备定期复盘。 学习和工作学习一直鞭策自己要成为一个持续学习者，今年坚持了每天都学英语： 在『百词斩』上背完了雅思核心单词，扇贝打卡365天。 当然最近学习的中心放在了机器学习方面，numpy、pandas、matplotlib、scikit、tensorflow都在马不停蹄地学习中。要理解好多的算法还是比较头疼的。 学完了Andrew Ng的机器学习的课程。 工作先看自己15年的总结： 不得不提的一个感想是，谁也不知道你之前学到的东西就在某天就用上了。在前一家公司下班后吃过饭就开始在慕课网和网易云课堂上学习,期间把python算是入门了，没想到半年后的项目中有很多用到python分析程序的，期间也写了很多脚本。那段时间心里老是念叨『但行好事，莫问前程』，虽不贴切，但我就是念叨这句。谁知道后面我会不会用python来分析『大』数据或搭建网站呢。（高呼『生命苦短，我用Python』） 翻到这里，不禁虎躯一震，说得太对了。 目前公司的业务场景不太需要在移动端进行复杂的运算，所以很多任务都可以用Hybrid方式来开发，一套代码即可。原生开发似乎有点奢侈了，所以在下半年我被单独安排了做数据分析这块。 当然这也正合我意，本来做Android原生开发这块就已经有危机意识了，所以自己本身也在寻求其他的可能。 期间也第一次正式用Django搭建了一个服务，此前在自己的服务器上随便搭过基于Django的工具类网站。但这倒是第一次用在生产环境，可喜可贺。 其它关键词 Macbook Pro 15寸 iPhone 8 Plus iWatch S2 最强王者 分手 复合 2018年目标 首付 结婚 全马 67.5kg 英语/day 锻炼/week 一本书/month 在数据分析上做出点成绩/year]]></content>
+      <categories>
+        <category>Life</category>
+      </categories>
+      <tags>
+        <tag>2017</tag>
+        <tag>总结</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[iPython技巧]]></title>
+    <url>%2F2017%2F10%2F18%2Fipython%2F</url>
+    <content type="text"><![CDATA[记录一下ipython的一些技巧 常用命令Introspection 在对象前或对象后使用问号 ? ，将会展示该对象的一些基本信息 如果在一个方法名上使用问号，将会展示该方法的说明文档（docstring） 使用双问号??将会展示该方法的源码 ?和通配符*的搭配使用有奇效： In [100]:np.load? np.loader np.load np.loads np.loadtxt np.pkgload %run 命令 该命令可以在IPython中直接执行Python程序文件。 %paste 执行剪贴板中的代码 快捷键 参考 《Python for Data Analysis》Chapter 3]]></content>
+  </entry>
+  <entry>
+    <title><![CDATA[Android中app.build配置]]></title>
+    <url>%2F2017%2F10%2F18%2Fgradle-in-android%2F</url>
+    <content type="text"><![CDATA[备份一下项目中的app.build文件123456789101112131415161718192021222324release &#123; minifyEnabled true shrinkResources true proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro' resValue "string", "app_name", "AppName" resValue "string", "account_type", "io.jiezhi.app.type" &#125; preRelease &#123; debuggable true jniDebuggable true minifyEnabled true zipAlignEnabled true proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro' applicationIdSuffix ".pre" resValue "string", "app_name", "AppName（Pre）" resValue "string", "account_type", "io.jiezhi.app.type.pre" versionNameSuffix '-pre' &#125; debug &#123; applicationIdSuffix ".debug" resValue "string", "app_name", "AppName（debug）" resValue "string", "account_type", "io.jiezhi.app.type.debug" versionNameSuffix '-debug' &#125;]]></content>
+  </entry>
+  <entry>
+    <title><![CDATA[使用注解改进Android代码]]></title>
+    <url>%2F2017%2F05%2F07%2Fannotations%2F</url>
+    <content type="text"><![CDATA[注解有很多用途。 但是，在这里我们将讨论如何使用注解来改进我们的android编码。 注解即元数据而元数据是提供有关其他数据的信息的一组数据。 注解有很多用途。 但是，在这里我们将讨论如何使用注解来改进我们的android编码。 官方Android已经提供了支持注解，你可以添加如下依赖关系来导入注解： compile ‘com.android.support:support-annotations:x.x.x’ 每个人都想成为一个好的程序员，每天我也在努力地提高自己。 任何人都可以编写计算机可以理解的代码，而好的程序员编写人可以理解的代码。 - Martin Fowler 让我们一起探索下一些有用的注解空类型注解@Nullable和@NonNull注解用于检查给定的变量、参数甚至是返回值是否为空。 @Nullable：它表示一个变量、参数或返回值可以为空。 @NonNUll：它表示不能为空的变量、参数或返回值。 例如：123456@NonNullpublic View getView(@Nullable String s1, @NonNull String s2) &#123; // s1 可以为空 // s2 不可以为空 // 该方法必须返回一个不为空的view&#125; 所以当我们尝试这样调用该方法时： 1View view = getView("Amit", null); 在代码检测期间，Android Studio会警告你s2的值不能为空。 资源注解我们都知道，Android对资源的引用（如drawable和string资源）都是传递int类型的，因此我们必须验证资源类型。假设代码中希望传入特定类型的资源（例如Drawables），这里可以传入引用类型的int值，但实际上却传入了另外类型的资源，例如R.string资源： 1234public void setText(@StringRes int resId) &#123; // resId 必须为string类型的id // resId 不能为常规的int值&#125; 所以，当你像如下方式调用该方法时： 1textView.setText(56); 在代码检测过程中，当传入非string资源的参数时，注解将会生成一个警告。 线程注解线程注解检查方法是否在其期望的线程被调用。 支持的注解有： @MainThread@UiThread@WorkerThread@BinderThread@AnyThread 如果你添加如下的注解：1234@WorkerThreadpublic void doSomething()&#123; // 该方法一定要从worker线程调用&#125; 如果你从非worker线程调用该方法时，你将会得到一个警告。 值限定注解有时候，我们必须对参数做一些约束，所以使用@IntRange，@FloatRange和@Size注解来验证传入参数的值。 当调用该方法的人可能会传递错误的值（超出指定的范围）时，该注解是非常有用的。 在下面的例子中，@IntRange注解确保传递的整数值必须在0到255之间。 1public void setAlpha(@IntRange(from=0,to=255) int alpha) &#123;&#125; 权限注解使用@RequiresPermission注解来验证调用者的权限。 以下示例注解setWallpaper()方法来确保方法的调用者具有permission.SET_WALLPAPERS权限： 12@RequiresPermission(Manifest.permission.SET_WALLPAPER)public abstract void setWallpaper(Bitmap bitmap) throws IOException; 如果在调用该方法时没有在manifest文件中添加需要的权限，代码检测器将会给你一个警告。]]></content>
+  </entry>
+  <entry>
+    <title><![CDATA[android中的ArrayMap和SparseArray]]></title>
+    <url>%2F2017%2F03%2F30%2Fandroid-arraymap-vs-sparsearray%2F</url>
+    <content type="text"><![CDATA[为了提高Android应用程序的性能，Android系统提供了专门为移动开发而设计的集合。 集合是软件开发中最常用的东西了。 一般来说，当需要将数据存储在键值对中时，我们想到的第一个数据结构就是HashMap。 它非常的灵活，因此它是存储键值对的数据结构的最优选择。 因此，ArrayMap和SparseArray比使用HashMap有更高的内存效率。 HashMap原理HashMap基本上是HashMap.Entry对象的一个数组。 Entry是HashMap的内部类，它用来保存键值对。 当键值对被插入到HashMap中时，会计算出该键的hashCode，并将该值分配给EntryClass的hashCode变量。 通过该hashCode，我们可以获取该键值对在存储池中的索引。 如果存储池中已经存在了键值对，则将插入新的键值对，并把最后一个键值对指向这个新的键值对，这使得存储池成为一个链接列表。 从数组中检索值的时间效率为恒定时间或O(1)。 这意味着不管数组的大小，拉取数组中的任何元素时间都相同。 这可以通过使用散列函数来生成指定键的数组索引。 HashMap用于将整数键映射到对象。 以下是创建HashMap和获取键和值的示例代码：1234567891011121314HashMap&lt; String, String&gt; map = new HashMap&lt; String, String&gt;();map.put(“Key1”, "Value1");map.put(“Key2”, " Value2");map.put(“Key3”, " Value3");Set set = hmap.entrySet();Iterator iterator = set.iterator();// Iterate over HashMapwhile(iterator.hasNext()) &#123; Map.Entry mEntry = (Map.Entry)iterator.next(); String key = mEntry.getKey(); String value = mEntry.getValue();&#125; ArrayMap原理不像HashMap中包含一个数组，ArrayMap中包含了两个小数组。 第一个数组（Hash-Array）按顺序包含指定的哈希键。 第二个数组（Key Value Array）根据第一个数组存储对象的键和值。 当我们搜索其中的内容时，将会在Hash-Array上完成二分查找，通过找到的哈希索引，然后直接从第二个数组（Key Value Array）返回键值对。 如果第二个数组（Key Value Array）中的键不匹配，则通过第二个数组（Key Value Array）完成线性遍历来解决冲突。 以下是创建ArrayMap和获取键和值的示例代码： 123456789ArrayMap&lt;String, String&gt; arrayMap = new ArrayMap&lt;&gt;();arrayMap.put(“Key1”, “Value1”);arrayMap.put(“Key2”, “Value2”);arrayMap.put(“Key3”, “Value3”);for (int i = 0; i &lt; arrayMap.size(); i++) &#123; String key = arrayMap.keyAt(i); String value = arrayMap.valueAt(i);&#125; SparseArray原理与ArrayMap的主要区别在于，在SparseArray键中始终是原始类型。 在其他方面的操作原理是相似的。 当键是原始类型时，稀疏数组（Sparse arrays）可用于替换哈希映射（hash maps）。 SparseArray旨在消除自动装箱的问题（ArrayMap不能避免自动装箱问题），而这种方法会影响内存消耗。 以下是创建SparseArray的示例代码：1234567891011SparseArray sparseArray = new SparseArray();sparseArray.put(1, “Value1”);SparseLongArray sparseLongArray = new SparseLongArray();sparseLongArray.put(1, 1L);SparseBooleanArray sparseBooleanArray = new SparseBooleanArray();sparseBooleanArray.put(1, true);SparseIntArray sparseIntArray = new SparseIntArray();sparseIntArray.put(1, 2); 该类在API 1中已经存在了，但在API 11中经过了重新设计。兼容库中的更新版本的SparseArrayCompat也可用于较旧设备。 还有几种其他类型的SparseArray： LongSparseArray，SparseIntArray，SparseBooleanArray等HashMap可以被以下的Array类替换： Comparison内存的连续分配和回收以及垃圾收集将导致Android应用程序的滞后，从而降低了应用程序的性能。 除此之外，ArrayMap＆SparseArray通过使用2个小数组而不是一个大的数组来避免内存问题。 使用SparseArray比使用HashMap的好处是： 使用原语（primitives）带来更多的内存效率 没有自动装箱操作 自由分配内存 缺点: 对于大集合，速度较慢 仅适用于Android 一般来说，如果没有频繁的插入或删除操作，且大小是小于1000，那么ArrayMap / SparseArray类是非常好的选择。 来自Android开发者的视频将为您提供进一步的细节： 结论我们可以得出结论，将整数映射到对象，SparseArray比使用HashMap的更有效。 理论是SparseArray可以比HashMap（&lt;1000）更快地添加和检索元素，在这种情况下，减少了哈希函数处理时间。 原文地址：https://android.jlelse.eu/app-optimization-with-arraymap-sparsearray-in-android-c0b7de22541a]]></content>
+      <categories>
+        <category>Android</category>
+      </categories>
+      <tags>
+        <tag>android</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[【译】Android Studio 技巧8 —— Json模型]]></title>
+    <url>%2F2017%2F03%2F21%2Fandroid-studio-tip8%2F</url>
+    <content type="text"><![CDATA[最近JSON对象非常受欢迎。那让我们看看如何对他们建模。 试想一下，你的后端团队给了你一个你期望的JSON示例。 分析过后，你尝试建立POJO模型，所以你通过众多的第三方库简单地进行注入（例如gson）。 你花了很多时间来创建表示json的每个单个实体的POJO。 这非常无聊而且浪费了大量的时间。 部分人可能会使用json2pojo网站，但你仍然必须手动将生成的类放入到你的包，而且可能变得很混乱。 让我们看一个不错的插件，可以更高效地处理这个过程。 RoboPOJOGenerator它支持从模式(schema)或从实际的JSON数据中生成POJO模型。 它还可以生成支持gson，Jackson，LoganSquare和AutoValueGson方案的对象，因此您可以使用任何种类的库来解析。 它还支持Kotlin，这是一个非常好的功能。它还会问你是否要生成toString和getters＆setters方法。 我希望这将帮助你加快开发过程，并且减少无聊的工作量！ 敬请关注下一篇文章！]]></content>
+      <categories>
+        <category>Android</category>
+      </categories>
+      <tags>
+        <tag>android</tag>
+        <tag>json</tag>
+        <tag>plugin</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[【译】android studio 技巧1——Parcelable]]></title>
+    <url>%2F2017%2F03%2F19%2Fandroid-studio-tip1%2F</url>
+    <content type="text"><![CDATA[最后，我决定开始我自己的技术博客。首先发布一系列的帖子来描述一些我每天开发都在使用的Android Studio插件。 如果你不知道如何在Android Studio中安装插件，请点击此链接。 Android Parcelable代码生成器你是否有过必须在两个Activity/Fragment之间转发数据情况？ 如果是的话，你应该熟悉Bundle类的用法，你也知道你只能在其中放置一个特定类型的项目。 但是如果我想转发整个对象呢？ 那么，该对象将需要实现Serializable或Parcelable接口。 第一种方式对于开发人员还算简单，在第一个实例中，我们似乎要用这种方式。 但是，正如这个帖子解释的，使用Parcelable接口是更有效率的。 不过它的缺点是需要写一点代码，而且可能不是那么直观。这是“Android Parcelable代码生成器”插件所做的。 你可以让这个插件生成实现Parcelable接口所需的代码。 具体怎么做呢，请往下看： 如果有人使用Kotliin的话，这里也有一款插件可以使用：Parcelable Code Generator(for kotlin)敬请关注下一篇文章！]]></content>
+      <categories>
+        <category>Android</category>
+      </categories>
+      <tags>
+        <tag>android</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[【译】Android Studio 技巧2——资源和图标]]></title>
+    <url>%2F2017%2F03%2F19%2Fandroid-studio-tip2%2F</url>
+    <content type="text"><![CDATA[这是我的第二篇帖子。 今天我要讨论一下资源，特别是图标这块。 Android Drawable Importer作为Android开发人员，你应该在drawable文件夹中手动地导入过很多图标了。 有些聪明的设计师给你的资源已经按照正确的命名放在了正确的文件夹中了，这会简化你很多的工作。但有时候你可能要重命名和手动移动每个PNG文件到相关的drawable文件夹中。 这会花费你一些时间，些许苦恼。 我非常想把这时间用在别的事情上，那我们如何改进它并停止浪费时间呢？ “Android Drawable Importer”这款插件将会帮助到你。 它主要有4个主要特点： 批量导入资源 导入图标资源包 导入矢量资源 多分辨率（Multisource）资源 批量导入资源这是个非常有用的特性，顾名思义，就是导入一批drawable。 假设你有5个只有一种分辨率的不同的图标，你可以一次把他们导入到指定分辨率的文件夹中。 如果你想的话，它还创建其他的png的drawable文件夹。 导入图标资源包导入图标资源包允许你从预定义资源集合中导入图标，而且你还可以指定其大小，颜色，格式和尺寸。 这已经不是特别有用了，因为Android Studio集成了一个名为Image Asset Studio的功能，通过官方的这个插件你可以做同样或更多的事。 例如，你可以将文本作为资源导出，或者你可以用来处理图片。 导入矢量资源导入矢量资源使你能够从给定的集合导入矢量资源。 Android Studio已经集成了一个名为Vector Asset Studio的类似工具。 此外，它还允许你从给定的SVG或PSD导入向量。 我建议在这种情况下使用集成工具而不是插件。 多分辨率资源最后但同样重要的是，多分辨率资源。 你可以为每个导入的资源的不同分辨率指定为不同图标。 如果你需要根据屏幕分辨率使用不同的图标，或者如果你在不同的文件夹中有同样的图标，并且想要立即导入所有图标，这个可能非常有用。 本文到此结束。 如果有想法请留下你的评论！]]></content>
+      <categories>
+        <category>Android</category>
+      </categories>
+      <tags>
+        <tag>android</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[【译】Android Studio 贴士 3— FindViewById]]></title>
+    <url>%2F2017%2F03%2F16%2Fandroid-studio-findviewbyid%2F</url>
+    <content type="text"><![CDATA[今天，我们讨论一下View。让我们谈谈如何快速地从xml布局文件中获取到定义好的View实例。 本文翻译自Federico Palmieri 的文章。 我很确定每个Android开发人员都会很快就开始厌烦，为layout文件中的View编写findviewbyid的重复动作。如果你不厌烦它，那么让我们尝试另一种方式，来避免浪费时间！ 有些人可能使用ButterKnife来避免findviewbyid后的转换（可能还有其他一些原因）。即使这样，它也不会减轻给每个的id加注解的痛苦。 有多少次你从xml布局和你的java代码来回切换，只是因为你忘了一个view的id？让我们放弃这种方式吧！ 我们有两种不同的方式可以使用，无论你使用简单的findviewbyid还是使用ButterKnife。 使用ButterKnife如果你是ButterKnife的用户，那么你可能要学习下Android ButterKnife Zelezny。 Android ButterKnife Zelezny 这个插件将允许你简单地生成ButterKnife注解，而对于Activity和Fragment，它也将添加ButterKnife.bind(…)方法的调用。在View中，则需要你自己添加该调用。 Activity Fragment View 不使用ButterKnife如果你不使用ButterKnife，那么你可能需要考虑使用FindViewByMe。 FindViewByMe 编辑：我之前向该仓库中推送对Fragment和自定义View的支持，如今，开发人员发布了解决下面提到的问题的插件的v1.3.5。 我将相应地更新GIF。 这个很棒的插件仍然在开发中，目前还不能很好地支持Fragment和自定义view。 在Activity中，它将为你执行一切，而无需手动定义和赋值布局文件中的view。 在Fragment和自定义view中，您将需要稍微更多的努力。 Activity 如前所述，它不能很好地与Fragment工作，但我们任然可以使它工作。 你需要重写onCreate，因为插件只能在onCreate方法中调用生成代码来工作。 Fragment (Hexo插入视频可能有问题，可以点击链接查看)油管视频 在视图中，它的工作原理与Fragment中的几乎相同。 你不能重写onCreate，但你可以通过创建一个假的onCreate()方法来作弊。 View油管视频 你可以帮助这个插件的开发者继续改进它，并通过fork该仓库来解决上述问题。 感谢，和往常一样，请让我知道你的意见！]]></content>
+      <categories>
+        <category>Android</category>
+      </categories>
+      <tags>
+        <tag>android</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[6行脚本获取Google Voice]]></title>
+    <url>%2F2017%2F03%2F12%2Fget-google-voice%2F</url>
+    <content type="text"><![CDATA[Google Voice（简称GV）在程序员的圈子里也不算太陌生了，尤其是经常混V站的人应该经常见到这货的出现。不清楚的可以关掉或者先自行Google了。 如果你上网查教程，其实很简单无非使用类似TextNow/TextMe等先申请个美国的号码，然后绑定Google账号，再从Google申请个Voice号码即可。步骤也不多，但很多人Google Voice号码都选好了，可就是点击申请会一直出现『请求错误』的提示。据报道称，解决这个问题的唯一途径就是『狂点大法』——不停地点，运气好5分钟或半小时就能申请到好，也有运气不好，需要一天甚至更多的时间来点击申请。所以有的人就放弃了，或者直接去马云家直接花几十块钱买了。 目前实现这个『狂点大法』的无非两种途径，模拟鼠标点击和模拟网络请求。 模拟鼠标点击：顾名思义就是不停地让鼠标在申请按钮上点击，直到你收到Google 邮件恭喜你获得了号码为止。这种很多人会使用『按键精灵』类似的软件来实现不停地点击。但是我选择了自己写python脚本来模拟点击，毕竟自己写的代码才放心。代码如下： 12345678from pymouse import PyMouseimport timem = PyMouse()while True: m.click(528, 800-196, 1) time.sleep(3) 其中点击的坐标要改成你自己的，可使用截屏工具来获得按钮的坐标。 模拟网络请求：这个方法就是直接跳过点击事件，毕竟你点击了也是通过网络请求来实现的。这样子更彻底点，这里粗略地介绍个思路： 打开浏览器的开发模式（F12）点击网页上的申请按钮找到本次post请求，然后右键复制cURL把cURL请求扔到脚本里，找个服务器或者自己电脑终端里在后台运行即可这个我也放出个shell 脚本吧： 123456for (( i=1; i&gt;0; i++ ))do curl 'https://www.google.com/voice/b/0/service/post' ... --compressed sleep 3sdone 如果你需要帮助可以在博客下方留言即可。]]></content>
+  </entry>
+  <entry>
+    <title><![CDATA[你好2017]]></title>
+    <url>%2F2017%2F03%2F09%2F2016-summary%2F</url>
+    <content type="text"><![CDATA[似乎我的2017来的有点迟啊。 翻一下自己的博客，上一篇还停留在2016年9月29日，还像个综述。 除了博客荒废了之外，去年也还少了一份总结。正如去个景点不拍个照就跟没去似的，一年不来个总结就感觉一年就跟白过了一样，然而暂时我也不想去过多总结了，就先随便总结下吧。 总之去年4月底离开了老东家去三亚浪了一圈，在下半年来到了现在这家公司——『让农业经营更容易』。刚到公司就在赶项目，加之又被阿飞他们带了一个小学生特别多的游戏，所以书读的少了。基本就是晚上加班回去和出差的路上零星读了几本书，然后也没记录到我的书单上了。 此外，也在去年年中的时候加入了Google字幕组，帮忙翻译一些Google的开发教学视频的字幕，去年翻的时长差不多80分钟吧。但实在是被我的懒癌整的这阶段又不是太想去接视频翻字幕了，还是等今年I/O大会结束再去接点视频翻吧。所幸，读书荒废之外，还保持着每天学英语的习惯，背几十个单词或读几篇新闻亦或几条听力，时多时少，最重要的是我坚持下来了。 年后过来项目算是轻松点了，除了沉迷游戏外还是能挤出点时间的。最近一直看国外的medium博客上有不少优秀的技术文章，心又痒了，想平时没事也可以翻译一点。遂捡起老早前注册但没发过文章的公众号，于昨天打响了文章第一枪。 今天想干脆一不做二不休，把这hexo博客再拿起来维护着吧，不管看的人多少，起码是自己风流倜傥的过往！ 之前域名过期了，也懒得续费了，还是直接用github的地址吧：http://jiezhi.github.io 欢迎打赏丢香蕉给我。]]></content>
+  </entry>
+  <entry>
+    <title><![CDATA[DHT 相关资源整理]]></title>
+    <url>%2F2016%2F09%2F29%2Fdht-resources%2F</url>
+    <content type="text"><![CDATA[想自己实现一个DHT爬虫，这里先收集一些资源 GO语言实现的DHT网络爬虫 python语言磁力搜索引擎源码公开，基于DHT协议 btlike BT搜索引擎 A DHT in Python Twisted 搜索资源： v2ex]]></content>
+  </entry>
+  <entry>
+    <title><![CDATA[tmux初步入门]]></title>
+    <url>%2F2016%2F09%2F29%2Fhello-tmux%2F</url>
+    <content type="text"><![CDATA[记录一下常用的tmux命令 Create Named Sessions 12345tmux new-session -s basicortmux new -s basic detach session 1PREFIX d Retattaching to Existing Sessions 12345tmux list-sessionsortmux ls Attach to Sessions 1tmux attach -t basic]]></content>
+      <categories>
+        <category>tools</category>
+      </categories>
+  </entry>
+  <entry>
+    <title><![CDATA[Android 在style.xml文件中设置match_parent 和 wrap_content]]></title>
+    <url>%2F2016%2F07%2F14%2Fandroid-set-match-parend-in-style-file%2F</url>
+    <content type="text"><![CDATA[在style文件中直接设置android:width值为wrap_content的话会报错: Cannot resolve symbol &apos;wrap_content&apos; 那该如何解决？ 一般情况下，我们会把界面中共用的一些属性直接定义在style.xml文件中，但是在设置View的高度和宽度时，如果想用wrap_content和match_parent的话，则需要先定义一下： 在dimmens.xml文件中添加： 12&lt;dimen name="match_parent"&gt;-1dp&lt;/dimen&gt;&lt;dimen name="wrap_content"&gt;-2dp&lt;/dimen&gt; 然后在style.xml文件中直接引用即可，如： 12345&lt;style name="begin_medium_text" parent="medium_text"&gt; &lt;item name="android:gravity"&gt;end|center_vertical&lt;/item&gt; &lt;item name="android:width"&gt;@dimen/wrap_content&lt;/item&gt; &lt;item name="android:height"&gt;@dimen/match_parent&lt;/item&gt;&lt;/style&gt; Reference: http://stackoverflow.com/questions/6859331/how-can-i-use-layout-width-using-resource-file]]></content>
+      <categories>
+        <category>Android</category>
+      </categories>
+      <tags>
+        <tag>android</tag>
+        <tag>View</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[解决adb无法找到genymotion模拟器问题]]></title>
+    <url>%2F2016%2F05%2F23%2Fadb-with-genymotion-error%2F</url>
+    <content type="text"><![CDATA[今天升级了一下Android SDK结果开着genymotion模拟器的情况下却找不到设备。用adb devices查看会出现如下错误： 1234567➜ ~ adb devicesList of devices attachedadb server version (32) doesn't match this client (35); killing...error: could not install *smartsocket* listener: Address already in useADB server didn't ACK* failed to start daemon *error: cannot connect to daemon 看了是adb版本的问题了，在genymotion中有个设置成你自己的sdk地址即可，重启模拟器后即可： Reference：https://twitter.com/chiuki/status/709410135551168512]]></content>
+      <categories>
+        <category>Android</category>
+      </categories>
+      <tags>
+        <tag>android</tag>
+        <tag>adb</tag>
+        <tag>genymotion</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[使用Decorator设计Cache]]></title>
+    <url>%2F2016%2F04%2F20%2Fdecorator4cache%2F</url>
+    <content type="text"><![CDATA[利用decorator实现cache如果你使用的是python 3.2+，则可以直接使用functools中的lru_cache。当然也可以自己实现的了。 123456789101112131415161718192021222324252627282930313233343536373839404142434445464748495051525354555657#!/usr/bin/env python# -*- coding: utf-8 -*-"""Created on 4/20/16@author: Jiezhi.G@gmail.comMy Blog: jiezhi.github.ioReference: &lt;Expert Python Programming&gt; Chapter 2--Decorators_Proxy Page.53"""import timeimport hashlibimport picklecache = &#123;&#125;def is_obsolete(entry, duration): return time.time() - entry['time'] &gt; durationdef compute_key(function, args, kw): key = pickle.dumps((function.func_name, args, kw)) return hashlib.sha1(key).hexdigest()def memoize(duration=10): def _memoize(function): def __memoize(*args, **kw): key = compute_key(function, args, kw) # do we have it already? if key in cache and not is_obsolete(cache[key], duration): print 'we got a winner' return cache[key]['value'] # computing result = function(*args, **kw) # storing the result cache[key] = &#123;'value': result, 'time': time.time()&#125; return result return __memoize return _memoize@memoize()def very_very_very_complex_stuff(a, b): return a + bif __name__ == '__main__': print very_very_very_complex_stuff(2, 2) print cache print very_very_very_complex_stuff(2, 2) 运行后可以看到结果：12344&#123;'dedfca39c250ca2047c5d66a13c5df2e9ac90181': &#123;'value': 4, 'time': 1461155366.249486&#125;&#125;we got a winner4]]></content>
+      <categories>
+        <category>python</category>
+      </categories>
+      <tags>
+        <tag>python</tag>
+        <tag>Decorator</tag>
+        <tag>cache</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[python监测服务器 异常后发邮件]]></title>
+    <url>%2F2016%2F03%2F20%2Fsend-mail-with-python%2F</url>
+    <content type="text"><![CDATA[最近写了个python脚本来监控服务器，结合crontab定时任务来定期检查服务器是否可以正常访问。 这里服务器给定一个固定url，服务器端监测数据库表是否正常，如果正常直接给出「ok」的回复。里面逻辑也很简单直接上代码：123456789101112131415161718192021222324252627282930313233343536373839404142434445#!/usr/bin/python# coding: utf-8"""Author: Jiezhi.G@gmail.comFunction: Monitor server and send mail when server down!Date: 2016-03-18PS: You can add this msg to cron:* 9,21 * * * python ~/monitor.py &gt;&gt; ~/monitor.log"""import urllib2import smtplibimport timefrom email.mime.text import MIMETextfrom email.header import Headersender_mail = "***"password = '***'receiver = ['***', '***', '***']smtp_server = "smtp.yeah.net"def send_alert_mail(): msg = MIMEText('服务器异常，请检查服务器!', 'plain', 'utf-8') msg['Subject'] = '!!!服务器异常' msg['From'] = 'Monitor&lt;***&gt;' server = smtplib.SMTP(smtp_server, 25) server.login(sender_mail, password) server.sendmail(sender_mail, receiver, msg.as_string()) server.quit()def check_server(url): ret = urllib2.urlopen(urllib2.Request(url)) data = ret.read() return data == "ok"if __name__ == '__main__': url_ch = 'http://zh.example.com/api/isok.php' url_en = 'http://en.examp.com/api/isok.php' t = time.strftime("%Y-%m-%d %A %X %Z", time.localtime()) if not check_server(url_ch): print t, 'server down' send_alert_mail() else: print t, 'every thing is ok']]></content>
+      <categories>
+        <category>python</category>
+      </categories>
+      <tags>
+        <tag>python</tag>
+        <tag>monitor</tag>
+        <tag>email</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[centos6安装python2.7]]></title>
+    <url>%2F2016%2F03%2F05%2Fcentos6-install-python2-7%2F</url>
+    <content type="text"><![CDATA[最近开始学习在centos上搭建nginx和django，但是centos6 自带的python2.6。但是基本无法运行django，所以需要安装python2.7。 nginx以及从源码编译好并且已经运行了，但是配合django使用的时候却出了点问题，具体怎么怎么用django搭建服务器可参考Setting up Django and your web server with uWSGI and nginx。 centos6安装python2.7并设置为默认python命令： 下载python2.7.11后编译并安装：1234wget http://www.python.org/ftp/python/2.7.11/Python-2.7.11.tar.bz2tar jxvf Python-2.7.11.tar.bz2cd Python-2.7.11./configure &amp;&amp; make &amp;&amp; make install 安装好的2.7版本路径为/usr/local/bin/python2.7 安装好后替换默认python：先查看默认的python路径：1which python 我这边的是位于/usr/bin/python,查看一下该文件并不是python2.6的链接文件，用diff命令看了下和同路径下的python2.6没有区别，所以可以直接删除或者重命名为python.bak 由于系统程序依赖2.6版本，所以先修改下依赖：1vim /usr/bin/yum 将其头部python改为#!/usr/bin/python2.6，运行下yum是否出错，不出错可以直接将python2.7设置为系统默认命令了：1ln -s /usr/local/bin/python2.7 /usr/bin/python 在执行下python –version看看是否已经是python2.7的了。 2.本以为这样就可以高枕无忧了，结果好多东西都得重新配置： pip重新下载并配置： 12wget https://bootstrap.pypa.io/get-pip.pypython get-pip.py 重新安装virtualenv 1pip install virtualenv 运行django缺少_sqlite3： 1ln -s /usr/lib/python2.6/lib-dynload/_sqlite3.so /usr/local/lib/python2.7/lib-dynload 参考这里 再次运行还会出现个问题：“UnicodeDecodeError: &#39;ascii&#39; codec can&#39;t decode byte”如果是使用virtualenv环境下操作的话，此时可以在django/lib/python2.7/site-packages 路径下新建名为sitecustomize.py的文件：12345# encoding=utf8 import sys reload(sys) sys.setdefaultencoding('utf8') 参考这里]]></content>
+      <categories>
+        <category>Centos</category>
+      </categories>
+      <tags>
+        <tag>centos</tag>
+        <tag>python2.7</tag>
+        <tag>djangoC</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[解决'libproxychains.so.3' from LD_PRELOAD cannot be preloaded问题]]></title>
+    <url>%2F2016%2F02%2F02%2Flibproxychains-cannot-be-preloaded%2F</url>
+    <content type="text"><![CDATA[在本地Ubuntu服务器配置好ss客户端后，如果想在命令行以及想ssh远程的时候可以访问某些404页面时需要proxychains工具。 但是在运行proxychains时报错了： 123➜ ~ proxychains ping google.comProxyChains-3.1 (http://proxychains.sf.net)ERROR: ld.so: object 'libproxychains.so.3' from LD_PRELOAD cannot be preloaded (cannot open shared object file): ignored. 看来proxychains无法加载libproxychains.so.3库，查到的资料是修改/usr/bin/proxychains文件： export LD_PRELOAD=libproxychains.so.3 改为 export LD_PRELOAD=/usr/lib/libproxychains.so.3 但是保存后还是会提示无法加载该库。 所以呢，用find命令找一下该库吧： 12➜ ~ find /usr/ -name libproxychains.so.3 -print/usr/lib/x86_64-linux-gnu/libproxychains.so.3 所以改为 /usr/lib/x86_64-linux-gnu/libproxychains.so.3 就可以了]]></content>
+      <categories>
+        <category>Ubuntu</category>
+      </categories>
+      <tags>
+        <tag>ss</tag>
+        <tag>proxychains</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[Ubuntu上安装MySQL并配置远程登录]]></title>
+    <url>%2F2016%2F01%2F28%2Finstall-mysql-on-ubuntu%2F</url>
+    <content type="text"><![CDATA[详见内容。 ##安装sudo apt-get install mysql-server 如果是第一次安装，则在安装过程中会提示让你配置密码，用户名默认为root。 如果想再次配置可以用此命令： sudo dpkg-reconfigure mysql-server-5.5（找到对应的版本号） 正常情况下安装好后，mysql服务应该已经启动，可以查看下：sudo netstat -tap | grep mysql12tcp 0 0 *:mysql *:* LISTEN 1392/mysqldtcp 0 0 192.168.1.49:mysql 192.168.1.155:65335 ESTABLISHED 1392/mysqld 或者netstat -tuln看一下是否有3306端口被使用一般会是12345678Active Internet connections (only servers)Proto Recv-Q Send-Q Local Address Foreign Address Statetcp 0 0 127.0.0.1:3306 0.0.0.0:* LISTENtcp 0 0 0.0.0.0:139 0.0.0.0:* LISTENtcp 0 0 0.0.0.0:80 0.0.0.0:* LISTENtcp 0 0 127.0.1.1:53 0.0.0.0:* LISTENtcp 0 0 0.0.0.0:22 0.0.0.0:* LISTEN... ##配置远程登录从上面可以看到端口3306对应的地址是127.0.0.1，这就意味着这个端口即mysql服务只能在本机上访问。我们想要远程访问mysql服务，那么就需要修改这个地址。 修改mysql配置文件mysql默认配置文件地址应该是/etc/mysql/my.cnf（如果没有尝试下/etc/my.cnf）：sudo vim /etc/mysql/my.cnf注释掉这一行：bind_address=127.0.0.1 给mysql新建用户，并授予远程登录的权限： 登录mysqlmysql -u root -p 创建新用户CREATE USER &#39;jiezhi&#39; IDENTIFIED BY &#39;mypass&#39;; 其中 jiezhi 为用户名， mypass为用户密码； 授予远程登录权限GRANT ALL ON *.* TO &#39;jiezhi&#39;@&#39;%&#39; IDENTIFIED BY &#39;mypass&#39; 其中*.*为授权的数据库，格式为dbname.tablename，这里是全部授权; jiezhi为用户名， %意味着容许用户访问IP为任意IP，你也可以指定IP； mypass为用户密码。 ##重启MySQLsudo service mysql restart或者sudo /etc/init.d/mysql restart ##远程访问假定MySQL服务器IP为192.168.1.100则远程登录可使用如下命令，因为MySQL端口默认为3306，所以下面的-P 3306为可选项：mysql -u jiezhi -h 192.168.1.100 [-P 3306] -p然后输入密码就可以远程登录了。 ##其它当时我在局域网配置好后，用另外的机器死活登录不上，而服务器上端口3306对应的IP为0.0.0.0，按理都是正常的。折腾半天，用mac自带的端口扫描工具，发现扫描不到3306端口，最后意识到防火墙的问题，所以修复了iptables后即可正常访问。 有空会把iptables配置再写一篇吧。]]></content>
+      <categories>
+        <category>Server</category>
+      </categories>
+      <tags>
+        <tag>ubuntu</tag>
+        <tag>mysql</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[解决Can't connect to MySQL server问题]]></title>
+    <url>%2F2016%2F01%2F28%2Fcannot-connect-to-mysql%2F</url>
+    <content type="text"><![CDATA[今天远程访问Ubuntu上的MySQL时出现错误：ERROR 2003 (HY000): Can&#39;t connect to MySQL server on &#39;192.168.1.49&#39; (60) 所以先登录服务器，用命令netstat -tuln查看一下：1234567891011Active Internet connections (only servers)Proto Recv-Q Send-Q Local Address Foreign Address Statetcp 0 0 0.0.0.0:3306 0.0.0.0:* LISTENtcp 0 0 0.0.0.0:139 0.0.0.0:* LISTENtcp 0 0 0.0.0.0:80 0.0.0.0:* LISTENtcp 0 0 127.0.1.1:53 0.0.0.0:* LISTENtcp 0 0 0.0.0.0:22 0.0.0.0:* LISTENtcp 0 0 127.0.0.1:631 0.0.0.0:* LISTENtcp 0 0 0.0.0.0:25 0.0.0.0:* LISTENtcp 0 0 0.0.0.0:445 0.0.0.0:* LISTEN... 可以看出，MySQL配置应该没问题的，当然也确保MySQL用户密码等都是对的。 查了半天，怀疑是不是iptables问题（但记不得之前曾经配置过iptables，所以一直没想这块）：sudo iptables -L12345678910111213141516171819202122Chain INPUT (policy ACCEPT)target prot opt source destinationACCEPT all -- anywhere anywhereACCEPT all -- anywhere anywhere state RELATED,ESTABLISHEDACCEPT tcp -- anywhere anywhere tcp dpt:httpACCEPT tcp -- localhost anywhere tcp dpt:mysqlDROP tcp -- anywhere anywhere tcp dpt:mysqlACCEPT tcp -- anywhere anywhere tcp dpt:mysqlACCEPT tcp -- 192.168.1.0/24 anywhere tcp dpt:mysqlChain FORWARD (policy ACCEPT)target prot opt source destinationDOCKER all -- anywhere anywhereACCEPT all -- anywhere anywhere ctstate RELATED,ESTABLISHEDACCEPT all -- anywhere anywhereACCEPT all -- anywhere anywhereChain OUTPUT (policy ACCEPT)target prot opt source destinationChain DOCKER (1 references)target prot opt source destination 很奇怪这边怎么会有一个对mysql访问的DROP规则，但还是先删为敬！这次再iptables命令多加个参数：sudo iptables -L -n --line-number12345678910111213141516Chain INPUT (policy ACCEPT)num target prot opt source destination1 ACCEPT all -- 0.0.0.0/0 0.0.0.0/02 ACCEPT all -- 0.0.0.0/0 0.0.0.0/0 state RELATED,ESTABLISHED3 ACCEPT tcp -- 0.0.0.0/0 0.0.0.0/0 tcp dpt:804 ACCEPT tcp -- 127.0.0.1 0.0.0.0/0 tcp dpt:33065 DROP tcp -- 0.0.0.0/0 0.0.0.0/0 tcp dpt:33066 ACCEPT tcp -- 0.0.0.0/0 0.0.0.0/0 tcp dpt:33067 ACCEPT tcp -- 192.168.1.0/24 0.0.0.0/0 tcp dpt:3306Chain FORWARD (policy ACCEPT)num target prot opt source destination1 DOCKER all -- 0.0.0.0/0 0.0.0.0/02 ACCEPT all -- 0.0.0.0/0 0.0.0.0/0 ctstate RELATED,ESTABLISHED3 ACCEPT all -- 0.0.0.0/0 0.0.0.0/04 ACCEPT all -- 0.0.0.0/0 0.0.0.0/0 这下每条规则前都有了序号，所以可以根据序号直接来修改或删除： sudo optables -D INPUT 5把INPUT的第五条规则删除，然后去客户端再次登录MySQL，成功！]]></content>
+      <categories>
+        <category>MySQL</category>
+      </categories>
+      <tags>
+        <tag>MySQL</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[2015总结]]></title>
+    <url>%2F2015%2F12%2F28%2F2015-summary%2F</url>
+    <content type="text"><![CDATA[2015 总结 2015年总结似乎不说句『岁月不居，时节如流』就无法表达自己对时光飞逝的感叹。 老计划先看下去年给今年定下的计划吧： 一个月一本书（非技术类） 坚持锻炼（起码隔三差五） 坚持记账 一个月一本书据相关资料显示，目前完整读完的书为22本。在这些书中技术类书籍为7本，非技术类的15本，有趣的是技术类7本基本都是外文原版书，其它15本为中文书；实体书为4本，剩下18本为电子书；实体书中，2本是在学校图书馆借的、2本是公司的，电子书中6本是在多看、当当以及Amazon买的，1本是官方免费的，剩下的就该是从不太好的渠道获得了的。 所以总体看来去年定的读书计划算是完成了。 详细书单，请点我。 坚持锻炼这个嘛，就有点马马虎虎了。 第一次搬家前（1月-4月）毕业前租住的老房子地方还算大，所以基本还是会定时做俯卧撑、平板支撑以及滚轮之类的几乎零成本的运动（地方大点就行），周末偶尔回校打球。 第一次搬家后（4月-12月）在三月底搬了次家，找了个装修还算可以的房子，但卧室目测也就10㎡左右，所以除了床和电脑桌，放了书橱和杂物后基本没有地方可以『施展拳脚』了，再加上下班也比较晚，所以回去基本不想动了，洗漱后看30分钟到1小时左右书后基本也就到12点了。 这期间公司买了乒乓球桌，我也捡起了小学时的水平在午饭后和晚饭后和同事打打球，但似乎这个运动对我这个想减肥和增肌的人来说似乎没什么改变。 再有，这期间在住的地方报了一个驾校，近两三个月的周末基本就在驾校度过了，回校打球的次数也少了或为零了。好久不运动再加上体重增加了，待几个月再回去打球跑了十几分钟就觉得胸闷了，往事涌上心头，彼时大半个球场跑个几个小时也觉得小case而已，不禁让人唏嘘不已。 现在读研的同学似乎更忙了，也不见招呼打球了。 第二次搬家后（12月）算是多花了几百块升级了一下，加阳台面积差不多30㎡了吧，也算是有地方好好学习和锻炼了，目前每天几组20个俯卧撑已然成了习惯，只是肚子上的赘肉似乎还是用滚轮有效些，有待后期加上。 坚持记账大学时开始坚持记账，但当时太为琐碎，连每次公交具体是1块2还是1块6都要记下，再加上当时基本账目比较零碎，所以毕业后彻底格式化数据后从头再来了。 助学贷款也左左右右地都还掉了，其它的话隐私原因略去不表。（等元旦估计要花不少时间汇总整理这些账单了） 总的来说，因为去年对今年基本没定下太高目标，所以基本也算完成了。 年终汇总工作 记得是元旦前一天和第一家公司老板提的离职，虽然理由是公司就我一个做Android开发的，而且又偏底层又没人带比较累，但多少还有薪资方面的原因的，交接时间内，就面了个人觉得南京还不错的公司途牛（心想旅游业在国内后期发展肯定会很好）。就在一开发群里找了途牛的于总代为投递简历。但毕竟too yong了，面试时在一些深层次原理方面以及当时根本没接触过的js与android交互方面败了下来。回来查了下最后面我的CTO，原来是小道君牵线的。当然这和我一毛钱关系也没有。 2月正式离职了，本想年前找不到工作的话我就安心复习半个月年后再说吧。抱着试试看的态度投了几家，下午接到两个电话，一家二手车评估公司的电话，安排第二天电话面试。一家是老板亲自打电话约过去面试，揣着现在看来很水的简历就过去了。谁又能想到上来不问我Android知识而是问算法呢，费了好大劲才想出点高中时接触过但并不系统的一点算法知识。要么是我太年轻，要么就是老板太能吹，没想到几个小时后就觉定加入了。人生就是这样哈，谁也不知道盒子打开后会是什么。 当然，进来后我也不是『如愿』地做了应用层，而是侧重于反编译以及程序分析这块工作。如果当时不是做的所谓的『特种安全』，也许根本不会接触到现在工作内容了吧。平行世界的我在做什么呢？说不定你吃的中药就是我抓给你的。XD 不得不提的一个感想是，谁也不知道你之前学到的东西就在某天就用上了。在前一家公司下班后吃过饭就开始在慕课网和网易云课堂上学习,期间把python算是入门了，没想到半年后的项目中有很多用到python分析程序的，期间也写了很多脚本。那段时间心里老是念叨『但行好事，莫问前程』，虽不贴切，但我就是念叨这句。谁知道后面我会不会用python来分析『大』数据或搭建网站呢。（高呼『生命苦短，我用Python』） 学习与读书买书一个月前的搬家，总共搬了3趟，第一次就全部是书。正所谓『买书如山倒，读书如抽丝』，都怪奶茶家动不动来个满200减100，几次下来差不多屯的书够几年看的，人家搬家嫌重的书我也买回来，朋友还送了基本厚厚的英文原版书。。。虽说多看上也动不动搞活动，买了不少套书，但起码不增加搬家负担。这病啊，就跟女人爱买衣服一样，想治好往往却是徒劳的。 读书一向自诩是爱看书的人，也在不停地给朋友同学推荐书。但看了论坛里的一些朋友列出的书单，发现自己还是读的太少太少。有时候现在的状态像是大学时某个阶段的状态，彼时老抱怨看的书基本是技术类的，而高中时向往的好多文学书在大学却很难挤出时间来看；此时又常常觉得上班时间太长，晚上回来最多看看经济或其他书籍，却挤不出时间看些技术类书籍。反正就是时间总是不够用的。 改变年少时，基本只对科技类新闻感兴趣，感觉历史类的和经济类的太无聊。今年最大的转变应该就是对这两方面逐渐来了兴趣。看吴军博士的《浪潮之巅》后，发现我对一些著名IT公司的历史很感兴趣，里面很多的故事都值得细细玩味。再者，随着今年的大牛市，我也冲进去感受了一把，经历了『大起大落』后，发现没那么多时间盯盘，还是转投指数基金定投吧。 技术 技术有两个发展方向，一种是纵向一种是横向的，横向的是瑞士军刀，纵向的是削铁如泥的干将莫邪。这两个方向都没有对与错，发展到一定程度都会相互融合，就好比中国佛家禅修的南顿北渐，其实到了最后，渐悟与顿悟都是一样的，顿由渐中来。 自从接触编程以来，我应该一直就没安分过吧，捣鼓了太多东西，从Windows到Linux再到OS X，从MySQL到MangoDB，从Pascal到C、C++、VB、Java、HTML、PHP、Shell Script、JavaScript、Python、Object-C、Swift、Scala、Go、NodeJS，从Android到iOS到Raspberry Pi，但却又没有一样精通的，论坛上的人说的很对，很多时候并不是真正学过，而是只是学习了一些语法而已，过几天就会忘记。虽说我选择了瑞士军刀之路，但目前来说还是个山寨的，学其形却丢掉了神。这样下去很可能就是捡了芝麻、丢了西瓜。 技能树很大固然很好，但是没有硕大的树根是不行的，下面一年该修剪枝桠，回归主干了——算法、编译原理、虚拟机！ 生命中的黑天鹅 天有不测风云，人有旦夕祸福。——《破窑赋》宋·吕蒙正 就在上周，去公司的路上，快到站后忽然身体不舒服，头晕得不行，赶紧找地方坐下，我想那时脸色苍白得一定很吓人。坐了一会左侧腹部又剧烈疼痛，我想莫非这就是传说中的阑尾疼了？查了下才发现自己的解剖课算是白学了（阑尾在右侧腹部），网上有的说可能是前列腺炎，吓死了，总不能年纪轻轻地就害这病呀。。缓了会坚持到了公司，却发现疼痛有增无减。在同事的帮助下，去医院挂了急诊。医生简单检查下轻淡地说是肾结石，「待打了止痛针后去B超看看石头多大，小的话多喝点水尿掉，大的话就要震碎了」。那时我的心情一定不是太好的，肾结石？我腰子怎么就不好了呢，我还没结婚呀。。，医生看我很疼的样子，就安慰了下我「放心，死不了人的」，我「。。。」 事情到了这地步，似乎又要是个程序员年纪轻轻地就。。。故事。可是B超却又没发现有石头，尿检白细胞过多，莫非不是石头作怪只是个炎症而已？我又担心是不是石头太小或是我憋尿时间不够长呢。真不知道该喜还是该悲。。 多喝水，不要憋尿 这是医生交代给我的，回来后那天下午喝的水量差不多是我一周喝的水量。（平时早上到公司倒一杯水后，往往下班后还没喝完。。） 回来的路上就一直在想，如果我真的不行了，这算不算生命中的黑天鹅呢。一个积极向上、勤奋好学的大学毕业生，正值风华正茂、指点江山的年纪，却早早的。。 诚然，生活中存在太多的意外。打开盒子也许是巧克力，也许就是潘多拉。我们在向前奋斗的同时也得提防生活中的种种意外！（如果此处人寿保险或人流医院给我广告费，这就差不多是一篇不错的软文了，你听过安利吗，哈哈） 多锻炼，定期体检吧。 这阶段折腾了会基金定投，该考虑为父母和自己买点商业保险了。 新计划 多看书 多喝水 多运动 尾声在微博上看到了这段话，感觉不错，分享一下： 你转了无术健身视频，肚子上任然是里三层外三层的赘肉； 你分享了N多旅游攻略，假期依然是趴在床上玩手机； 你购物车里装满了中意的商品，最终还是默默删除； 你脑补了与他一辈子的故事，到现在还都未表白。 你把一切都琢磨了筹划了，抱着一个很完美的假象心满意足，实际上，什么都没发生。 1234$ whoamijiezhi$ echo Just do it!Just do it ##]]></content>
+      <categories>
+        <category>Life</category>
+      </categories>
+      <tags>
+        <tag>life</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[查找子字符串之间的内容]]></title>
+    <url>%2F2015%2F12%2F21%2Fpython-find-content-between-two-substrings%2F</url>
+    <content type="text"><![CDATA[直接代码。123456789101112131415161718192021s = "123123STRINGabcabc"def find_between( s, first, last ): try: start = s.index( first ) + len( first ) end = s.index( last, start ) return s[start:end] except ValueError: return ""def find_between_r( s, first, last ): try: start = s.rindex( first ) + len( first ) end = s.rindex( last, start ) return s[start:end] except ValueError: return ""print find_between( s, "123", "abc" )print find_between_r( s, "123", "abc" ) [参见]（http://stackoverflow.com/questions/3368969/find-string-between-two-substrings） 听首音乐放松一下： author: Jiezhi.Gemail: Jiezhi.G@gmail.com]]></content>
+      <categories>
+        <category>python</category>
+      </categories>
+      <tags>
+        <tag>python</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[Java中对方法的执行设置超时]]></title>
+    <url>%2F2015%2F12%2F03%2Fjava-settimeout4method%2F</url>
+    <content type="text"><![CDATA[利用FutureTask对一个方法设置执行超时的操作12345678910111213141516171819202122232425262728293031323334353637383940414243package io.github.jiezhi.concurrent;import java.util.concurrent.*;/** * Created by jiezhi on 12/3/15. */public class TimeoutDemo &#123; private static final String TAG = "jiezhi:TimeoutDemo"; public static void main(String args[])&#123; runFunTimeout(); &#125; /** * 在固定时间内执行一个函数,超时则退出 */ private static void runFunTimeout() &#123; FutureTask&lt;Object&gt; task = new FutureTask&lt;&gt;(() -&gt; needTime(10 * 1000)); ExecutorService executor = Executors.newFixedThreadPool(1); executor.execute(task); try &#123; task.get(5, TimeUnit.SECONDS); &#125; catch (InterruptedException | ExecutionException | TimeoutException e) &#123; e.printStackTrace(); &#125; executor.shutdown(); &#125; private static int needTime(long t) &#123; try &#123; Thread.sleep(t); &#125; catch (InterruptedException e) &#123; e.printStackTrace(); &#125; return 1; &#125;&#125;]]></content>
+      <categories>
+        <category>Java</category>
+      </categories>
+      <tags>
+        <tag>java</tag>
+        <tag>timeout</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[有趣的vim]]></title>
+    <url>%2F2015%2F11%2F18%2Finteresting-vim%2F</url>
+    <content type="text"><![CDATA[记录一些vim奇淫技巧。 vim自带的教程四处找教程学习vim？别忘了vim可是自带教程的哦:-D Unix系统下，在终端中输入）vimtutor即可；Windows的话，执行$VIMRUNTIME目录下的vimtutor.bat即可。什么？英文不好？试试vimtutor zh 在匹配括号间跳转 %命令容许我们在一组开、闭括号间跳转（参见 :h %）,该命令适用于（）、{}和[]。]]></content>
+      <categories>
+        <category>Vim</category>
+      </categories>
+      <tags>
+        <tag>vim</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[有趣的shell命令]]></title>
+    <url>%2F2015%2F11%2F13%2Finteresting-shell-command%2F</url>
+    <content type="text"><![CDATA[在《Command Line Kung Fu》书中看到不少有用的命令，遂志于此。 Shell历史 以root身份执行之前的命令： $ sudo!! 或者 su -c “!!” 执行之前以给定字符串开头的命令： 12345➜ ~ whoamijiezhi➜ ~ !w➜ ~ whoamijiezhi !^复用前一个命令的首个参数（第二个词), !$复用前个命令的末个参数，如： 1234➜ ~ open source/_posts/interesting-shell-command.md -a Atom➜ ~ !^ // 回车后会看到*source/_posts/interesting-shell-command.md*//按&lt;C+u&gt;清除当前命令行后➜ ~ !$ // 回车后可以看到*Atom* !!:N复用前个命令第N个参数 第一个参数为1，如!!:1,而第一个单词即命令本身为0如在命令open source/_posts/interesting-shell-command.md -a Atom中!!:0为open, !!:1为source/_posts/interesting-shell-command.md 查看你用的最多的命令： 1$ history | awk '&#123;print $2&#125;' | sort | uniq -c | sort -rn | head 清除历史记录 1$ history -c ###文本处理 使用vim通过网络编辑文件 12$ vim csp://remote-host//path/to/file$ vim scp://remote-user@remote-host//path/to/file 以表格格式展示输出column -t,可以看出输出结果可读性更好了： 123456➜ ~ echo -e 'one two\nthree four'one twothree four➜ ~ echo -e 'one two\nthree four' | column -tone twothree four 借助sudo向文件添加文本： 1$ echo text | sudo tee -a file 使用tr命令，替换字符： 1$ echo $PATH | tr ':' '\n' 网络和SSH 在当前目录下搭建服务器：12$ python -m SimpleHTTPServer [8080]$ python3 -m http.server *通过SSh远程挂载目录至本地12$ sshfs remote-host:/directory mountpoint$ fusermount -u mountpoint 通过命令获取你的公共IP123$ curl ifconfig.me$ curl ifconfig.me/ip$ curl ifconfig.me/host 未完待续:-D]]></content>
+      <categories>
+        <category>Linux</category>
+      </categories>
+      <tags>
+        <tag>shell</tag>
+        <tag>skill</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[解决mv Argument list too long问题]]></title>
+    <url>%2F2015%2F11%2F03%2Ffix-mv-argument-list-too-long%2F</url>
+    <content type="text"><![CDATA[移动近百万文件的时候，忽然报出错误：12$ mv 1/11*.dat 2/-bash: /bin/mv: Argument list too long 显然当需要移动的文件太多的时候，mv命令就束手无策了。 比如要将文件夹1中所有以11开头的dat文件移到文件夹2下：解决办法：使用find命令：1$ find 1 -name '11*.dat' -exec mv &#123;&#125; 2 \; 其中-exec后为需要运行的命令，{}为搜到的文件，\;为exec的结束符。 不过好像很耗时的样子。。 reference:1.http://stackoverflow.com/questions/11942422/moving-large-number-of-filess]]></content>
+      <categories>
+        <category>Linux</category>
+      </categories>
+      <tags>
+        <tag>Linux</tag>
+        <tag>shell</tag>
+        <tag>bash</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[解决Error=NeedsBrowser问题]]></title>
+    <url>%2F2015%2F10%2F22%2Ffix-googleplaycrawler-needsbrowser%2F</url>
+    <content type="text"><![CDATA[在本地可以正常运行的Raccoon，部署到服务器时报异常：『com.akdeniz.googleplaycrawler.GooglePlayException: Error=NeedsBrowser』。 异常大致如下：12345678Exception in thread "main" com.akdeniz.googleplaycrawler.GooglePlayException: Error=NeedsBrowserUrl=https://accounts.google.com/ContinueSignIn?sarp=1&amp;scc=1&amp;continue=https%3A%2F%2Faccounts.google.com%2Fo%2Fandroid%2Fauth%3Fhl%3Den_us%26xoauth_display_name%3DAndroid%2BLogin%2BService%26source%3DAndroid%2BLogin&amp;plt=AKgnsbvpYOFQNYD02v2gawgW73Qa_H9ymB1OhI6mqifo1tfMndMaVWA6wyfuVSN94w4003Kc6lz9gJ51fjnAY97fXoMvEHTlV0AqVIwRpHNwcNMS50dFsO7e7dveFv-8HhJRvfDHHruJy7MJH-Gq808p3U_LANxN0g0irHHDcf3o4TjFQC1GHpg2abYrIkPYuea4qVhzHgN2gI7tduYeFF7VTSLhQ-SQIHWLmgMhnfrTGMBsgWUPN7wErrorDetail=To access your account, you must sign in on the web. Touch Next to start browser sign-in.at com.akdeniz.googleplaycrawler.GooglePlayAPI.executeHttpRequest(GooglePlayAPI.java:522)at com.akdeniz.googleplaycrawler.GooglePlayAPI.executePost(GooglePlayAPI.java:482)at com.akdeniz.googleplaycrawler.GooglePlayAPI.executePost(GooglePlayAPI.java:462)at com.akdeniz.googleplaycrawler.GooglePlayAPI.loginAC2DM(GooglePlayAPI.java:180)... Google了一下，说是Google处于安全考虑，在新设备上登录时做出了限制。 解决方案：https://accounts.google.com/b/0/DisplayUnlockCaptcha ，然后点击『继续/continue』即可。 参考：https://github.com/Akdeniz/google-play-crawler/issues/79]]></content>
+      <categories>
+        <category>Other</category>
+      </categories>
+      <tags>
+        <tag>爬虫</tag>
+        <tag>Google Play</tag>
+        <tag>验证</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[ipython切换python]]></title>
+    <url>%2F2015%2F10%2F20%2Ffix-ipython-with-python%2F</url>
+    <content type="text"><![CDATA[由于Mac自带Python权限方面的问题，所以用brew另外安装了python。但用pip安装了模块后发现，python可以导入而ipython却无法导入。 意味着在Mac上存在了两个python，我已经将brew安装的python设置为默认的了，其地址为：12➜ bin which python/usr/local/bin/python 而Mac自带的python地址其实是/usr/bin/python。 在看一下ipython：12345678910111213➜ bin which ipython/usr/local/bin/ipython➜ bin head `which ipython`#!/usr/bin/python# -*- coding: utf-8 -*-import reimport sysfrom IPython import start_ipythonif __name__ == '__main__': sys.argv[0] = re.sub(r'(-script\.pyw|\.exe)?$', '', sys.argv[0]) 这也就意味着ipython现在默认是指向系统自带的python的，所以我们需要修改ipython命令头部。即：#!/usr/bin/python改为#!/usr/local/bin/python。 问题解决。]]></content>
+      <categories>
+        <category>python</category>
+      </categories>
+      <tags>
+        <tag>mac</tag>
+        <tag>python</tag>
+        <tag>ipython</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[Apache Commons CLI]]></title>
+    <url>%2F2015%2F10%2F13%2FApache-Commons-CLI%2F</url>
+    <content type="text"><![CDATA[Apache Commons 中的CLI库提供了解析命令行选项的API。同样也可以帮你打印出标准的帮助信息。 在*nix系统中使用命令行，经常会需要加参数进行不同的操作，Apache Commons提供的这个库可以帮你实现这样的功能。 #介绍 项目官方地址下载地址 #使用直接代码12345678910111213141516171819202122232425262728293031323334353637383940414243444546import org.apache.commons.cli.CommandLine;import org.apache.commons.cli.CommandLineParser;import org.apache.commons.cli.DefaultParser;import org.apache.commons.cli.HelpFormatter;import org.apache.commons.cli.Options;import org.apache.commons.cli.ParseException;public class CliTest &#123; public static void main(String[] args) &#123; // TODO Auto-generated method stub Options options = new Options(); options.addOption("t", false, "display current time"); options.addOption("c", true, "country code"); HelpFormatter formatter = new HelpFormatter(); formatter.printHelp("help", options); CommandLineParser parser = new DefaultParser(); try &#123; CommandLine cmd = parser.parse(options, args); // No argument command 't' if (cmd.hasOption("t"))&#123; System.out.println("Yes"); &#125; else &#123; System.out.println("No"); &#125; // With argument command 'c' String countryCode = cmd.getOptionValue("c"); if (countryCode == null) &#123; System.out.println("no code"); &#125; else &#123; System.out.println("code:" + countryCode); &#125; &#125; catch (ParseException e) &#123; // TODO Auto-generated catch block e.printStackTrace(); System.exit(-1); &#125; &#125;&#125; 加参数-t -c cn执行得到的结果:12345usage: help -c &lt;arg&gt; country code -t display current timeYescode:cn]]></content>
+      <categories>
+        <category>Java</category>
+      </categories>
+      <tags>
+        <tag>Java</tag>
+        <tag>Apache</tag>
+        <tag>CLI</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[android输出带上当前类名和方法名log]]></title>
+    <url>%2F2015%2F09%2F25%2Fandroid-tag-personalized%2F</url>
+    <content type="text"><![CDATA[这里介绍一下我自己在debug Android程序中使用log的Tips。如果出现问题，可以快速看到方法的调用堆栈，便于找到出错的敌方。 12345678910111213141516171819202122import android.util.Log;/** * Created by jiezhi on 9/25/15. * Function: */public class LogUtil &#123; private static final String TAG = "jiezhi:LogUtil"; static boolean DEBUG = true; public static void d() &#123; if (!DEBUG) &#123; return; &#125; StackTraceElement[] stacks = Thread.currentThread().getStackTrace(); String file = stacks[3].getFileName(); String fileName = file.substring(0, file.indexOf('.')); String methodName = stacks[3].getMethodName(); Log.d(fileName, "-------&gt;" + methodName + "&lt;-------"); &#125;&#125; 在方法中直接调用LogUtil.d()即可输出类名和方法名。]]></content>
+      <categories>
+        <category>Android</category>
+      </categories>
+      <tags>
+        <tag>Android</tag>
+        <tag>Log</tag>
+        <tag>Tips</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[解决Gravatar头像在中国不能正常显示的问题]]></title>
+    <url>%2F2015%2F09%2F16%2F%E8%A7%A3%E5%86%B3Gravatar%E5%A4%B4%E5%83%8F%E5%9C%A8%E4%B8%AD%E5%9B%BD%E4%B8%8D%E8%83%BD%E6%AD%A3%E5%B8%B8%E6%98%BE%E7%A4%BA%E7%9A%84%E9%97%AE%E9%A2%98%2F</url>
+    <content type="text"><![CDATA[如果你遇到Gravatar在中国不能正常显示的问题，这篇文章也许可以帮助你。昨天花了大半天时间终于把hexo搭建好了，也挑选了个模板，并进行配置。同时也将之前wp中的一些文章，再次迁移至此。等deploy至github后，用手机访问，发现不能正常显示图片。嗯，在国内你会遇见各种问题。Gravatar已经被墙了。 搜了下，好像使用SSL访问Gravatar则可以，所以将hexo中头像配置文件修改了一下： hexo/node_modules/hexo/lib/plugins/helper/gravatar.js123var str = &apos;https://www.gravatar.com/avatar/&apos; + md5(email.toLowerCase()); 在电脑上试了下是可以的，但在手机上还是无法正确显示头像。。。 索性直接改为微博头像吧，我的weibo头像地址：http://tp2.sinaimg.cn/1723846713/180/40002045318/1 hexo/node_modules/hexo/lib/plugins/helper/gravatar.js123456789function gravatarHelper(email, options)&#123; // use weibo avatar instead of gravatar. return &apos;http://tp2.sinaimg.cn/1723846713/180/40002045318/1&apos;;&#125; 改完后重新生成即可。 1hexo generate]]></content>
+      <categories>
+        <category>hexo</category>
+      </categories>
+      <tags>
+        <tag>gravatar</tag>
+        <tag>hexo</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[对inJustDecodeBounds的理解]]></title>
+    <url>%2F2015%2F08%2F28%2Fandroid-inJustDecodeBounds%2F</url>
+    <content type="text"><![CDATA[浅谈对BitmapFactory.Options.inJustDecodeBounds的理解。 public boolean inJustDecodeBounds If set to true, the decoder will return null (no bitmap), but the out… fields will still be set, allowing the caller to query the bitmap without having to allocate the memory for its pixels. 可能英文水平的关系，看这个解释楞是没看出个所以然来，不过在看Android官方这篇博客 有个解释倒是能领悟一二： Setting the inJustDecodeBounds property to true while decoding avoids memory allocation, returning null for the bitmap object but setting outWidth, outHeight and outMimeType. This technique allows you to read the dimensions and type of the image data prior to construction (and memory allocation) of the bitmap. 即：如果inJustDecoedBounds设置为true的话，解码bitmap时可以只返回其高、宽和Mime类型，而不必为其申请内存，从而节省了内存空间。 下面是官方给的code snippet:123456BitmapFactory.Options options = new BitmapFactory.Options();options.inJustDecodeBounds = true;BitmapFactory.decodeResource(getResources(), R.id.myimage, options);int imageHeight = options.outHeight;int imageWidth = options.outWidth;String imageType = options.outMimeType;]]></content>
+      <categories>
+        <category>Android</category>
+      </categories>
+      <tags>
+        <tag>android</tag>
+        <tag>BitmapFactory</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[Ubuntu 配置MySQL]]></title>
+    <url>%2F2015%2F08%2F26%2FUbuntu_%E9%85%8D%E7%BD%AEMySQL%2F</url>
+    <content type="text"><![CDATA[在Ubuntu上一键配置Apache、mysql、php环境。1sudo apt-get install lamp-server^ or1sudo apt-get install mysql-server]]></content>
+      <categories>
+        <category>Ubuntu</category>
+      </categories>
+      <tags>
+        <tag>Apache</tag>
+        <tag>lamp</tag>
+        <tag>Ubuntu</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[Android 让EditText默认不获取软键盘]]></title>
+    <url>%2F2015%2F08%2F25%2FAndroid_%E8%AE%A9EditText%E9%BB%98%E8%AE%A4%E4%B8%8D%E8%8E%B7%E5%8F%96%E8%BD%AF%E9%94%AE%E7%9B%98%2F</url>
+    <content type="text"><![CDATA[在Android开发中，会遇到这种情况，当页面中存在EditText时，默认会把软键盘给调出来，而我们并不想让软键盘弹出。解决方案： 在EditText的父控件中设置如下两个属性即可：12android:focusable="true"android:focusableInTouchMode="true"]]></content>
+      <categories>
+        <category>Android</category>
+      </categories>
+      <tags>
+        <tag>android</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[Algorithm-选择排序]]></title>
+    <url>%2F2015%2F06%2F24%2FAlgorithm-%E9%80%89%E6%8B%A9%E6%8E%92%E5%BA%8F%2F</url>
+    <content type="text"><![CDATA[C语言实现的选择排序。123456789101112131415161718192021222324252627282930313233343536#include &lt;stdio.h&gt; void SelectionSort(int *a, int n); int main()&#123; int a[6] = &#123;3, 6, 4, 2, 1, 5&#125;; int i; for (i = 0; i &lt; 6; i++) printf("a[%d]=%d ", i, a[i]); printf("\n"); SelectionSort(a, 6); for (i = 0; i &lt; 6; i++) printf("a[%d]=%d ", i, a[i]); printf("\n"); return 0;&#125; void SelectionSort(int *a, int n)&#123; int i, j; int tmp; int t; for (i = 0; i &lt; n - 1; i++) &#123; tmp = i; for (j = i + 1; j &lt; n; j++) &#123; if (a[j] &lt; a[tmp]) tmp = j; &#125; t = a[tmp]; a[tmp] = a[i]; a[i] = t; &#125;&#125;]]></content>
+      <categories>
+        <category>Algorithm</category>
+      </categories>
+      <tags>
+        <tag>算法</tag>
+        <tag>sort</tag>
+        <tag>排序</tag>
+        <tag>选择排序</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[Algorithm-冒泡排序]]></title>
+    <url>%2F2015%2F06%2F24%2FAlgorithm-%E5%86%92%E6%B3%A1%E6%8E%92%E5%BA%8F%2F</url>
+    <content type="text"><![CDATA[C语言实现冒泡排序。123456789101112131415161718192021222324252627282930313233343536373839#includevoid BubbleSort(int *a, int n);int main()&#123; int n = 6; int a[6] = &#123;3, 2, 4, 6, 5, 1&#125;; for (int i = 0; i &amp;lt; n; i++) &#123; printf(&amp;quot;a[%d]=%d ", i, a[i]); &#125; printf(&amp;quot;\n&amp;quot;); BubbleSort(a, n); for (int i = 0; i &amp;lt; n; i++) &#123; printf(&amp;quot;a[%d]=%d ", i, a[i]); &#125; printf(&amp;quot;\n&amp;quot;); return 0;&#125;void BubbleSort(int *a, int n)&#123; int i, j; int tmp; for (i = 0; i &amp;lt; n - 1; i++) &#123; for (j = 0; j &amp;lt; n - i - 1; j++) &#123; if (a[j] &gt; a[j + 1]) &#123; tmp = a[j]; a[j] = a[j + 1]; a[j + 1] = tmp; &#125; &#125; &#125;&#125; 输出结果： 12a[0]=3 a[1]=2 a[2]=4 a[3]=6 a[4]=5 a[5]=1a[0]=1 a[1]=2 a[2]=3 a[3]=4 a[4]=5 a[5]=6]]></content>
+      <categories>
+        <category>Algorithm</category>
+      </categories>
+      <tags>
+        <tag>冒泡排序</tag>
+        <tag>算法</tag>
+        <tag>sort</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[C语言实现交换]]></title>
+    <url>%2F2015%2F06%2F24%2FC%E8%AF%AD%E8%A8%80%E5%AE%9E%E7%8E%B0%E4%BA%A4%E6%8D%A2%2F</url>
+    <content type="text"><![CDATA[这里介绍两种方式，一种是通过宏定义的方式实现，一种是通过指针交换实现：12345678910111213141516171819202122232425#include &lt;stdio.h&gt;;#define swap_m(x, y, t) ((t)=(x),(x)=(y),(y)=(t))void swap(int *x, int *y);int main()&#123; int a = 10; int b = 1; int temp; swap(&amp;amp;a, &amp;amp;b); printf(&amp;quot;a=%d, b=%d\n&amp;quot;, a, b); swap_m(a, b, temp); printf(&amp;quot;a=%d, b=%d\n&amp;quot;, a, b); return 0;&#125;void swap(int *x, int *y)&#123; int tmp; tmp = *x; *x = *y; *y = tmp;&#125;]]></content>
+      <categories>
+        <category>Algorithm</category>
+      </categories>
+      <tags>
+        <tag>C</tag>
+        <tag>Algorithm</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[Regular Expressions常用转义字符]]></title>
+    <url>%2F2015%2F06%2F07%2FRegular_Expressions%E5%B8%B8%E7%94%A8%E8%BD%AC%E4%B9%89%E5%AD%97%E7%AC%A6%2F</url>
+    <content type="text"><![CDATA[记录RE一些常见的转义字符字符简写式 \a 报警符 [\b] 退格字符 \c x 控制字符 \d (= [0-9])数字字符 \D ( = [^0-9]) 非数字字符 \o xxx 字符的八进制值 \w ( = [_a-zA-Z0-9]) 单词字母 \W ( = [^_a-zA-Z0-9])非单词字符 \0 空字符 \x xx 字符的十六进制值 \u xxx 字符的Unicode值 ##匹配空白符 \f 换页符 \h 水平空白符 \H 非水平空白符 \n 换行符 \r 回车符 \s ( = [ \t\n\r])空白符（匹配空格、制表符、换行符、回车符） \S 非空白符 \t 水平制表符 \v 垂直制表符 \V 非垂直制表符 正则表达式中的选项 (?d) Unix中的行 (?i) 不区分大小写 (?J) 容许重复的名字 (?m) 多行 (?s) 单行（dotall） (?u) Unicode (?U) 默认最短匹配 (?x) 忽略空格和注释]]></content>
+      <categories>
+        <category>综合</category>
+      </categories>
+      <tags>
+        <tag>RE</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[Android读取内存信息]]></title>
+    <url>%2F2015%2F06%2F01%2Fandroid_read_memory_info%2F</url>
+    <content type="text"><![CDATA[通过adb命令获取设备内存信息在adb shell的情况下执行命令：1234567891011121314151617181920212223242526272829303132333435363738shell@maguro:/ $ cat /proc/meminfo MemTotal: 710960 kB MemFree: 136148 kB Buffers: 3400 kB Cached: 228768 kB SwapCached: 0 kB Active: 266960 kB Inactive: 158372 kB Active(anon): 193608 kB Inactive(anon): 1552 kB Active(file): 73352 kB Inactive(file): 156820 kB Unevictable: 412 kB Mlocked: 0 kB HighTotal: 598016 kB HighFree: 85216 kB LowTotal: 112944 kB LowFree: 50932 kB SwapTotal: 0 kB SwapFree: 0 kB Dirty: 0 kB Writeback: 0 kB AnonPages: 193552 kB Mapped: 164744 kB Shmem: 1584 kB Slab: 19668 kB SReclaimable: 7920 kB SUnreclaim: 11748 kB KernelStack: 4208 kB PageTables: 6540 kB NFS_Unstable: 0 kB Bounce: 0 kB WritebackTmp: 0 kB CommitLimit: 355480 kB Committed_AS: 3875984 kB VmallocTotal: 778240 kB VmallocUsed: 55432 kB VmallocChunk: 686020 kB dmupsys:12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152535455565758596061626364656667686970717273shell@maguro:/ $ dumpsys meminfoApplications Memory Usage (kB):Uptime: 4699227 Realtime: 6241493Total PSS by process: 57336 kB: com.android.launcher (pid 625) 55811 kB: system (pid 379) 33484 kB: com.android.systemui (pid 463) 23032 kB: com.baidu.appsearch (pid 941) 17931 kB: com.android.phasebeam (pid 547) 17042 kB: com.lbe.security:service (pid 910) 16522 kB: com.baidu.appsearch:bdservice_v1 (pid 1239) 11232 kB: com.tencent.mobileqq:MSF (pid 2159) 10447 kB: com.baidu.BaiduMap:bdservice_v1 (pid 1217) 8220 kB: com.android.phone (pid 600) 7185 kB: com.baidu.BaiduMap:MapCoreService (pid 2223) 6628 kB: com.tencent.mobileqq (pid 2176) 5703 kB: com.android.inputmethod.latin (pid 574) 5115 kB: android.process.media (pid 2673) 4694 kB: com.android.nfc (pid 611) 3106 kB: com.android.nfc:handover (pid 665) 2769 kB: com.android.musicfx (pid 1736) 2763 kB: com.android.smspush (pid 705) 0 kB: com.qihoo.permmgr (pid 751) 0 kB: com.baidu.BaiduMap (pid 1405)Total PSS by OOM adjustment: 55811 kB: System 55811 kB: system (pid 379) 46398 kB: Persistent 33484 kB: com.android.systemui (pid 463) 8220 kB: com.android.phone (pid 600) 4694 kB: com.android.nfc (pid 611) 57336 kB: Foreground 57336 kB: com.android.launcher (pid 625) 23800 kB: Visible 17931 kB: com.android.phasebeam (pid 547) 3106 kB: com.android.nfc:handover (pid 665) 2763 kB: com.android.smspush (pid 705) 62299 kB: Perceptible 23032 kB: com.baidu.appsearch (pid 941) 17042 kB: com.lbe.security:service (pid 910) 16522 kB: com.baidu.appsearch:bdservice_v1 (pid 1239) 5703 kB: com.android.inputmethod.latin (pid 574) 15562 kB: A Services 10447 kB: com.baidu.BaiduMap:bdservice_v1 (pid 1217) 5115 kB: android.process.media (pid 2673) 27814 kB: Background 11232 kB: com.tencent.mobileqq:MSF (pid 2159) 7185 kB: com.baidu.BaiduMap:MapCoreService (pid 2223) 6628 kB: com.tencent.mobileqq (pid 2176) 2769 kB: com.android.musicfx (pid 1736) 0 kB: com.qihoo.permmgr (pid 751) 0 kB: com.baidu.BaiduMap (pid 1405)Total PSS by category: 109517 kB: Dalvik 75944 kB: Other dev 39041 kB: Unknown 31896 kB: .dex mmap 24323 kB: .so mmap 5692 kB: .apk mmap 1360 kB: .ttf mmap 655 kB: Other mmap 540 kB: Stack 28 kB: Ashmem 20 kB: .jar mmap 4 kB: Cursor 0 kB: NativeTotal PSS: 289020 kB KSM: 0 kB saved from shared 0 kB 0 kB unshared; 0 kB volatile 指定pid信息：123456789101112131415161718192021222324252627282930313233343536373839shell@maguro:/ $ dumpsys meminfo 625Applications Memory Usage (kB):Uptime: 4872829 Realtime: 6415095** MEMINFO in pid 625 [com.android.launcher] ** Shared Private Heap Heap Heap Pss Dirty Dirty Size Alloc Free ------ ------ ------ ------ ------ ------ Native 0 0 0 16752 8417 1926 Dalvik 15581 12884 14852 21608 19175 2433 Stack 40 8 40 Cursor 0 0 0 Ashmem 0 0 0 Other dev 30451 1412 18692 .so mmap 1890 2652 884 .jar mmap 0 0 0 .apk mmap 1459 0 0 .ttf mmap 470 0 0 .dex mmap 1122 2832 104 Other mmap 23 8 8 Unknown 6305 432 6296 TOTAL 57341 20228 40876 38360 27592 4359 Objects Views: 261 ViewRootImpl: 1 AppContexts: 9 Activities: 1 Assets: 4 AssetManagers: 4 Local Binders: 14 Proxy Binders: 29 Death Recipients: 0 OpenSSL Sockets: 0 SQL MEMORY_USED: 547 PAGECACHE_OVERFLOW: 393 MALLOC_SIZE: 62 DATABASES pgsz dbsz Lookaside(b) cache Dbname 4 68 79 37/20/6 /data/user/0/com.android.launcher/databases/launcher.db 4 312 23 251/16/2 /data/user/0/com.android.launcher/cache/widgetpreviews.db]]></content>
+      <categories>
+        <category>Android</category>
+      </categories>
+      <tags>
+        <tag>android</tag>
+        <tag>memory</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[用dialog给Bash穿上衣服]]></title>
+    <url>%2F2015%2F05%2F26%2F%E7%94%A8dialog%E7%BB%99Bash%E7%A9%BF%E4%B8%8A%E8%A1%A3%E6%9C%8D%2F</url>
+    <content type="text"><![CDATA[bash下的dialog窗口的实现。 1234567891011121314151617181920212223242526272829303132333435363738394041424344#!/bin/bashtemp=$(mktemp -t test.XXXXXX)temp2=$(mktemp -t test2.XXXXXX)function diskspace &#123; df -h &gt; $temp dialog --textbox $temp 20 60&#125;function whoseon &#123; who &gt; $temp dialog --textbox $temp 20 50&#125;function memusage &#123; cat /proc/meminfo &gt; $temp diaolog --textbox $temp 20 50&#125;while [ 1 ]do dialog --menu &quot;Sys Admin Menu&quot; 20 30 10 1 &quot;Display disk space&quot; 2 &quot;Display users&quot; 3 &quot;Dispaly memory usage&quot; 0 &quot;Exi 2&gt; $temp2if [ $? -eq 1 ]then breakfiselection=$(cat $temp2)case $selection in1) diskspace ;;2) whoseon ;;3) memusage ;;0) break ;;*) dialog --msgbox &quot;Sorry, invalid selection&quot; 10 30esacdonerm -f $temp 2&gt; /dev/nullrm -f $temp2 2&gt; /dev/null]]></content>
+      <categories>
+        <category>Bash</category>
+      </categories>
+      <tags>
+        <tag>bash</tag>
+        <tag>dialog</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[PHP处理来自Python的Post的json数据]]></title>
+    <url>%2F2015%2F05%2F18%2FPHP%E5%A4%84%E7%90%86%E6%9D%A5%E8%87%AAPython%E7%9A%84Post%E7%9A%84json%E6%95%B0%E6%8D%AE%2F</url>
+    <content type="text"><![CDATA[最近用Python处理了一些json数据，但在过程中遇到一些问题，遂记录之。1.Python Post json格式数据至服务器： 查阅了一些资料，大多是这么样的： 12345678__author__ = 'jiezhi' import urllibimport urllib2 data = &#123;'name': 'jiezhi', 'age': '24'&#125;ret = urllib2.urlopen(url='http://jiezhiblog.com/test.php', data=urllib.urlencode(data))print ret.read() 但是，到php那里往往是array类型的了。 经过几番折腾改用下面的代码： 12345678__author__ = 'jiezhi' import urllib2import json data = &#123;'name': 'jiezhi', 'age': '24'&#125;ret = urllib2.urlopen(url='http://jiezhiblog.com/test.php', data=json.dumps(data))print ret.read() 2.在PHP端问题 用了改后的Python代码，却发现$_POST没有获取到数据，所以改用file_get_contents(“php://input”)来获取提交的数据：12345678910&lt;?php $input = file_get_contents("php://input"); var_dump($input); if ($input)&#123; print_r($input); $arr = json_decode($input,true); echo "arr"; print_r($arr); &#125;?&gt; 此时可以正确获取到提交的数据。]]></content>
+      <categories>
+        <category>PHP</category>
+      </categories>
+      <tags>
+        <tag>python</tag>
+        <tag>json</tag>
+        <tag>PHP</tag>
+        <tag>POST</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[Ubuntu无法登陆问题]]></title>
+    <url>%2F2015%2F04%2F29%2FUbuntu%E6%97%A0%E6%B3%95%E7%99%BB%E9%99%86%E9%97%AE%E9%A2%98%2F</url>
+    <content type="text"><![CDATA[今天修改/etc/environment文件，重启后发现无法登陆进入了，用vssh登陆出现以下错误：123456789101112131415-bash: groups: command not foundCommand &apos;ls&apos; is available in &apos;/bin/ls&apos;The command could not be located because &apos;/bin&apos; is not included in the PATH environment variable.ls: command not foundCommand &apos;lesspipe&apos; is available in the following places * /bin/lesspipe * /usr/bin/lesspipeThe command could not be located because &apos;/bin:/usr/bin&apos; is not included in the PATH environment variable.lesspipe: command not foundCommand &apos;dircolors&apos; is available in &apos;/usr/bin/dircolors&apos;The command could not be located because &apos;/usr/bin&apos; is not included in the PATH environment variable.dircolors: command not foundCommand &apos;ls&apos; is available in &apos;/bin/ls&apos;The command could not be located because &apos;/bin&apos; is not included in the PATH environment variable.ls: command not found 此时一些例如”ls”的外置命令都无法使用，解决办法：12export PATH=/usr/bin:/binsudo vim /etc/environment 然后在里面添加变量： 1PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games 保存后： 1source /etc/environment 问题解决！]]></content>
+      <categories>
+        <category>Ubuntu</category>
+      </categories>
+      <tags>
+        <tag>ubuntu</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[Ubuntu 64位adb无法使用问题的解决]]></title>
+    <url>%2F2015%2F04%2F20%2FUbuntu_64%E4%BD%8Dadb%E6%97%A0%E6%B3%95%E4%BD%BF%E7%94%A8%E9%97%AE%E9%A2%98%E7%9A%84%E8%A7%A3%E5%86%B3%2F</url>
+    <content type="text"><![CDATA[今天在Ubuntu 14.02 （64位）下安装了Android开发环境，其中遇到adb无法使用的情况，以为是没配置环境变量的问题，就添加一下： 1sudo vim /etc/profile 12export PATH=&quot;$PATH:/home/username/sdk/tools&quot;export PATH=&quot;$PATH:/home/username/sdk/paltform-tools&quot; 但是系统注销后运行，还是会报错：没有该文件或文件夹。 经查阅发现Linux下SDK的adb命令是32位的，所以要在64位系统上要安装兼容包： Ubuntu 13.10及以上的版本： 123sudo dpkg --add-architecture i386sudo apt-get updatesudo apt-get install libncurses5:i386 libstdc++6:i386 zlib1g:i386 以下的版本： 1apt-get install ia32-libs 执行过后可发现adb可正常运行。]]></content>
+      <categories>
+        <category>Android</category>
+      </categories>
+      <tags>
+        <tag>android</tag>
+        <tag>aosp</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[利用国内镜像源下载、编译Android源码]]></title>
+    <url>%2F2015%2F04%2F15%2F%E5%88%A9%E7%94%A8%E5%9B%BD%E5%86%85%E9%95%9C%E5%83%8F%E6%BA%90%E4%B8%8B%E8%BD%BD%E3%80%81%E7%BC%96%E8%AF%91Android%E6%BA%90%E7%A0%81%2F</url>
+    <content type="text"><![CDATA[在国内下载Android可是不太容易，不过从Google断断续续地下载了几天源码后发现清华大学有个TUNA镜像源可以下载Android源码，甚是方便。 参考网站： http://source.android.com/index.html https://aosp.tuna.tsinghua.edu.cn/ 一.环境准备： 现在Android源码的下载和编译在Linux和Mac OS上都可以了，但Mac OS上设置略微复杂点，所以我选择了Ubuntu 14.04 64位的虚拟机。（硬盘建议50G以上，编译的时候给虚拟机加大CPU和内存。） 编译Gingerbread (2.3.x) 及其以上的源码需要64位的系统，以下的可以在32位系统上编译。 1.Java下载和配置 Java 7：适用最新版的源码： 12$ sudo apt-get update$ sudo apt-get install openjdk-7-jdk 如果系统上有多个Java版本，可以设置默认的： 12$ sudo update-alternatives --config java$ sudo update-alternatives --config javac Java 6: 适用于Gingerbread（2.3）~ KitKat（4.4） Java 5:适用于 Cupcake（1.5）~ Froyo（2.2） 如果Java安装失败可到Java官网下载后自行安装，略去不表。 2.其它依赖包：​1$ sudo apt-get install bison g++-multilib git gperf libxml2-utils make zlib1g-dev:i386 zip 但在编译过程中发现还需要两个包，所以也提前安装好吧： 1$ sudo apt-get install flex libswitch-perl 如果是Ubuntu 12.04： 123456$ sudo apt-get install git gnupg flex bison gperf build-essential \ zip curl libc6-dev libncurses5-dev:i386 x11proto-core-dev \ libx11-dev:i386 libreadline6-dev:i386 libgl1-mesa-glx:i386 \ libgl1-mesa-dev g++-multilib mingw32 tofrodos \ python-markdown libxml2-utils xsltproc zlib1g-dev:i386$ sudo ln -s /usr/lib/i386-linux-gnu/mesa/libGL.so.1 /usr/lib/i386-linux-gnu/libGL.so 如果是Ubuntu 10.04 – 11.10： 12345$ sudo apt-get install git gnupg flex bison gperf build-essential \ zip curl zlib1g-dev libc6-dev lib32ncurses5-dev ia32-libs \ x11proto-core-dev libx11-dev lib32readline5-dev lib32z-dev \ libgl1-mesa-dev g++-multilib mingw32 tofrodos python-markdown \ libxml2-utils xsltproc 11.10： 1$ sudo apt-get install libx11-dev:i386 10.04： 1$ sudo ln -s /usr/lib32/mesa/libGL.so.1 /usr/lib32/mesa/libGL.so 二、下载源码 1.下载repo： repo是Google基于Git推出的一款版本管理工具，用python写的。 先配置目录： 12$ mkdir ~/bin$ PATH=~/bin:$PATH 下载repo并赋予其可执行权限： 12$ curl https://storage.googleapis.com/git-repo-downloads/repo &gt; ~/bin/repo$ chmod a+x ~/bin/repo 当然由于众所周知的原因，我们往往无法把repo下到本地。这里提供一个我下载并修改好的下载链接：http://jiezhiblog.com/wp-content/uploads/2015/04/repo1.txt （wp的限制，只能把repo重命名为repo.txt，下载后改回repo即可） 下载放到~/bin目录下，并修改权限即可： 1chmod a+x repo 2.初始化repo 进入放置源码的目录，如： 12$ mkdir ~/android/android 4.3_r1$ cd ~/android/android 4.3_r1 关键的来了，如果想体验好点，建议国内的从清华大学的镜像源下载： 1$ repo init -u git://aosp.tuna.tsinghua.edu.cn/android/platform/manifest 或者指定要下载的分支： 1$ repo init -u git://aosp.tuna.tsinghua.edu.cn/android/platform/manifest -b android-4.3_r1 完成后即可和服务器同步了： 1$ repo sync 该服务器限制了每个IP并发数，也就是你可以使用： 1$ repo sync -j4 设置并发数为4.，给别人留有余地。 现在应该在从服务器下载源码了，但是如果中途有中断了，继续执行repo sync即可。 如何让repo自动在断开后自动下载： 新建autorepo.sh: 123456#!/bin/shrepo syncwhile [ $? -ne 0 ]dorepo syncdone 然后执行即可： 1$ sh autorepo.sh 如果你之前已经下载了部分AOSP的代码的话，切换到TUNA服务器也很方便，如官网所示： 如果你之前已经通过某种途径获得了 AOSP 的源码(或者你只是 init 这一步完成后)， 你希望以后通过 TUNA 同步 AOSP 部分的代码，只需要将 .repo/manifest.xml 把其中的 aosp 这个 remote 的 fetch 从 https://android.googlesource.com 改为 git://aosp.tuna.tsinghua.edu.cn/android/ diff&lt;manifest&gt; &lt;remote name=&quot;aosp&quot;- fetch=&quot;https://android.googlesource.com&quot;+ fetch=&quot;git://aosp.tuna.tsinghua.edu.cn/android/&quot; review=&quot;android-review.googlesource.com&quot; /&gt; &lt;remote name=&quot;github&quot; 这个方法也可以用来在同步 Cyanogenmod 代码的时候从 TUNA 同步部分代码 三、编译： 当源码下载后，可以看到目录里多出很多源码文件夹： 1234567891011121314151617181920212223242526[aosp@myserver android4.1_r1]$ ls -hltotal 100Kdrwxrwxr-x 3 aosp aosp 4.0K Apr 7 11:27 abidrwxrwxr-x 9 aosp aosp 4.0K Apr 7 11:27 bionicdrwxrwxr-x 5 aosp aosp 4.0K Apr 7 11:27 bootabledrwxrwxr-x 7 aosp aosp 4.0K Apr 7 11:27 builddrwxrwxr-x 11 aosp aosp 4.0K Apr 7 11:27 ctsdrwxrwxr-x 18 aosp aosp 4.0K Apr 7 11:27 dalvikdrwxrwxr-x 19 aosp aosp 4.0K Apr 7 11:27 developmentdrwxrwxr-x 10 aosp aosp 4.0K Apr 7 11:27 devicedrwxrwxr-x 3 aosp aosp 4.0K Apr 7 11:27 docsdrwxrwxr-x 144 aosp aosp 4.0K Apr 7 11:29 externaldrwxrwxr-x 14 aosp aosp 4.0K Apr 7 11:32 frameworksdrwxrwxr-x 10 aosp aosp 4.0K Apr 7 11:32 gdkdrwxrwxr-x 10 aosp aosp 4.0K Apr 7 11:32 hardwaredrwxrwxr-x 11 aosp aosp 4.0K Apr 7 11:32 libcoredrwxrwxr-x 4 aosp aosp 4.0K Apr 7 11:32 libnativehelper-r--r--r-- 1 aosp aosp 87 Apr 7 11:27 Makefiledrwxrwxr-x 8 aosp aosp 4.0K Apr 7 11:32 ndkdrwxrwxr-x 4 aosp aosp 4.0K Apr 7 14:28 outdrwxrwxr-x 7 aosp aosp 4.0K Apr 7 11:33 packagesdrwxrwxr-x 4 aosp aosp 4.0K Apr 7 11:33 pdkdrwxrwxr-x 12 aosp aosp 4.0K Apr 7 11:33 prebuiltdrwxrwxr-x 9 aosp aosp 4.0K Apr 7 11:34 prebuiltsdrwxrwxr-x 48 aosp aosp 4.0K Apr 7 11:34 sdkdrwxrwxr-x 9 aosp aosp 4.0K Apr 7 11:34 system 如果你准备在模拟器里运行，则按照如下步骤编译即可，如果你想刷到手机上则还有一些任务要做（见第四步）。 0.其中由于配置问题，我的代码是放在服务器上编译的: 由于.repo这个隐藏文件夹里的文件占用空间很大，所以在压缩的时候将其排除： 1$ tar -zcvf android4.3_r1.tar.gz android4.3_r1/ --exclude .repo 然后利用scp命令将压缩好的文件上传到服务器： 1$ scp android4.3_r1.tar.gz username@host:/home/android/ 其中username和host是你用户名和服务器地址。 解压： 1$ tar -zxvf android4.3_r1.tar.gz / 1.初始化： 1$ source build/envsetup.sh 2.使用lunch命令选择编译目标，如： 1$ lunch aosp_arm-eng 或者直接lunch，会让你选择编译目标的。 其中参数说明： BUILD NAME DEVICE NOTES aosp_arm ARM emulator 包括所有语言、APP和输入法的配置 aosp_maguro maguro 运行在Galaxy Nexus GSM/HSPA+ (“maguro”)上 aosp_panda panda 运行在 PandaBoard (“panda”)上 BUILDTYPE USE user limited access; suited for production（有权限限制，适合产品级） userdebug preferred for debugging（适合调试） eng development configuration with additional debugging tools（有额外的调试工具） 4.3.编译 1$ make -j4 -jN表示用N个线程来编译，如果你是配置是2CPU，每个CPU有4核，每核可跑俩线程，那么你可以make -j16乃至-j32，这样速度将大大加快。. 4.成功 在android4.3_r1/out/target/product/generic目录下可以看到如下文件： 12345678910111213141516[aosp@myserver generic]$ ls -lhtotal 205M-rw-rw-r-- 1 aosp aosp 7 Apr 7 14:49 android-info.txt-rw-rw-r-- 1 aosp aosp 25K Apr 7 14:48 clean_steps.mkdrwxrwxr-x 4 aosp aosp 4.0K Apr 7 15:19 datadrwxrwxr-x 3 aosp aosp 4.0K Apr 7 15:18 dex_bootjars-rw-rw-r-- 1 aosp aosp 47K Apr 7 15:27 installed-files.txtdrwxrwxr-x 14 aosp aosp 4.0K Apr 7 15:27 obj-rw-rw-r-- 1 aosp aosp 557 Apr 7 14:48 previous_build_config.mk-rw-rw-r-- 1 aosp aosp 163K Apr 7 15:18 ramdisk.imgdrwxrwxr-x 8 aosp aosp 4.0K Apr 7 15:18 rootdrwxrwxr-x 5 aosp aosp 4.0K Apr 7 15:18 symbolsdrwxrwxr-x 12 aosp aosp 4.0K Apr 7 15:27 system-rw------- 1 aosp aosp 204M Apr 7 15:27 system.imgdrwxrwxr-x 3 aosp aosp 4.0K Apr 7 15:05 test-rw------- 1 aosp aosp 99K Apr 7 15:19 userdata.img 四、刷机 1.模拟器的话，其实直接运行emulator即可运行： 由于不涉及内核，我的做法是把ramdisk.img、system.img和userdata.img复制到sdk/system-images/android-18/default/armeabi-v7a/目录下替换掉原来的文件。（可以把原来的先备份）然后新建对应的API虚拟机，运行即可。 2.真机 真机我是用Google三太子Galaxy Nexus&nbsp;[maguro] (GSM/HSPA+)做的实验，毕竟亲儿子，驱动方面都很好配置。 a.在第三步编译之前，先把驱动配置好： 1234567891011121314151617181920212223242526272829303132333435363738394041424344454647$ cd ~/android/anddroid-4.3_r1$ wget https://dl.google.com/dl/android/aosp/broadcom-maguro-jwr66y-5fa7715b.tgz$ tar -zxvf broadcom-maguro-jwr66y-5fa7715b.tgz$ ./extract-broadcom-maguro.sh # (view the license and then type &quot;I ACCEPT&quot;)...$ wget https://dl.google.com/dl/android/aosp/imgtec-maguro-jwr66y-b0a4a1ef.tgz$ tar -zxvf imgtec-maguro-jwr66y-b0a4a1ef.tgz$ ./extract-imgtec-maguro.sh # (view the license and then type &quot;I ACCEPT&quot;)...$ wget https://dl.google.com/dl/android/aosp/invensense-maguro-jwr66y-e0d2e531.tgz$ tar -zxvf invensense-maguro-jwr66y-e0d2e531.tgz$ ./extract-invensense-maguro.sh # (view the license and then type &quot;I ACCEPT&quot;)...$ wget https://dl.google.com/dl/android/aosp/nxp-maguro-jwr66y-d8ac2804.tgz$ tar -zxvf nxp-maguro-jwr66y-d8ac2804.tgz$ ./extract-nxp-maguro.sh # (view the license and then type &quot;I ACCEPT&quot;)...$ wget https://dl.google.com/dl/android/aosp/samsung-maguro-jwr66y-fb8f93b6.tgz$ tar -zxvf samsung-maguro-jwr66y-fb8f93b6.tgz$ ./extract-samsung-maguro.sh # (view the license and then type &quot;I ACCEPT&quot;)...$ wget https://dl.google.com/dl/android/aosp/widevine-maguro-jwr66y-c49927ce.tgz$ tar -zxvf widevine-maguro-jwr66y-c49927ce.tgz$ ./extract-widevine-maguro.sh # (view the license and then type &quot;I ACCEPT&quot;) 然后按照第三步编译即可。 b.连接手机，打开USB调试，进入bootloader模式： 1$ adb reboot bootloader 如果bootloader被锁住的话，先解锁：1$ fastboot oem unlock 然后进入system.img等文件的目录： 12345$ fastboot flash boot boot.img$ fastboot flash system system.img$ fastboot flash userdata userdata.img 然后重启即可。]]></content>
+      <categories>
+        <category>Android</category>
+      </categories>
+      <tags>
+        <tag>android</tag>
+        <tag>aosp</tag>
+        <tag>源码</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[Mac上python安装第三方库]]></title>
+    <url>%2F2015%2F04%2F15%2FMac%E4%B8%8Apython%E5%AE%89%E8%A3%85%E7%AC%AC%E4%B8%89%E6%96%B9%E5%BA%93%2F</url>
+    <content type="text"><![CDATA[本人靠着《thinkpython》这本书算是对python入了门，但对第三方库的使用还不熟悉。 因为百度空间即将关闭，想借Evi1m0大神的一段python爬出代码来爬一下自己的网站的，结果其中缺少第三方库而无法运行。1.在线安装搜一些资料大多是用pip安装的，结果我的Mac上也没有pip。首先安装pip： 1sudo easy_install pip 如果我要安装wget模块，直接执行：1sudo pip install wget 2.离线安装如果你已经把第三方模块下载好了，比如wget模块。其目录结构如下： 12345-rw-r--r--@ 1 jiezhi staff 3.3K Jul 20 2014 PKG-INFO -rw-r--r--@ 1 jiezhi staff 2.0K Jul 20 2014 README.txt drwxr-xr-x 3 jiezhi staff 102B Apr 14 21:49 build -rw-r--r--@ 1 jiezhi staff 1.1K Jul 20 2014 setup.py -rwxr-xr-x@ 1 jiezhi staff 13K Jul 20 2014 wget.py 其中只要执行下面的命令即可： 1sudo python setup.py install]]></content>
+      <categories>
+        <category>Python 2.x</category>
+      </categories>
+      <tags>
+        <tag>mac</tag>
+        <tag>python</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[My Chrome Extensions]]></title>
+    <url>%2F2015%2F04%2F07%2FMy_Chrome_Extensions%2F</url>
+    <content type="text"><![CDATA[#Life ##惠惠购物助手 4.1.0 【网易出品】在您网购浏览商品的同时，自动对比其他优质电商同款商品价格，并提供商品价格历史，帮您轻松抄底，聪明网购不吃亏！ ##Clearly 10.5.1.8 Clearly makes blog posts, articles and webpages clean and easy to read. Save them to Evernote to read anywhere. ##Evernote Web Clipper 6.3 Use the Evernote extension to save things you see on the web into your Evernote account. ##Save to Pocket 1.9.11 Pocket Extension for Chrome - The best way to save articles, videos and more. ##Momentum 0.41.1 Replace new tab page with a personal dashboard featuring todo, weather, and inspiration. ##豆瓣+百度网盘™ 1.9 在豆瓣电影,音乐,读书条目页面显示百度网盘搜索结果. ##迅雷下载支持测试版 2.6.4 迅雷下载支持(Not from Chrome Web Store.) ##Pomodoro Timer 1.6.0.1 Pomodoro Timer for Chrome App. a simple way to manage your time and increase your productivity. ##Google Dictionary (by Google) 4.0.2 View definitions easily as you browse the web. ##feedly Mini 34 The easiest way to add content to your feedly. #Tools ##AdBlock 最受欢迎的Chrome扩展，拥有超过4000万用户！屏蔽整个互联网上的广告。 ##Adkill and Media download 去视频广告、视频音频下载、正常显示反盗链图片三合一 by xplsy ##Advertising Terminator 3.1.4 Clear all the ads on the page: floating ads, shopping ads, malicious pop, tracking code, video ads. ##ARC Welder 41.4410.244.25 Package Android APKs for ARC (App Runtime for Chrome) ##Full Page Screen Capture 0.0.15 Screen capture your current page in entirety and reliably! ##Toolbox 1.0.43 Chrome Toolbox, Useful tool set. Commonly used text processing tools. ps:sorting, de-emphasis, trimming, md5, sha1, Code format. #Dev ##Android SDK Search 0.3.4 Adds an ‘ad’ omnibox command and view source links for the Android SDK. #Web ##DHC - REST/HTTP API Client 0.7.20 REST &amp; HTTP API developer’s pocket knife. Easy to use and configurable. HATEOAS, Hypermedia, Requests History+Repository, and more. ##Wappalyzer 2.37 Identifies software on the web. ##Responsive Web Design Tester 1.0.7 Responsive Web Design Tester is a quick and easy way to test your responsive website. ##Postman - REST Client (Packaged App) 2.0.14 Supercharge your API workflow with Postman! Build, test, and document your APIs faster. More than a million developers already do.]]></content>
+      <categories>
+        <category>综合</category>
+      </categories>
+      <tags>
+        <tag>chrome</tag>
+        <tag>extensions</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[包含Android源码的镜像源]]></title>
+    <url>%2F2015%2F04%2F02%2F%E5%8C%85%E5%90%ABAndroid%E6%BA%90%E7%A0%81%E7%9A%84%E9%95%9C%E5%83%8F%E6%BA%90%2F</url>
+    <content type="text"><![CDATA[这两天下载Android源码，算是被折腾死了。后来就想没准国内有镜像源的话，下载就不至于这么痛苦了。 下面就把我找到源列表分享一下： 清华大学：http://mirrors.tuna.tsinghua.edu.cn/ 中国科学院大学开源软件协会：http://www.opencas.org/]]></content>
+      <categories>
+        <category>Android</category>
+      </categories>
+      <tags>
+        <tag>android</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[repo的下载与安装]]></title>
+    <url>%2F2015%2F03%2F30%2Frepo%E7%9A%84%E4%B8%8B%E8%BD%BD%E4%B8%8E%E5%AE%89%E8%A3%85%2F</url>
+    <content type="text"><![CDATA[这两天在张罗着下载Android源码，结果在安装repo的时候老是提示找不到服务器。 1curl https://storage.googleapis.com/git-repo-downloads/repo &amp;gt; ~/bin/repo 后来索性把代码找到直接复制到本地好了： 123456789101112131415161718192021222324252627282930313233343536373839404142434445464748495051525354555657585960616263646566676869707172737475767778798081828384858687888990919293949596979899100101102103104105106107108109110111112113114115116117118119120121122123124125126127128129130131132133134135136137138139140141142143144145146147148149150151152153154155156157158159160161162163164165166167168169170171172173174175176177178179180181182183184185186187188189190191192193194195196197198199200201202203204205206207208209210211212213214215216217218219220221222223224225226227228229230231232233234235236237238239240241242243244245246247248249250251252253254255256257258259260261262263264265266267268269270271272273274275276277278279280281282283284285286287288289290291292293294295296297298299300301302303304305306307308309310311312313314315316317318319320321322323324325326327328329330331332333334335336337338339340341342343344345346347348349350351352353354355356357358359360361362363364365366367368369370371372373374375376377378379380381382383384385386387388389390391392393394395396397398399400401402403404405406407408409410411412413414415416417418419420421422423424425426427428429430431432433434435436437438439440441442443444445446447448449450451452453454455456457458459460461462463464465466467468469470471472473474475476477478479480481482483484485486487488489490491492493494495496497498499500501502503504505506507508509510511512513514515516517518519520521522523524525526527528529530531532533534535536537538539540541542543544545546547548549550551552553554555556557558559560561562563564565566567568569570571572573574575576577578579580581582583584585586587588589590591592593594595596597598599600601602603#!/bin/sh## repo default configuration##REPO_URL='git://codeaurora.org/tools/repo.git'REPO_REV='stable'# Copyright (C) 2008 Google Inc.## Licensed under the Apache License, Version 2.0 (the "License");# you may not use this file except in compliance with the License.# You may obtain a copy of the License at## http://www.apache.org/licenses/LICENSE-2.0## Unless required by applicable law or agreed to in writing, software# distributed under the License is distributed on an "AS IS" BASIS,# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.# See the License for the specific language governing permissions and# limitations under the License.magic='--calling-python-from-/bin/sh--'"""exec" python -E "$0" "$@" """#$magic"if __name__ == '__main__': import sys if sys.argv[-1] == '#%s' % magic: del sys.argv[-1]del magic# increment this whenever we make important changes to this scriptVERSION = (1, 10)# increment this if the MAINTAINER_KEYS block is modifiedKEYRING_VERSION = (1,0)MAINTAINER_KEYS = """ Repo Maintainer &lt;repo@android.kernel.org&gt;-----BEGIN PGP PUBLIC KEY BLOCK-----Version: GnuPG v1.4.2.2 (GNU/Linux)mQGiBEj3ugERBACrLJh/ZPyVSKeClMuznFIrsQ+hpNnmJGw1a9GXKYKk8qHPhAZfWKtrBqAVMNRLhL85oSlekRz98u41H5si5zcuv+IXJDF5MJYcB8f22wAy15lUqPWiVCkk1l8qqLiuW0fo+ZkPY5qOgrvc0HW1SmdH649uNwqCbcKb6CxaTxzhOwCgj3APxI1WfzLqdJjsm1Nq98L0cLcD/iNsILCuw44PRds3J75YP0pze7YF/6WFMB6QSFGuaUX1FsTTztKNXGms8i5b2l1B8JaLRWq/jOnZzyl1zrUJhkc0JgyZW5oNLGyWGhKDFxp5YpHuIuMImopWEMFIRQNrvlg+YVK8t3FpdI1RY0LYqha8pPzANhEYgSfoVzObfbfbA/4ioOrxy8ifSoga7ITyZMA+XbW8bx33WXutO9N7SPKS/AK2JpasSEVLZcONae5hvAEGVXKxVPDjJBmIc2cOe7kOKSi3OxLzBqrjS2rnjiP4o0ekhZIe4+ocwVOge0PLlH5avCqihGRhpoqDRsmpzSHzJIxtoeb+GgGEX8KkUsVAhbQpUmVwbyBNYWludGFpbmVyIDxyZXBvQGFuZHJvaWQua2VybmVsLm9yZz6IYAQTEQIAIAUCSPe6AQIbAwYLCQgHAwIEFQIIAwQWAgMBAh4BAheAAAoJEBZTDV6SD1xl1GEAn0x/OKQpy7qI6G73NJviU0IUMtftAKCFMUhGb/0bZvQ8Rm3QCUpWHyEIu7kEDQRI97ogEBAA2wI65fs9y/rMwD6dkD/vK9v4C9mOn1IL5JCPYMJBVSci+9ED4ChzYvfq7wOcj9qIvaE0GwCt2ar7Q56me5J+byhSb32Rqsw/r3Vo5cZMH80N4cjesGuSXOGyEWTe4HYoxnHvgF4EKI2LK7xfTUcxMtlyn52sUpkfKsCpUhFvdmbAiJE+jCkQZr1Z8u2KphV79Ou+P1N5IXY/XWOlq48Qf4MWCYlJFrB07xjUjLKMPDNDnm58L5byDrP/eHysKexpbakLxCmYyfT6DV1SWLblpd2hie0sL3YejdtuBMYMS2rI7Yxb8kGuqkz+9l1qhwJtei945MaretDy/d/JH/pRYkRf7L+ke7dpzrP+aJmcz9P1e6gq4NJsWejaALVASBiioqNfQmtqSVzF1wkR5avZkFHuYvj6V/t1RrOZTXxkSk18KFMJRBZrdHFCWbc5qrVxUB6eN5pja0NFIUCigLBV1c6I2DwiuboMNh18VtJJh+nwWeez/RueN4ig59gRTtkcc0PR35tX2DR8+xCCFVW/NcJ4PSePYzCuuLvp1vEDHnj41R52Fz51hgddT4rBsp0nL+5IsocSOIIezw8T9vVzMY4ArCKFAVu2IVyBcahTfBS8q5EM63mONU6UVJEozfGljiMwxuQ7JwKcw0AUEKTKG7aBgBaTAgT8TOevpvlw91cAAwUP/jRkyVi/0WAb0qlEaq/SouWxX1faR+vU3b+Y2/DGjtXQMzG0qpetaTHC/AxxHpgt/dCkWI6ljYDnxgPLwG0aOasm94BjZc6vZwf1opFZUKsjOAAxRxNZyjUJKe4UZVuMTk6zo27Nt3LMnc0FO47vFcOjRyquvgNOS818irVHUf12waDx8gszKxQTTtFxU5/ePB2jZmhP6oXSe4K/LG5T+WBRPDrHiGPhCzJRzm9BP0lTnGCAj3o9W90STZa65RK7IaYpC8TB35JTBEbrrNCpw6lzd74LnNEp5eMlKDnXzUAgAH0yzCQeMl7t33QCdYx2hRs2wtTQSjGfAiNmj/WWVl5Jn+2jCDnRLenKHwVRFsBX2e0BiRWt/i9Y8fjorLCXVj4z+7yW6DawdLkJorEop3v5ILwfC7hVx4jHSnOgZ65L9s8EQdVr1ckN9243yta7rNgwfcqb60ILMFF1BRk/0V7wCL+68UwwiQDvyMOQuqkysKLSDCLb7BFcyA7j6KG+5hpsREstFX2wK1yKeraz5xGrFy8tfAaeBMIQ17gvFSp/suc9DYO0ICK2BISzq+F+ZiAKsjMYOBNdH/h0zobQHTHs37+/QLMomGEGKZMWi0dShU2J5mNRQu3Hhxl3hHDVbt5CeJBb26aQcQrFz69WzE3GNvmJosh6leayjtI9P2A6iEkEGBECAAkFAkj3uiACGwwACgkQFlMNXpIPXGWpTACbBS+Up3RpfYVfd63c1cDdlru13pQAn3NQy/SN858MkxN+zym86UBgOad2=CMiZ-----END PGP PUBLIC KEY BLOCK-----"""GIT = 'git' # our git commandMIN_GIT_VERSION = (1, 5, 4) # minimum supported git versionrepodir = '.repo' # name of repo's private directoryS_repo = 'repo' # special repo reposioryS_manifests = 'manifests' # special manifest repositoryREPO_MAIN = S_repo + '/main.py' # main scriptimport optparseimport osimport reimport readlineimport subprocessimport syshome_dot_repo = os.path.expanduser('~/.repoconfig')gpg_dir = os.path.join(home_dot_repo, 'gnupg')extra_args = []init_optparse = optparse.OptionParser(usage="repo init -u url [options]")# Logginggroup = init_optparse.add_option_group('Logging options')group.add_option('-q', '--quiet', dest="quiet", action="store_true", default=False, help="be quiet")# Manifestgroup = init_optparse.add_option_group('Manifest options')group.add_option('-u', '--manifest-url', dest='manifest_url', help='manifest repository location', metavar='URL')group.add_option('-o', '--origin', dest='manifest_origin', help="use REMOTE instead of 'origin' to track upstream", metavar='REMOTE')group.add_option('-b', '--manifest-branch', dest='manifest_branch', help='manifest branch or revision', metavar='REVISION')group.add_option('-m', '--manifest-name', dest='manifest_name', help='initial manifest file (deprecated)', metavar='NAME.xml')group.add_option('--mirror', dest='mirror', action='store_true', help='mirror the forrest')group.add_option('--reference', dest='reference', help='location of mirror directory', metavar='DIR')# Toolgroup = init_optparse.add_option_group('repo Version options')group.add_option('--repo-url', dest='repo_url', help='repo repository location', metavar='URL')group.add_option('--repo-branch', dest='repo_branch', help='repo branch or revision', metavar='REVISION')group.add_option('--no-repo-verify', dest='no_repo_verify', action='store_true', help='do not verify repo source code')class CloneFailure(Exception): """Indicate the remote clone of repo itself failed. """def _Init(args): """Installs repo by cloning it over the network. """ opt, args = init_optparse.parse_args(args) if args or not opt.manifest_url: init_optparse.print_usage() sys.exit(1) url = opt.repo_url if not url: url = REPO_URL extra_args.append('--repo-url=%s' % url) branch = opt.repo_branch if not branch: branch = REPO_REV extra_args.append('--repo-branch=%s' % branch) if branch.startswith('refs/heads/'): branch = branch[len('refs/heads/'):] if branch.startswith('refs/'): print &gt;&gt;sys.stderr, "fatal: invalid branch name '%s'" % branch raise CloneFailure() if not os.path.isdir(repodir): try: os.mkdir(repodir) except OSError, e: print &gt;&gt;sys.stderr, \ 'fatal: cannot make %s directory: %s' % ( repodir, e.strerror) # Don't faise CloneFailure; that would delete the # name. Instead exit immediately. # sys.exit(1) _CheckGitVersion() try: if _NeedSetupGnuPG(): can_verify = _SetupGnuPG(opt.quiet) else: can_verify = True if not opt.quiet: print &gt;&gt;sys.stderr, 'Getting repo ...' print &gt;&gt;sys.stderr, ' from %s' % url dst = os.path.abspath(os.path.join(repodir, S_repo)) _Clone(url, dst, opt.quiet) if can_verify and not opt.no_repo_verify: rev = _Verify(dst, branch, opt.quiet) else: rev = 'refs/remotes/origin/%s^0' % branch _Checkout(dst, branch, rev, opt.quiet) except CloneFailure: if opt.quiet: print &gt;&gt;sys.stderr, \ 'fatal: repo init failed; run without --quiet to see why' raisedef _CheckGitVersion(): cmd = [GIT, '--version'] proc = subprocess.Popen(cmd, stdout=subprocess.PIPE) ver_str = proc.stdout.read().strip() proc.stdout.close() proc.wait() if not ver_str.startswith('git version '): print &gt;&gt;sys.stderr, 'error: "%s" unsupported' % ver_str raise CloneFailure() ver_str = ver_str[len('git version '):].strip() ver_act = tuple(map(lambda x: int(x), ver_str.split('.')[0:3])) if ver_act &lt; MIN_GIT_VERSION: need = '.'.join(map(lambda x: str(x), MIN_GIT_VERSION)) print &gt;&gt;sys.stderr, 'fatal: git %s or later required' % need raise CloneFailure()def _NeedSetupGnuPG(): if not os.path.isdir(home_dot_repo): return True kv = os.path.join(home_dot_repo, 'keyring-version') if not os.path.exists(kv): return True kv = open(kv).read() if not kv: return True kv = tuple(map(lambda x: int(x), kv.split('.'))) if kv &lt; KEYRING_VERSION: return True return Falsedef _SetupGnuPG(quiet): if not os.path.isdir(home_dot_repo): try: os.mkdir(home_dot_repo) except OSError, e: print &gt;&gt;sys.stderr, \ 'fatal: cannot make %s directory: %s' % ( home_dot_repo, e.strerror) sys.exit(1) if not os.path.isdir(gpg_dir): try: os.mkdir(gpg_dir, 0700) except OSError, e: print &gt;&gt;sys.stderr, \ 'fatal: cannot make %s directory: %s' % ( gpg_dir, e.strerror) sys.exit(1) env = os.environ.copy() env['GNUPGHOME'] = gpg_dir.encode() cmd = ['gpg', '--import'] try: proc = subprocess.Popen(cmd, env = env, stdin = subprocess.PIPE) except OSError, e: if not quiet: print &gt;&gt;sys.stderr, 'warning: gpg (GnuPG) is not available.' print &gt;&gt;sys.stderr, 'warning: Installing it is strongly encouraged.' print &gt;&gt;sys.stderr return False proc.stdin.write(MAINTAINER_KEYS) proc.stdin.close() if proc.wait() != 0: print &gt;&gt;sys.stderr, 'fatal: registering repo maintainer keys failed' sys.exit(1) print fd = open(os.path.join(home_dot_repo, 'keyring-version'), 'w') fd.write('.'.join(map(lambda x: str(x), KEYRING_VERSION)) + '\n') fd.close() return Truedef _SetConfig(local, name, value): """Set a git configuration option to the specified value. """ cmd = [GIT, 'config', name, value] if subprocess.Popen(cmd, cwd = local).wait() != 0: raise CloneFailure()def _Fetch(local, quiet, *args): cmd = [GIT, 'fetch'] if quiet: cmd.append('--quiet') err = subprocess.PIPE else: err = None cmd.extend(args) cmd.append('origin') proc = subprocess.Popen(cmd, cwd = local, stderr = err) if err: proc.stderr.read() proc.stderr.close() if proc.wait() != 0: raise CloneFailure()def _Clone(url, local, quiet): """Clones a git repository to a new subdirectory of repodir """ try: os.mkdir(local) except OSError, e: print &gt;&gt;sys.stderr, \ 'fatal: cannot make %s directory: %s' \ % (local, e.strerror) raise CloneFailure() cmd = [GIT, 'init', '--quiet'] try: proc = subprocess.Popen(cmd, cwd = local) except OSError, e: print &gt;&gt;sys.stderr print &gt;&gt;sys.stderr, "fatal: '%s' is not available" % GIT print &gt;&gt;sys.stderr, 'fatal: %s' % e print &gt;&gt;sys.stderr print &gt;&gt;sys.stderr, 'Please make sure %s is installed'\ ' and in your path.' % GIT raise CloneFailure() if proc.wait() != 0: print &gt;&gt;sys.stderr, 'fatal: could not create %s' % local raise CloneFailure() _SetConfig(local, 'remote.origin.url', url) _SetConfig(local, 'remote.origin.fetch', '+refs/heads/*:refs/remotes/origin/*') _Fetch(local, quiet) _Fetch(local, quiet, '--tags')def _Verify(cwd, branch, quiet): """Verify the branch has been signed by a tag. """ cmd = [GIT, 'describe', 'origin/%s' % branch] proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd = cwd) cur = proc.stdout.read().strip() proc.stdout.close() proc.stderr.read() proc.stderr.close() if proc.wait() != 0 or not cur: print &gt;&gt;sys.stderr print &gt;&gt;sys.stderr,\ "fatal: branch '%s' has not been signed" \ % branch raise CloneFailure() m = re.compile(r'^(.*)-[0-9]&#123;1,&#125;-g[0-9a-f]&#123;1,&#125;$').match(cur) if m: cur = m.group(1) if not quiet: print &gt;&gt;sys.stderr print &gt;&gt;sys.stderr, \ "info: Ignoring branch '%s'; using tagged release '%s'" \ % (branch, cur) print &gt;&gt;sys.stderr env = os.environ.copy() env['GNUPGHOME'] = gpg_dir.encode() cmd = [GIT, 'tag', '-v', cur] proc = subprocess.Popen(cmd, stdout = subprocess.PIPE, stderr = subprocess.PIPE, cwd = cwd, env = env) out = proc.stdout.read() proc.stdout.close() err = proc.stderr.read() proc.stderr.close() if proc.wait() != 0: print &gt;&gt;sys.stderr print &gt;&gt;sys.stderr, out print &gt;&gt;sys.stderr, err print &gt;&gt;sys.stderr raise CloneFailure() return '%s^0' % curdef _Checkout(cwd, branch, rev, quiet): """Checkout an upstream branch into the repository and track it. """ cmd = [GIT, 'update-ref', 'refs/heads/default', rev] if subprocess.Popen(cmd, cwd = cwd).wait() != 0: raise CloneFailure() _SetConfig(cwd, 'branch.default.remote', 'origin') _SetConfig(cwd, 'branch.default.merge', 'refs/heads/%s' % branch) cmd = [GIT, 'symbolic-ref', 'HEAD', 'refs/heads/default'] if subprocess.Popen(cmd, cwd = cwd).wait() != 0: raise CloneFailure() cmd = [GIT, 'read-tree', '--reset', '-u'] if not quiet: cmd.append('-v') cmd.append('HEAD') if subprocess.Popen(cmd, cwd = cwd).wait() != 0: raise CloneFailure()def _FindRepo(): """Look for a repo installation, starting at the current directory. """ dir = os.getcwd() repo = None olddir = None while dir != '/' \ and dir != olddir \ and not repo: repo = os.path.join(dir, repodir, REPO_MAIN) if not os.path.isfile(repo): repo = None olddir = dir dir = os.path.dirname(dir) return (repo, os.path.join(dir, repodir))class _Options: help = Falsedef _ParseArguments(args): cmd = None opt = _Options() arg = [] for i in xrange(0, len(args)): a = args[i] if a == '-h' or a == '--help': opt.help = True elif not a.startswith('-'): cmd = a arg = args[i + 1:] break return cmd, opt, argdef _Usage(): print &gt;&gt;sys.stderr,\"""usage: repo COMMAND [ARGS]repo is not yet installed. Use "repo init" to install it here.The most commonly used repo commands are: init Install repo in the current working directory help Display detailed help on a commandFor access to the full online help, install repo ("repo init").""" sys.exit(1)def _Help(args): if args: if args[0] == 'init': init_optparse.print_help() sys.exit(0) else: print &gt;&gt;sys.stderr,\ "error: '%s' is not a bootstrap command.\n"\ ' For access to online help, install repo ("repo init").'\ % args[0] else: _Usage() sys.exit(1)def _NotInstalled(): print &gt;&gt;sys.stderr,\'error: repo is not installed. Use "repo init" to install it here.' sys.exit(1)def _NoCommands(cmd): print &gt;&gt;sys.stderr,\"""error: command '%s' requires repo to be installed first. Use "repo init" to install it here.""" % cmd sys.exit(1)def _RunSelf(wrapper_path): my_dir = os.path.dirname(wrapper_path) my_main = os.path.join(my_dir, 'main.py') my_git = os.path.join(my_dir, '.git') if os.path.isfile(my_main) and os.path.isdir(my_git): for name in ['git_config.py', 'project.py', 'subcmds']: if not os.path.exists(os.path.join(my_dir, name)): return None, None return my_main, my_git return None, Nonedef _SetDefaultsTo(gitdir): global REPO_URL global REPO_REV REPO_URL = gitdir proc = subprocess.Popen([GIT, '--git-dir=%s' % gitdir, 'symbolic-ref', 'HEAD'], stdout = subprocess.PIPE, stderr = subprocess.PIPE) REPO_REV = proc.stdout.read().strip() proc.stdout.close() proc.stderr.read() proc.stderr.close() if proc.wait() != 0: print &gt;&gt;sys.stderr, 'fatal: %s has no current branch' % gitdir sys.exit(1)def main(orig_args): main, dir = _FindRepo() cmd, opt, args = _ParseArguments(orig_args) wrapper_path = os.path.abspath(__file__) my_main, my_git = _RunSelf(wrapper_path) if not main: if opt.help: _Usage() if cmd == 'help': _Help(args) if not cmd: _NotInstalled() if cmd == 'init': if my_git: _SetDefaultsTo(my_git) try: _Init(args) except CloneFailure: for root, dirs, files in os.walk(repodir, topdown=False): for name in files: os.remove(os.path.join(root, name)) for name in dirs: os.rmdir(os.path.join(root, name)) os.rmdir(repodir) sys.exit(1) main, dir = _FindRepo() else: _NoCommands(cmd) if my_main: main = my_main ver_str = '.'.join(map(lambda x: str(x), VERSION)) me = [main, '--repo-dir=%s' % dir, '--wrapper-version=%s' % ver_str, '--wrapper-path=%s' % wrapper_path, '--'] me.extend(orig_args) me.extend(extra_args) try: os.execv(main, me) except OSError, e: print &gt;&gt;sys.stderr, "fatal: unable to start %s" % main print &gt;&gt;sys.stderr, "fatal: %s" % e sys.exit(148)if __name__ == '__main__': main(sys.argv[1:]) 保存为repo，然后修改权限即可： 比如保存在~/bin/repo 则 12$ PATH=~/bin:$PATH$ chmod a+x ~/bin/repo]]></content>
+      <categories>
+        <category>Android</category>
+      </categories>
+      <tags>
+        <tag>aosp</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[ubuntu 12.04 中怎么安装 jdk 7]]></title>
+    <url>%2F2015%2F03%2F27%2Fubuntu_12.04_%E4%B8%AD%E6%80%8E%E4%B9%88%E5%AE%89%E8%A3%85_jdk_7%2F</url>
+    <content type="text"><![CDATA[ubuntu 12.04 中怎么安装 jdk 7.]]></content>
+      <categories>
+        <category>Ubuntu</category>
+      </categories>
+  </entry>
+  <entry>
+    <title><![CDATA[Mac 更改Hosts文件]]></title>
+    <url>%2F2015%2F03%2F17%2FMac_%E6%9B%B4%E6%94%B9Hosts%E6%96%87%E4%BB%B6%2F</url>
+    <content type="text"><![CDATA[1sudo vi /etc/hosts]]></content>
+      <categories>
+        <category>Mac</category>
+      </categories>
+      <tags>
+        <tag>mac</tag>
+        <tag>hosts</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[python函数式编程]]></title>
+    <url>%2F2015%2F03%2F16%2Fpython%E5%87%BD%E6%95%B0%E5%BC%8F%E7%BC%96%E7%A8%8B%2F</url>
+    <content type="text"><![CDATA[1.我们可以把一个函数直接作为参数传入另一个参数： 123456import mathdef add(x, y, f): return f(x) + f(y)print add(25, 9, math.sqrt)&lt;/pre&gt; 2.map()函数 map()是 Python 内置的高阶函数，它接收一个函数 f 和一个 list，并通过把函数 f 依次作用在 list 的每个元素上，得到一个新的 list 并返回。 1234def format_name(s): return s.capitalize()print map(format_name, ['adam', 'LISA', 'barT'])&lt;/pre&gt; 3.reduce()函数 reduce()函数也是Python内置的一个高阶函数。reduce()函数接收的参数和 map()类似，一个函数 f，一个list，但行为和 map()不同，reduce()传入的函数 f 必须接收两个参数，reduce()对list的每个元素反复调用函数f，并返回最终结果值。 1234def prod(x, y): return x * yprint reduce(prod, [2, 4, 5, 7, 12]) 4.filter()函数 filter()函数是 Python 内置的另一个有用的高阶函数，filter()函数接收一个函数 f 和一个list，这个函数 f 的作用是对每个元素进行判断，返回 True或 False，filter()根据判断结果自动过滤掉不符合条件的元素，返回由符合条件元素组成的新list。 利用filter()过滤出1~100（包括1和100）中平方根是整数的数 1234567import mathdef is_sqr(x): i = int(math.sqrt(x)) return i * i == xprint filter(is_sqr, range(1, 101)) 以上资料来自慕课网中《python进阶》课程。]]></content>
+      <categories>
+        <category>Python 2.x</category>
+      </categories>
+      <tags>
+        <tag>python</tag>
+        <tag>code</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[Android使用XmlPullParser解析xml文件]]></title>
+    <url>%2F2015%2F03%2F12%2FAndroid%E4%BD%BF%E7%94%A8XmlPullParser%E8%A7%A3%E6%9E%90xml%E6%96%87%E4%BB%B6%2F</url>
+    <content type="text"><![CDATA[123456789101112131415161718192021222324252627282930313233private void parse() &#123; try &#123; XmlPullParserFactory factory = XmlPullParserFactory.newInstance(); factory.setNamespaceAware(false); XmlPullParser xpp = factory.newPullParser(); xpp.setInput(new FileReader(filePath)); int eventType = xpp.getEventType(); while (eventType != XmlPullParser.END_DOCUMENT) &#123; if (eventType == XmlPullParser.START_DOCUMENT) &#123; System.out.println(&amp;quot;Start document&amp;quot;); &#125; else if (eventType == XmlPullParser.START_TAG) &#123; System.out.println(&amp;quot;Start tag &amp;quot; + xpp.getName()); &#125; else if (eventType == XmlPullParser.END_TAG) &#123; System.out.println(&amp;quot;end tag &amp;quot; + xpp.getName()); &#125; else if (eventType == XmlPullParser.TEXT) &#123; System.out.println(&amp;quot;Text &amp;quot; + xpp.getText()); &#125; eventType = xpp.next(); &#125; System.out.println(&amp;quot;End docment&amp;quot;); &#125; catch (XmlPullParserException e) &#123; // TODO Auto-generated catch block e.printStackTrace(); &#125; catch (FileNotFoundException e) &#123; // TODO Auto-generated catch block e.printStackTrace(); &#125; catch (IOException e) &#123; // TODO Auto-generated catch block e.printStackTrace(); &#125;&#125;]]></content>
+      <categories>
+        <category>Android</category>
+      </categories>
+      <tags>
+        <tag>android</tag>
+        <tag>xml</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[情恨天]]></title>
+    <url>%2F2010%2F07%2F22%2F%E6%83%85%E6%81%A8%E5%A4%A9%2F</url>
+    <content type="text"><![CDATA[情恨天长剑耿介长相思，在佳人。一日不见，思之如狂。狂兮狂兮可奈何？只恨相见.既相见，何相识？芳草凋零，北雁南飞。飞兮飞兮留不住，自是流年。]]></content>
+      <categories>
+        <category>说说</category>
+      </categories>
+  </entry>
+  <entry>
+    <title><![CDATA[noip 2006 作业调度方案 jsp]]></title>
+    <url>%2F2009%2F11%2F17%2Fnoip_2006_%E4%BD%9C%E4%B8%9A%E8%B0%83%E5%BA%A6%E6%96%B9%E6%A1%88_jsp%2F</url>
+    <content type="text"><![CDATA[作业调度方案 本来想用记录p=record u,b,e:integer; end; （u为第几道工序，b为开始时间，e为结束时间） 来实现的，直接排还是挺方便的，但有些地方不好实现就没做下去……直接排：1234567891011for I:=1 to m*n do beginj:=1;while p[I,j].e&lt;&gt;0 do inc(j);&#123;p[I,j].e=0意味着p[I,j]已被安排过了，下一道工序&#125;p[I,j].b:=p[I-1,j].e;&#123;在同一个机器上的上一道工序结束时间&#125;p[I,j].e:=p[I,j].b+t[I,j];&#123;t[I,j]为该道工序所占时间&#125;end; 123456789101112131415161718192021222324252627282930313233343536373839404142434445464748495051525354555657585960616263646566676869707172737475767778798081828384858687888990919293949596979899program jsp;const nn=20;var f:array[1..nn,0..nn*nn]of boolean;//each machine condition; t:array[1..nn,1..nn]of integer;//cover time; e:array[1..nn,0..nn]of integer;//end time; a:array[1..nn*nn]of integer;//following; b:array[1..nn,1..nn]of integer;//belong to machine g:array[1..nn*nn]of integer;//dealing with; flag:boolean; i,j,m,n,k,best,nt,nm:integer;beginassign(input,&amp;#39;jsp.in&amp;#39;);reset(input);assign(output,&amp;#39;&amp;#39;);rewrite(output);readln(m,n);fillchar(a,sizeof(a),0);fillchar(e,sizeof(e),0);fillchar(f,sizeof(f),true);fillchar(g,sizeof(g),0);for i:=1 to m*n do read(a[i]);readln;for i:=1 to n do begin for j:=1 to m do read(b[i,j]);end;for i:=1 to n do begin for j:=1 to m do read(t[i,j]); readln;end;for i:=1 to m*n do begin inc(g[a[i]]); nt:=t[a[i],g[a[i]]]; nm:=b[a[i],g[a[i]]];&#123;nt：needtime；nm：machine&#125; for j:=e[a[i],g[a[i]]-1]to 400 do begin&#123;从该工件的上一个工序结束时间开始搜索&#125; flag:=true; for k:=j to j+nt do if k&amp;amp;lt;=400 then flag:=flag and f[nm,k]; if flag then begin&#123;如果搜索成功&#125; e[a[i],g[a[i]]]:=j+nt;&#123;记下结束时间&#125; for k:=j+1 to j+nt-1 do f[nm,k]:=false; break;&#123;减少搜索&#125; end; end;end; best:=0; for i:=1 to n do &#123;从每道工序入手，但如果从每个机器入手呢？&#125; if best&amp;amp;lt;e[i,m]then best:=e[i,m]; writeln(best); close(input);close(output);end.]]></content>
+      <categories>
+        <category>Pascal</category>
+      </categories>
+      <tags>
+        <tag>noip</tag>
+        <tag>pascal</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[noip 2006 能量项链 energy]]></title>
+    <url>%2F2009%2F11%2F17%2Fnoip_2006_%E8%83%BD%E9%87%8F%E9%A1%B9%E9%93%BE_energy%2F</url>
+    <content type="text"><![CDATA[能量项链 12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152535455565758596061626364656667686970717273rogram energy;&#123;20:02 &#125;var a1,a2:array[1..200]of integer; q:array[1..200,1..200]of longint; i,j,n,k,m,p:integer; best:longint;beginassign(input,&apos;energy.in&apos;);reset(input);assign(output,&apos;energy.ans&apos;);rewrite(output);readln(n);for i:=1 to n do read(a1[i]);readln;for i:=1 to n-1 do a2[i]:=a1[i+1];a2[n]:=a1[1];m:=n*2-1;for i:=n+1 to m do begin a1[i]:=a1[i-n];a2[i]:=a2[i-n]end;//for i:=1 to m do writeln(a1[i],&apos; &apos;,a2[i],&apos; &apos;);fillchar(q,sizeof(q),0);for p:=1 to n-1 do for i:=1 to m-1 do begin j:=i+p; if j&gt;m then break; for k:=i to j-1 do begin if q[i,j]&lt;q[i,k]+q[k+1,j]+a1[i]*a2[k]*a2[j] then q[i,j]:=q[i,k]+q[k+1,j]+a1[i]*a2[k]*a2[j]; end; end;best:=0;for i:=1 to n do if best&lt;q[i,i+n-1]then best:=q[i,i+n-1];writeln(best);close(input);close(output);end.]]></content>
+      <categories>
+        <category>Pascal</category>
+      </categories>
+      <tags>
+        <tag>noip</tag>
+        <tag>pascal</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[noip 2006 金明的预算方案 budget]]></title>
+    <url>%2F2009%2F11%2F17%2Fnoip_2006_%E9%87%91%E6%98%8E%E7%9A%84%E9%A2%84%E7%AE%97%E6%96%B9%E6%A1%88_budget%2F</url>
+    <content type="text"><![CDATA[金明的预算方案 123456789101112131415161718192021222324252627282930313233343536373839404142434445464748495051525354555657585960616263646566676869707172737475767778798081828384858687888990919293949596979899100101102103104105106107108109110111112113114115116117118119120121122123124125126127program budget; &#123;20:03 &#125; type node=record u:integer; v,p:array[0..2]of integer; end; var w:array[1..60]of node; f:array[0..60,0..2000]of longint; vx,px,qx,g:array[1..60]of integer; m,n,i,k,j:integer; begin assign(input,&apos;budget.in&apos;);reset(input); assign(output,&apos;budget.out&apos;);rewrite(output); readln(n,m); k:=0; for i:=1 to m do begin readln(px[i],vx[i],qx[i]); if qx[i]=0 then begin inc(k);g[i]:=k; with w[k] do begin u:=0; v[0]:=vx[i];p[0]:=px[i]; for j:=1 to 2 do begin v[j]:=0;p[j]:=0; end; end; end; end; for i:=1 to m do begin if qx[i]&lt;&gt;0 then with w[g[qx[i]]] do begin inc(u);v[u]:=vx[i];p[u]:=px[i]; end; end; for i:=1 to k do with w[i] do begin write(&apos;w[&apos;,i,&apos;]:&apos;); for j:=0 to 2 do write(&apos;(&apos;,v[j],&apos;,&apos;,p[j],&apos;) &apos;); writeln; end; fillchar(f,sizeof(f),0); for i:=1 to k do for j:=1 to n do with w[i] do begin f[i,j]:=f[i-1,j]; if (f[i,j]&lt; (f[i-1,j-p[0]]+p[0]*v[0]))and(j&gt;=p[0]) then f[i,j]:=f[i-1,j-p[0]]+p[0]*v[0]; if (f[i,j]&lt; (f[i-1,j-p[0]-p[1]]+p[0]*v[0]+v[1]*p[1]))and(j&gt;=p[0]+p[1]) then f[i,j]:=f[i-1,j-p[0]-p[1]]+p[0]*v[0]+v[1]*p[1]; if (f[i,j]&lt; (f[i-1,j-p[0]-p[2]]+p[0]*v[0]+p[2]*v[2]))and(j&gt;=p[0]+p[2]) then f[i,j]:=f[i-1,j-p[0]-p[2]]+p[0]*v[0]+p[2]*v[2]; if (f[i,j]&lt; (f[i-1,j-p[0]-p[1]-p[2]]+p[0]*v[0]+v[1]*p[1]+p[2]*v[2]))and(j&gt;=p[0]+p[1]+p[2]) then f[i,j]:=f[i-1,j-p[0]-p[1]-p[2]]+p[0]*v[0]+v[1]*p[1]+p[2]*v[2]; writeln(&apos;f[&apos;,i,&apos;,&apos;,j,&apos;]:&apos;,f[i,j]); end; writeln(f[k,n]); close(input);close(output); end.]]></content>
+      <categories>
+        <category>Pascal</category>
+      </categories>
+      <tags>
+        <tag>noip</tag>
+        <tag>pascal</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[NOIP 2005 谁拿了最多奖学金]]></title>
+    <url>%2F2009%2F11%2F17%2FNOIP_2005_%E8%B0%81%E6%8B%BF%E4%BA%86%E6%9C%80%E5%A4%9A%E5%A5%96%E5%AD%A6%E9%87%91%2F</url>
+    <content type="text"><![CDATA[就像解题报告中说的超简单，但还是出了许多小毛病,如刚开始将sum同avi,paper等定义在一起，而我为了省空间将它们限制在0..100，故算出来的sum错误无疑了；用字符读入数据时忘了空格……最后在比较时本想输出sum同最先出现的人却费事的用downto，结果没用‘&lt;=’反画蛇添足了……唉……太粗心了…… 123456789101112131415161718192021222324252627282930313233343536373839404142434445464748495051525354555657585960616263646566676869707172737475767778798081828384858687888990919293949596979899100101102103104105106107108109program scholar;type node=record name:string[20]; avi,ping,paper:0..100; bu,west:boolean; sum:integer; end;var stu:array [0..100] of node; i,n,max:integer; sumup:longint; c:char;beginassign(input,&apos;scholar1.in&apos;);reset(input);assign(output,&apos;&apos;);rewrite(output);readln(n);for i:=0 to 100 do with stu[i] do begin name:=&apos;&apos;; avi:=0;ping:=0;paper:=0;sum:=0; bu:=false;west:=false; end;for i:=1 to n do with stu[i] do begin read(c); while c&lt;&gt;&apos; &apos; do begin name:=name+c;read(c);end; read(avi);read(ping); read(c); read(c);if c=&apos;Y&apos;then bu:=true else bu:=false; read(c); read(c);if c=&apos;Y&apos;then west:=true else west:=false; readln(paper); if (avi&gt;80)and(paper&gt;0)then inc(sum,8000); if (avi&gt;85)and(ping&gt;80) then inc(sum,4000); if avi&gt;90 then inc(sum,2000); if (avi&gt;85)and west then inc(sum,1000); if (ping&gt;80)and bu then inc(sum,850);end;sumup:=0;max:=0;for i:=1 to n do begin sumup:=sumup+stu[i].sum; if max&lt;stu[i].sum then begin max:=stu[i].sum;stu[0]:=stu[i]; end;end;writeln(stu[0].name);writeln(stu[0].sum);writeln(sumup);close(input);close(output);end.]]></content>
+      <categories>
+        <category>Pascal</category>
+      </categories>
+      <tags>
+        <tag>noip</tag>
+        <tag>pascal</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[NOIP 2004 津津的储蓄计划]]></title>
+    <url>%2F2009%2F11%2F17%2FNOIP_2004_%E6%B4%A5%E6%B4%A5%E7%9A%84%E5%82%A8%E8%93%84%E8%AE%A1%E5%88%92%2F</url>
+    <content type="text"><![CDATA[可以说超简单的一道题，学过数组的人都应会做1234567891011121314151617181920212223program save;var a:array[0..12]of integer; i,x,p:integer;beginassign(input,&apos;save.in&apos;);reset(input);assign(output,&apos;&apos;);rewrite(output);for i:=1 to 12 do a[i]:=300;a[0]:=0;p:=0;for i:=1 to 12 do beginreadln(x);inc(a[i],a[i-1]);dec(a[i],x); if a[i]&lt;0 then begin writeln(&apos;-&apos;,i); close(input);close(output);exit;end else &#123;if a[i]&gt;=100 then&#125; begin p:=(a[i]div 100)*100; inc(a[0],p); a[i]:=a[i]-p;end;end;a[0]:=a[0]*6 div 5;writeln(a[0]+a[12]);close(input);close(output);end.]]></content>
+      <categories>
+        <category>Pascal</category>
+      </categories>
+      <tags>
+        <tag>noip</tag>
+        <tag>pascal</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[NOIP 2004 合并果子 fruit]]></title>
+    <url>%2F2009%2F11%2F17%2FNOIP_2004_%E5%90%88%E5%B9%B6%E6%9E%9C%E5%AD%90_fruit%2F</url>
+    <content type="text"><![CDATA[首先快排是要的，下面就是计算最小的体力耗费值了，其中我用到了冒泡排序，具体见下： 12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152535455565758596061626364656667686970717273747576777879program fruit;var a:array [0..10001]of longint; i,j,k,n:integer; t,s:longint; flag:boolean;procedure fastsort(l,r:integer);var lx,rx,pi:integer;beginlx:=l;rx:=r;pi:=a[l];while lx&lt;rx do begin while a[rx]&gt;pi do dec(rx); if lx&lt;rx then begin t:=a[rx];a[rx]:=a[lx];a[lx]:=t;inc(lx); end; while a[lx]&lt;pi do inc(lx); if lx&lt;rx then begin t:=a[rx];a[rx]:=a[lx];a[lx]:=t;dec(rx); end;end; if l&lt;lx-1 then fastsort(l,lx-1); if r&gt;rx+1 then fastsort(rx+1,r);end;beginassign(input,&apos;fruit.in&apos;);reset(input);assign(output,&apos;fruit.ans&apos;);rewrite(output);readln(n);for i:=1 to n do read(a[i]);fastsort(1,n);s:=0;a[0]:=0;for i:=1 to n do begin s:=s+a[i]+a[i-1];a[i]:=a[i-1]+a[i]; for k:=i to n-1 do if a[k]&gt;a[k+1] then begin t:=a[k];a[k]:=a[k+1];a[k+1]:=t; end;end; dec(s,a[1]); writeln(s);close(input);close(output);end. 其中还有许多可以优化的地方，如：可以用t:=a[i];a[i]:=a[n];a[n]:=t;来减少后面的排序次数，又数组已是有序的了故还可在冒泡排序上优化，可置一布尔型变量flag来提前结束排序. 但十个测试点都过了就不做了.]]></content>
+      <categories>
+        <category>Pascal</category>
+      </categories>
+      <tags>
+        <tag>noip</tag>
+      </tags>
+  </entry>
+</search>
