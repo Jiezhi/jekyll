@@ -34,8 +34,8 @@
       <tags>
         <tag>Apache</tag>
         <tag>Flink</tag>
-        <tag>Big Data</tag>
         <tag>Translate</tag>
+        <tag>Big Data</tag>
       </tags>
   </entry>
   <entry>
@@ -492,9 +492,9 @@
         <category>Algorithm</category>
       </categories>
       <tags>
-        <tag>排序</tag>
-        <tag>sort</tag>
         <tag>算法</tag>
+        <tag>sort</tag>
+        <tag>排序</tag>
         <tag>选择排序</tag>
       </tags>
   </entry>
@@ -506,9 +506,9 @@
         <category>Algorithm</category>
       </categories>
       <tags>
-        <tag>sort</tag>
-        <tag>算法</tag>
         <tag>冒泡排序</tag>
+        <tag>算法</tag>
+        <tag>sort</tag>
       </tags>
   </entry>
   <entry>
