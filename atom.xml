@@ -261,9 +261,9 @@
       <category term="Life" scheme="http://jiezhi.github.io/categories/Life/"/>
     
     
-      <category term="2017" scheme="http://jiezhi.github.io/tags/2017/"/>
-    
       <category term="总结" scheme="http://jiezhi.github.io/tags/%E6%80%BB%E7%BB%93/"/>
+    
+      <category term="2017" scheme="http://jiezhi.github.io/tags/2017/"/>
     
   </entry>
   
@@ -365,9 +365,9 @@
     
       <category term="json" scheme="http://jiezhi.github.io/tags/json/"/>
     
-      <category term="plugin" scheme="http://jiezhi.github.io/tags/plugin/"/>
-    
       <category term="translate" scheme="http://jiezhi.github.io/tags/translate/"/>
+    
+      <category term="plugin" scheme="http://jiezhi.github.io/tags/plugin/"/>
     
   </entry>
   
