@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://jiezhi.github.io/"/>
-  <updated>2019-03-29T02:45:05.474Z</updated>
+  <updated>2019-03-29T02:49:25.530Z</updated>
   <id>http://jiezhi.github.io/</id>
   
   <author>
@@ -21,9 +21,9 @@
     <link href="http://jiezhi.github.io/2019/03/29/tunnel-server-socket-over-ssh/"/>
     <id>http://jiezhi.github.io/2019/03/29/tunnel-server-socket-over-ssh/</id>
     <published>2019-03-29T02:10:26.000Z</published>
-    <updated>2019-03-29T02:45:05.474Z</updated>
+    <updated>2019-03-29T02:49:25.530Z</updated>
     
-    <content type="html"><![CDATA[<p>平时我们使用SSH大多用来，登录远程服务器来进行远程操作。</p><p>但是 SSH 强大的功能远远不止登录远程服务器，比如说我在服务器上部署了一个服务，但是端口号并没有对外开放怎么办？又或者生产环境的数据库本地无法连接，而只能通过线上环境连接怎么办？<br><a id="more"></a></p><h1 id="SSH"><a href="#SSH" class="headerlink" title="SSH"></a>SSH</h1><h2 id="SSH-访问远程页面"><a href="#SSH-访问远程页面" class="headerlink" title="SSH 访问远程页面"></a>SSH 访问远程页面</h2><p><em>在 Shadowsocks 之前，很多人是使用 SSH 来跨过长城的。</em><br>现在遇到的问题，生产环境部署了 Flink，虽说 Flink 提供了 REST Api 来查看信息的，但是查看页面还是更方便点。但是又没办法连接生产环境怎么办？<br>其实可以通过 SSH 建立本地和服务器的通道，进而可以访问远程服务器的资源。<br>比如，flink 页面默认端口号为8081，在终端里执行这个命令后，即可通过访问本地的 localhost:8081 访问服务器上的 flink 页面。<br><code>ssh -L 8081:localhost:8081 user@flinkserver</code></p><h2 id="SSH-代理访问数据库"><a href="#SSH-代理访问数据库" class="headerlink" title="SSH 代理访问数据库"></a>SSH 代理访问数据库</h2><p>其实道理和上面的一样，一般生产环境数据库我们是没法直接连接的。不过只要有可以访问该数据库的其他服务器 SSH 配置就行了，同一个原理，但实现方式就很多了。</p><ol><li><p>直接登录服务器，通过 mysql 命令来访问。简单粗暴，但比较繁琐。</p></li><li><p>使用支持 SSH tunnel 的客户端来连接数据库，比如 <a href="https://www.jetbrains.com/datagrip/" target="_blank" rel="noopener">DataGrip</a></p><img src="/2019/03/29/tunnel-server-socket-over-ssh/datagrip_ssh.png"></li><li><p>同样，使用 ssh 命令来建立通道，本地就可以访问了。<br>比如数据库地址为：192.168.100.100:3306，远程服务器为：<a href="mailto:root@192.168.10.200" target="_blank" rel="noopener">root@192.168.10.200</a>，使用本地3307端口来映射（其他端口也行，我因为本地3306被用了，所以用3307了）<br><code>ssh -L 3307:192.168.100.100:3306 root@192.168.10.200</code></p></li></ol><p>执行过后，只需要连接 <code>localhost:3307</code> 就可以访问数据库了。</p><hr><p>SSH 还有很多强大的功能，下次有空再写一下配置的优化。</p>]]></content>
+    <content type="html"><![CDATA[<p>平时我们使用SSH大多用来，登录远程服务器来进行远程操作。</p><p>但是 SSH 强大的功能远远不止登录远程服务器，比如说我在服务器上部署了一个服务，但是端口号并没有对外开放怎么办？又或者生产环境的数据库本地无法连接，而只能通过线上环境连接怎么办？<br><a id="more"></a></p><h1 id="SSH"><a href="#SSH" class="headerlink" title="SSH"></a>SSH</h1><h2 id="SSH-访问远程页面"><a href="#SSH-访问远程页面" class="headerlink" title="SSH 访问远程页面"></a>SSH 访问远程页面</h2><p><em>在 Shadowsocks 之前，很多人是使用 SSH 来跨过长城的。</em><br>现在遇到的问题，生产环境部署了 Flink，虽说 Flink 提供了 REST Api 来查看信息的，但是查看页面还是更方便点。但是又没办法连接生产环境怎么办？<br>其实可以通过 SSH 建立本地和服务器的通道，进而可以访问远程服务器的资源。<br>比如，flink 页面默认端口号为8081，在终端里执行这个命令后，即可通过访问本地的 localhost:8081 访问服务器上的 flink 页面。<br><code>ssh -L 8081:localhost:8081 user@flinkserver</code></p><h2 id="SSH-代理访问数据库"><a href="#SSH-代理访问数据库" class="headerlink" title="SSH 代理访问数据库"></a>SSH 代理访问数据库</h2><p>其实道理和上面的一样，一般生产环境数据库我们是没法直接连接的。不过只要有可以访问该数据库的其他服务器 SSH 配置就行了，同一个原理，但实现方式就很多了。</p><ol><li><p>直接登录服务器，通过 mysql 命令来访问。简单粗暴，但比较繁琐。</p></li><li><p>使用支持 SSH tunnel 的客户端来连接数据库，比如 <a href="https://www.jetbrains.com/datagrip/" target="_blank" rel="noopener">DataGrip</a></p><img src="/2019/03/29/tunnel-server-socket-over-ssh/datagrip_ssh.png"></li><li><p>同样，使用 ssh 命令来建立通道，本地就可以访问了。<br>比如数据库地址为：192.168.100.100:3306，远程服务器为：<a href="mailto:root@192.168.10.200" target="_blank" rel="noopener">root@192.168.10.200</a>，使用本地3307端口来映射（其他端口也行，我因为本地3306被用了，所以用3307了）<br><code>ssh -L 3307:192.168.100.100:3306 root@192.168.10.200</code></p></li></ol><p>执行过后，只需要连接 <code>localhost:3307</code> 就可以访问数据库了。</p><hr><p>SSH 还有很多强大的功能，下次有空再写一下配置的优化。</p><hr><p>Reference:<br><a href="https://askubuntu.com/questions/112177/how-do-i-tunnel-and-browse-the-server-webpage-on-my-laptop" target="_blank" rel="noopener">https://askubuntu.com/questions/112177/how-do-i-tunnel-and-browse-the-server-webpage-on-my-laptop</a></p><p><a href="https://unix.stackexchange.com/questions/14160/ssh-tunneling-error-channel-1-open-failed-administratively-prohibited-open" target="_blank" rel="noopener">https://unix.stackexchange.com/questions/14160/ssh-tunneling-error-channel-1-open-failed-administratively-prohibited-open</a></p>]]></content>
     
     <summary type="html">
     
@@ -36,30 +36,6 @@
     
     
       <category term="ssh" scheme="http://jiezhi.github.io/tags/ssh/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Flink 流处理——窗口</title>
-    <link href="http://jiezhi.github.io/2019/03/22/flink-stream-operators-windows/"/>
-    <id>http://jiezhi.github.io/2019/03/22/flink-stream-operators-windows/</id>
-    <published>2019-03-22T08:11:30.000Z</published>
-    <updated>2019-03-22T09:56:43.280Z</updated>
-    
-    <content type="html"><![CDATA[<a id="more"></a><h1 id="Windows"><a href="#Windows" class="headerlink" title="Windows"></a>Windows</h1><p>Windows是处理无限流的核心，其将流拆分为有限大小的『桶』，然后我们可以基于『桶』进行计算。 本文档重点介绍如何在Flink中执行窗口化以及程序员如何从其提供的功能中获得最大益处。</p><p>Flink 的窗口程序的一般结构如下所示。 第一个片段指的是keyes stream，而第二个片段指的是non-keyed stream。 可以看出，唯一的区别是键控流的keyBy（…）调用和窗口（…）成为非键控流的windowAll（…）。 这也将作为页面其余部分的路线图。</p><h2 id="Keyed-vs-Non-Keyed-Windows"><a href="#Keyed-vs-Non-Keyed-Windows" class="headerlink" title="Keyed vs Non-Keyed Windows"></a>Keyed vs Non-Keyed Windows</h2><h2 id="Window-Assigners"><a href="#Window-Assigners" class="headerlink" title="Window Assigners"></a>Window Assigners</h2><h3 id="Tumbling-Windows"><a href="#Tumbling-Windows" class="headerlink" title="Tumbling Windows"></a>Tumbling Windows</h3><h3 id="Sliding-Windows"><a href="#Sliding-Windows" class="headerlink" title="Sliding Windows"></a>Sliding Windows</h3><h3 id="Session-Windows"><a href="#Session-Windows" class="headerlink" title="Session Windows"></a>Session Windows</h3><h3 id="Global-Windows"><a href="#Global-Windows" class="headerlink" title="Global Windows"></a>Global Windows</h3><h2 id="Window-Functions"><a href="#Window-Functions" class="headerlink" title="Window Functions"></a>Window Functions</h2><h3 id="ReduceFunction"><a href="#ReduceFunction" class="headerlink" title="ReduceFunction"></a>ReduceFunction</h3><h3 id="AggregateFunction"><a href="#AggregateFunction" class="headerlink" title="AggregateFunction"></a>AggregateFunction</h3><h3 id="FoldFunction"><a href="#FoldFunction" class="headerlink" title="FoldFunction"></a>FoldFunction</h3><h3 id="ProcessWindowFunction"><a href="#ProcessWindowFunction" class="headerlink" title="ProcessWindowFunction"></a>ProcessWindowFunction</h3><h3 id="ProcessWindowFunction-with-Incremental-Aggregation"><a href="#ProcessWindowFunction-with-Incremental-Aggregation" class="headerlink" title="ProcessWindowFunction with Incremental Aggregation"></a>ProcessWindowFunction with Incremental Aggregation</h3><h3 id="Using-per-window-state-in-ProcessWindowFunction"><a href="#Using-per-window-state-in-ProcessWindowFunction" class="headerlink" title="Using per-window state in ProcessWindowFunction"></a>Using per-window state in ProcessWindowFunction</h3><h3 id="WindowFunction-Legacy"><a href="#WindowFunction-Legacy" class="headerlink" title="WindowFunction (Legacy)"></a>WindowFunction (Legacy)</h3><h2 id="Evictors"><a href="#Evictors" class="headerlink" title="Evictors"></a>Evictors</h2><blockquote><p>The evictor has the ability to remove elements from a window after the trigger fires and before and/or after the window function is applied.</p></blockquote>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
-&lt;h1 id=&quot;Windows&quot;&gt;&lt;a href=&quot;#Windows&quot; class=&quot;headerlink&quot; title=&quot;Windows&quot;&gt;&lt;/a&gt;Windows&lt;/h1&gt;&lt;p&gt;Windows是处理无限流的核心，其将流拆分为有限大小的『桶』，
-      
-    
-    </summary>
-    
-      <category term="default" scheme="http://jiezhi.github.io/categories/default/"/>
-    
     
   </entry>
   
@@ -487,6 +463,24 @@
       <category term="android" scheme="http://jiezhi.github.io/tags/android/"/>
     
       <category term="translate" scheme="http://jiezhi.github.io/tags/translate/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>6行脚本获取Google Voice</title>
+    <link href="http://jiezhi.github.io/2017/03/12/get-google-voice/"/>
+    <id>http://jiezhi.github.io/2017/03/12/get-google-voice/</id>
+    <published>2017-03-12T13:14:41.000Z</published>
+    <updated>2019-02-19T08:38:45.744Z</updated>
+    
+    <content type="html"><![CDATA[<p>Google Voice（简称GV）在程序员的圈子里也不算太陌生了，尤其是经常混V站的人应该经常见到这货的出现。不清楚的可以关掉或者先自行Google了。</p><a id="more"></a><p>如果你上网查教程，其实很简单无非使用类似TextNow/TextMe等先申请个美国的号码，然后绑定Google账号，再从Google申请个Voice号码即可。步骤也不多，但很多人Google Voice号码都选好了，可就是点击申请会一直出现『请求错误』的提示。据报道称，解决这个问题的唯一途径就是『狂点大法』——不停地点，运气好5分钟或半小时就能申请到好，也有运气不好，需要一天甚至更多的时间来点击申请。所以有的人就放弃了，或者直接去马云家直接花几十块钱买了。</p><p>目前实现这个『狂点大法』的无非两种途径，模拟鼠标点击和模拟网络请求。</p><p>模拟鼠标点击：<br>顾名思义就是不停地让鼠标在申请按钮上点击，直到你收到Google 邮件恭喜你获得了号码为止。这种很多人会使用『按键精灵』类似的软件来实现不停地点击。但是我选择了自己写python脚本来模拟点击，毕竟自己写的代码才放心。<a href="https://gist.github.com/Jiezhi/aad8a37114825b0ce1a5bc48bf5f3cac" target="_blank" rel="noopener">代码</a>如下：</p><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pymouse <span class="keyword">import</span> PyMouse</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"></span><br><span class="line">m = PyMouse()</span><br><span class="line"></span><br><span class="line"><span class="keyword">while</span> <span class="keyword">True</span>:</span><br><span class="line">    m.click(<span class="number">528</span>, <span class="number">800</span><span class="number">-196</span>, <span class="number">1</span>)</span><br><span class="line">    time.sleep(<span class="number">3</span>)</span><br></pre></td></tr></table></figure><p>其中点击的坐标要改成你自己的，可使用截屏工具来获得按钮的坐标。</p><p>模拟网络请求：<br>这个方法就是直接跳过点击事件，毕竟你点击了也是通过网络请求来实现的。这样子更彻底点，这里粗略地介绍个思路：</p><p>打开浏览器的开发模式（F12）<br>点击网页上的申请按钮<br>找到本次post请求，然后右键复制cURL<br>把cURL请求扔到脚本里，找个服务器或者自己电脑终端里在后台运行即可<br>这个我也放出个<a href="https://gist.github.com/Jiezhi/d02c46449dda06ed0866757bc7ea92c2" target="_blank" rel="noopener">shell 脚本</a>吧：</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (( i=1; i&gt;0; i++ ))</span><br><span class="line"><span class="keyword">do</span></span><br><span class="line">    curl <span class="string">'https://www.google.com/voice/b/0/service/post'</span> ... --compressed</span><br><span class="line"></span><br><span class="line">    sleep 3s</span><br><span class="line"><span class="keyword">done</span></span><br></pre></td></tr></table></figure><p>如果你需要帮助可以在博客下方留言即可。</p>]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;Google Voice（简称GV）在程序员的圈子里也不算太陌生了，尤其是经常混V站的人应该经常见到这货的出现。不清楚的可以关掉或者先自行Google了。&lt;/p&gt;
+    
+    </summary>
+    
     
   </entry>
   
