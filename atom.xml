@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://jiezhi.github.io/"/>
-  <updated>2019-03-08T09:41:05.222Z</updated>
+  <updated>2019-03-29T02:45:05.474Z</updated>
   <id>http://jiezhi.github.io/</id>
   
   <author>
@@ -15,6 +15,53 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>通过 ssh 远程代理，访问远程资源</title>
+    <link href="http://jiezhi.github.io/2019/03/29/tunnel-server-socket-over-ssh/"/>
+    <id>http://jiezhi.github.io/2019/03/29/tunnel-server-socket-over-ssh/</id>
+    <published>2019-03-29T02:10:26.000Z</published>
+    <updated>2019-03-29T02:45:05.474Z</updated>
+    
+    <content type="html"><![CDATA[<p>平时我们使用SSH大多用来，登录远程服务器来进行远程操作。</p><p>但是 SSH 强大的功能远远不止登录远程服务器，比如说我在服务器上部署了一个服务，但是端口号并没有对外开放怎么办？又或者生产环境的数据库本地无法连接，而只能通过线上环境连接怎么办？<br><a id="more"></a></p><h1 id="SSH"><a href="#SSH" class="headerlink" title="SSH"></a>SSH</h1><h2 id="SSH-访问远程页面"><a href="#SSH-访问远程页面" class="headerlink" title="SSH 访问远程页面"></a>SSH 访问远程页面</h2><p><em>在 Shadowsocks 之前，很多人是使用 SSH 来跨过长城的。</em><br>现在遇到的问题，生产环境部署了 Flink，虽说 Flink 提供了 REST Api 来查看信息的，但是查看页面还是更方便点。但是又没办法连接生产环境怎么办？<br>其实可以通过 SSH 建立本地和服务器的通道，进而可以访问远程服务器的资源。<br>比如，flink 页面默认端口号为8081，在终端里执行这个命令后，即可通过访问本地的 localhost:8081 访问服务器上的 flink 页面。<br><code>ssh -L 8081:localhost:8081 user@flinkserver</code></p><h2 id="SSH-代理访问数据库"><a href="#SSH-代理访问数据库" class="headerlink" title="SSH 代理访问数据库"></a>SSH 代理访问数据库</h2><p>其实道理和上面的一样，一般生产环境数据库我们是没法直接连接的。不过只要有可以访问该数据库的其他服务器 SSH 配置就行了，同一个原理，但实现方式就很多了。</p><ol><li><p>直接登录服务器，通过 mysql 命令来访问。简单粗暴，但比较繁琐。</p></li><li><p>使用支持 SSH tunnel 的客户端来连接数据库，比如 <a href="https://www.jetbrains.com/datagrip/" target="_blank" rel="noopener">DataGrip</a></p><img src="/2019/03/29/tunnel-server-socket-over-ssh/datagrip_ssh.png"></li><li><p>同样，使用 ssh 命令来建立通道，本地就可以访问了。<br>比如数据库地址为：192.168.100.100:3306，远程服务器为：<a href="mailto:root@192.168.10.200" target="_blank" rel="noopener">root@192.168.10.200</a>，使用本地3307端口来映射（其他端口也行，我因为本地3306被用了，所以用3307了）<br><code>ssh -L 3307:192.168.100.100:3306 root@192.168.10.200</code></p></li></ol><p>执行过后，只需要连接 <code>localhost:3307</code> 就可以访问数据库了。</p><hr><p>SSH 还有很多强大的功能，下次有空再写一下配置的优化。</p>]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;平时我们使用SSH大多用来，登录远程服务器来进行远程操作。&lt;/p&gt;
+&lt;p&gt;但是 SSH 强大的功能远远不止登录远程服务器，比如说我在服务器上部署了一个服务，但是端口号并没有对外开放怎么办？又或者生产环境的数据库本地无法连接，而只能通过线上环境连接怎么办？&lt;br&gt;
+    
+    </summary>
+    
+      <category term="Linux" scheme="http://jiezhi.github.io/categories/Linux/"/>
+    
+    
+      <category term="ssh" scheme="http://jiezhi.github.io/tags/ssh/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Flink 流处理——窗口</title>
+    <link href="http://jiezhi.github.io/2019/03/22/flink-stream-operators-windows/"/>
+    <id>http://jiezhi.github.io/2019/03/22/flink-stream-operators-windows/</id>
+    <published>2019-03-22T08:11:30.000Z</published>
+    <updated>2019-03-22T09:56:43.280Z</updated>
+    
+    <content type="html"><![CDATA[<a id="more"></a><h1 id="Windows"><a href="#Windows" class="headerlink" title="Windows"></a>Windows</h1><p>Windows是处理无限流的核心，其将流拆分为有限大小的『桶』，然后我们可以基于『桶』进行计算。 本文档重点介绍如何在Flink中执行窗口化以及程序员如何从其提供的功能中获得最大益处。</p><p>Flink 的窗口程序的一般结构如下所示。 第一个片段指的是keyes stream，而第二个片段指的是non-keyed stream。 可以看出，唯一的区别是键控流的keyBy（…）调用和窗口（…）成为非键控流的windowAll（…）。 这也将作为页面其余部分的路线图。</p><h2 id="Keyed-vs-Non-Keyed-Windows"><a href="#Keyed-vs-Non-Keyed-Windows" class="headerlink" title="Keyed vs Non-Keyed Windows"></a>Keyed vs Non-Keyed Windows</h2><h2 id="Window-Assigners"><a href="#Window-Assigners" class="headerlink" title="Window Assigners"></a>Window Assigners</h2><h3 id="Tumbling-Windows"><a href="#Tumbling-Windows" class="headerlink" title="Tumbling Windows"></a>Tumbling Windows</h3><h3 id="Sliding-Windows"><a href="#Sliding-Windows" class="headerlink" title="Sliding Windows"></a>Sliding Windows</h3><h3 id="Session-Windows"><a href="#Session-Windows" class="headerlink" title="Session Windows"></a>Session Windows</h3><h3 id="Global-Windows"><a href="#Global-Windows" class="headerlink" title="Global Windows"></a>Global Windows</h3><h2 id="Window-Functions"><a href="#Window-Functions" class="headerlink" title="Window Functions"></a>Window Functions</h2><h3 id="ReduceFunction"><a href="#ReduceFunction" class="headerlink" title="ReduceFunction"></a>ReduceFunction</h3><h3 id="AggregateFunction"><a href="#AggregateFunction" class="headerlink" title="AggregateFunction"></a>AggregateFunction</h3><h3 id="FoldFunction"><a href="#FoldFunction" class="headerlink" title="FoldFunction"></a>FoldFunction</h3><h3 id="ProcessWindowFunction"><a href="#ProcessWindowFunction" class="headerlink" title="ProcessWindowFunction"></a>ProcessWindowFunction</h3><h3 id="ProcessWindowFunction-with-Incremental-Aggregation"><a href="#ProcessWindowFunction-with-Incremental-Aggregation" class="headerlink" title="ProcessWindowFunction with Incremental Aggregation"></a>ProcessWindowFunction with Incremental Aggregation</h3><h3 id="Using-per-window-state-in-ProcessWindowFunction"><a href="#Using-per-window-state-in-ProcessWindowFunction" class="headerlink" title="Using per-window state in ProcessWindowFunction"></a>Using per-window state in ProcessWindowFunction</h3><h3 id="WindowFunction-Legacy"><a href="#WindowFunction-Legacy" class="headerlink" title="WindowFunction (Legacy)"></a>WindowFunction (Legacy)</h3><h2 id="Evictors"><a href="#Evictors" class="headerlink" title="Evictors"></a>Evictors</h2><blockquote><p>The evictor has the ability to remove elements from a window after the trigger fires and before and/or after the window function is applied.</p></blockquote>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
+&lt;h1 id=&quot;Windows&quot;&gt;&lt;a href=&quot;#Windows&quot; class=&quot;headerlink&quot; title=&quot;Windows&quot;&gt;&lt;/a&gt;Windows&lt;/h1&gt;&lt;p&gt;Windows是处理无限流的核心，其将流拆分为有限大小的『桶』，
+      
+    
+    </summary>
+    
+      <category term="default" scheme="http://jiezhi.github.io/categories/default/"/>
+    
+    
+  </entry>
   
   <entry>
     <title>Flink 分布式运行时环境（Distributed Runtime Environment）</title>
@@ -261,9 +308,9 @@
       <category term="Life" scheme="http://jiezhi.github.io/categories/Life/"/>
     
     
-      <category term="总结" scheme="http://jiezhi.github.io/tags/%E6%80%BB%E7%BB%93/"/>
-    
       <category term="2017" scheme="http://jiezhi.github.io/tags/2017/"/>
+    
+      <category term="总结" scheme="http://jiezhi.github.io/tags/%E6%80%BB%E7%BB%93/"/>
     
   </entry>
   
@@ -326,7 +373,7 @@
     <link href="http://jiezhi.github.io/2017/03/30/android-arraymap-vs-sparsearray/"/>
     <id>http://jiezhi.github.io/2017/03/30/android-arraymap-vs-sparsearray/</id>
     <published>2017-03-30T13:02:58.000Z</published>
-    <updated>2019-02-19T08:36:01.831Z</updated>
+    <updated>2019-03-22T08:13:15.080Z</updated>
     
     <content type="html"><![CDATA[<p>为了提高Android应用程序的性能，Android系统提供了专门为移动开发而设计的集合。</p><a id="more"></a><p>集合是软件开发中最常用的东西了。 一般来说，当需要将数据存储在键值对中时，我们想到的第一个数据结构就是HashMap。 它非常的灵活，因此它是存储键值对的数据结构的最优选择。</p><p><strong>因此，ArrayMap和SparseArray比使用HashMap有更高的内存效率。</strong></p><h2 id="HashMap原理"><a href="#HashMap原理" class="headerlink" title="HashMap原理"></a>HashMap原理</h2><p>HashMap基本上是HashMap.Entry对象的一个数组。 Entry是HashMap的内部类，它用来保存键值对。</p><p>当键值对被插入到HashMap中时，会计算出该键的hashCode，并将该值分配给EntryClass的hashCode变量。 通过该hashCode，我们可以获取该键值对在存储池中的索引。 如果存储池中已经存在了键值对，则将插入新的键值对，并把最后一个键值对指向这个新的键值对，这使得存储池成为一个链接列表。</p><p>从数组中检索值的时间效率为恒定时间或O(1)。 这意味着不管数组的大小，拉取数组中的任何元素时间都相同。 这可以通过使用散列函数来生成指定键的数组索引。</p><p>HashMap用于将整数键映射到对象。</p><p><img src="https://cdn-images-1.medium.com/max/800/1*lXkll8fb72OFk5NVVbi_wQ.png" alt></p><p>以下是创建HashMap和获取键和值的示例代码：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">HashMap&lt; String, String&gt; map = <span class="keyword">new</span> HashMap&lt; String, String&gt;();</span><br><span class="line">map.put(“Key1”, <span class="string">"Value1"</span>);</span><br><span class="line">map.put(“Key2”, <span class="string">" Value2"</span>);</span><br><span class="line">map.put(“Key3”, <span class="string">" Value3"</span>);</span><br><span class="line"></span><br><span class="line">Set set = hmap.entrySet();</span><br><span class="line">Iterator iterator = set.iterator();</span><br><span class="line"></span><br><span class="line"><span class="comment">// Iterate over HashMap</span></span><br><span class="line"><span class="keyword">while</span>(iterator.hasNext()) &#123;</span><br><span class="line">    Map.Entry mEntry = (Map.Entry)iterator.next();</span><br><span class="line">    String key = mEntry.getKey();</span><br><span class="line">    String value = mEntry.getValue();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p><h2 id="ArrayMap原理"><a href="#ArrayMap原理" class="headerlink" title="ArrayMap原理"></a>ArrayMap原理</h2><p>不像HashMap中包含一个数组，ArrayMap中包含了两个小数组。 第一个数组（Hash-Array）按顺序包含指定的哈希键。 第二个数组（Key Value Array）根据第一个数组存储对象的键和值。</p><p>当我们搜索其中的内容时，将会在Hash-Array上完成二分查找，通过找到的哈希索引，然后直接从第二个数组（Key Value Array）返回键值对。 如果第二个数组（Key Value Array）中的键不匹配，则通过第二个数组（Key Value Array）完成线性遍历来解决冲突。<br><img src="https://cdn-images-1.medium.com/max/800/1*v1_3ug_tpscGtYc7JxP2Og.png" alt></p><p>以下是创建ArrayMap和获取键和值的示例代码：</p><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">ArrayMap&lt;String, String&gt; arrayMap = <span class="keyword">new</span> ArrayMap&lt;&gt;();</span><br><span class="line">arrayMap.put(“Key1”, “Value1”);</span><br><span class="line">arrayMap.put(“Key2”, “Value2”);</span><br><span class="line">arrayMap.put(“Key3”, “Value3”);</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; arrayMap.size(); i++) &#123;</span><br><span class="line">    String key = arrayMap.keyAt(i);</span><br><span class="line">    String value = arrayMap.valueAt(i);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><h2 id="SparseArray原理"><a href="#SparseArray原理" class="headerlink" title="SparseArray原理"></a>SparseArray原理</h2><p>与ArrayMap的主要区别在于，在SparseArray键中始终是原始类型。 在其他方面的操作原理是相似的。 当键是原始类型时，稀疏数组（Sparse arrays）可用于替换哈希映射（hash maps）。 SparseArray旨在消除自动装箱的问题（ArrayMap不能避免自动装箱问题），而这种方法会影响内存消耗。</p><p>以下是创建SparseArray的示例代码：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">SparseArray sparseArray = <span class="keyword">new</span> SparseArray();</span><br><span class="line">sparseArray.put(<span class="number">1</span>, “Value1”);</span><br><span class="line"></span><br><span class="line">SparseLongArray sparseLongArray = <span class="keyword">new</span> SparseLongArray();</span><br><span class="line">sparseLongArray.put(<span class="number">1</span>, <span class="number">1L</span>);</span><br><span class="line"></span><br><span class="line">SparseBooleanArray sparseBooleanArray = <span class="keyword">new</span> SparseBooleanArray();</span><br><span class="line">sparseBooleanArray.put(<span class="number">1</span>, <span class="keyword">true</span>);</span><br><span class="line"></span><br><span class="line">SparseIntArray sparseIntArray = <span class="keyword">new</span> SparseIntArray();</span><br><span class="line">sparseIntArray.put(<span class="number">1</span>, <span class="number">2</span>);</span><br></pre></td></tr></table></figure></p><p>该类在API 1中已经存在了，但在API 11中经过了重新设计。兼容库中的更新版本的SparseArrayCompat也可用于较旧设备。</p><p>还有几种其他类型的SparseArray：</p><p><em>LongSparseArray，SparseIntArray，SparseBooleanArray</em>等<br>HashMap可以被以下的Array类替换：</p><p><img src="https://cdn-images-1.medium.com/max/800/1*7FOi8twIY2LmDCpM-rOtwg.png" alt></p><h2 id="Comparison"><a href="#Comparison" class="headerlink" title="Comparison"></a>Comparison</h2><p>内存的连续分配和回收以及垃圾收集将导致Android应用程序的滞后，从而降低了应用程序的性能。 除此之外，ArrayMap＆SparseArray通过使用2个小数组而不是一个大的数组来避免内存问题。</p><h3 id="使用SparseArray比使用HashMap的好处是："><a href="#使用SparseArray比使用HashMap的好处是：" class="headerlink" title="使用SparseArray比使用HashMap的好处是："></a>使用SparseArray比使用HashMap的好处是：</h3><ul><li>使用原语（primitives）带来更多的内存效率</li><li>没有自动装箱操作</li><li>自由分配内存</li></ul><h3 id="缺点"><a href="#缺点" class="headerlink" title="缺点:"></a>缺点:</h3><ul><li>对于大集合，速度较慢</li><li>仅适用于Android</li></ul><p>一般来说，如果没有频繁的插入或删除操作，且大小是小于1000，那么ArrayMap / SparseArray类是非常好的选择。</p><p>来自Android开发者的视频将为您提供进一步的细节：<br><img src="https://youtu.be/ORgucLTtTDI" alt></p><h2 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h2><p>我们可以得出结论，将整数映射到对象，SparseArray比使用HashMap的更有效。 理论是SparseArray可以比HashMap（&lt;1000）更快地添加和检索元素，在这种情况下，减少了哈希函数处理时间。</p><blockquote><p>原文地址：<a href="https://android.jlelse.eu/app-optimization-with-arraymap-sparsearray-in-android-c0b7de22541a" target="_blank" rel="noopener">https://android.jlelse.eu/app-optimization-with-arraymap-sparsearray-in-android-c0b7de22541a</a></p></blockquote>]]></content>
     
@@ -440,42 +487,6 @@
       <category term="android" scheme="http://jiezhi.github.io/tags/android/"/>
     
       <category term="translate" scheme="http://jiezhi.github.io/tags/translate/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>6行脚本获取Google Voice</title>
-    <link href="http://jiezhi.github.io/2017/03/12/get-google-voice/"/>
-    <id>http://jiezhi.github.io/2017/03/12/get-google-voice/</id>
-    <published>2017-03-12T13:14:41.000Z</published>
-    <updated>2019-02-19T08:38:45.744Z</updated>
-    
-    <content type="html"><![CDATA[<p>Google Voice（简称GV）在程序员的圈子里也不算太陌生了，尤其是经常混V站的人应该经常见到这货的出现。不清楚的可以关掉或者先自行Google了。</p><a id="more"></a><p>如果你上网查教程，其实很简单无非使用类似TextNow/TextMe等先申请个美国的号码，然后绑定Google账号，再从Google申请个Voice号码即可。步骤也不多，但很多人Google Voice号码都选好了，可就是点击申请会一直出现『请求错误』的提示。据报道称，解决这个问题的唯一途径就是『狂点大法』——不停地点，运气好5分钟或半小时就能申请到好，也有运气不好，需要一天甚至更多的时间来点击申请。所以有的人就放弃了，或者直接去马云家直接花几十块钱买了。</p><p>目前实现这个『狂点大法』的无非两种途径，模拟鼠标点击和模拟网络请求。</p><p>模拟鼠标点击：<br>顾名思义就是不停地让鼠标在申请按钮上点击，直到你收到Google 邮件恭喜你获得了号码为止。这种很多人会使用『按键精灵』类似的软件来实现不停地点击。但是我选择了自己写python脚本来模拟点击，毕竟自己写的代码才放心。<a href="https://gist.github.com/Jiezhi/aad8a37114825b0ce1a5bc48bf5f3cac" target="_blank" rel="noopener">代码</a>如下：</p><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pymouse <span class="keyword">import</span> PyMouse</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"></span><br><span class="line">m = PyMouse()</span><br><span class="line"></span><br><span class="line"><span class="keyword">while</span> <span class="keyword">True</span>:</span><br><span class="line">    m.click(<span class="number">528</span>, <span class="number">800</span><span class="number">-196</span>, <span class="number">1</span>)</span><br><span class="line">    time.sleep(<span class="number">3</span>)</span><br></pre></td></tr></table></figure><p>其中点击的坐标要改成你自己的，可使用截屏工具来获得按钮的坐标。</p><p>模拟网络请求：<br>这个方法就是直接跳过点击事件，毕竟你点击了也是通过网络请求来实现的。这样子更彻底点，这里粗略地介绍个思路：</p><p>打开浏览器的开发模式（F12）<br>点击网页上的申请按钮<br>找到本次post请求，然后右键复制cURL<br>把cURL请求扔到脚本里，找个服务器或者自己电脑终端里在后台运行即可<br>这个我也放出个<a href="https://gist.github.com/Jiezhi/d02c46449dda06ed0866757bc7ea92c2" target="_blank" rel="noopener">shell 脚本</a>吧：</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (( i=1; i&gt;0; i++ ))</span><br><span class="line"><span class="keyword">do</span></span><br><span class="line">    curl <span class="string">'https://www.google.com/voice/b/0/service/post'</span> ... --compressed</span><br><span class="line"></span><br><span class="line">    sleep 3s</span><br><span class="line"><span class="keyword">done</span></span><br></pre></td></tr></table></figure><p>如果你需要帮助可以在博客下方留言即可。</p>]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;Google Voice（简称GV）在程序员的圈子里也不算太陌生了，尤其是经常混V站的人应该经常见到这货的出现。不清楚的可以关掉或者先自行Google了。&lt;/p&gt;
-    
-    </summary>
-    
-    
-  </entry>
-  
-  <entry>
-    <title>你好2017</title>
-    <link href="http://jiezhi.github.io/2017/03/09/2016-summary/"/>
-    <id>http://jiezhi.github.io/2017/03/09/2016-summary/</id>
-    <published>2017-03-09T12:28:27.000Z</published>
-    <updated>2019-02-19T08:35:06.627Z</updated>
-    
-    <content type="html"><![CDATA[<p>似乎我的2017来的有点迟啊。</p><a id="more"></a><p>翻一下自己的博客，上一篇还停留在2016年9月29日，还像个综述。</p><p>除了博客荒废了之外，去年也还少了一份总结。正如去个景点不拍个照就跟没去似的，一年不来个总结就感觉一年就跟白过了一样，然而暂时我也不想去过多总结了，就先随便总结下吧。</p><p>总之去年4月底离开了老东家去三亚浪了一圈，在下半年来到了现在这家公司——『让农业经营更容易』。刚到公司就在赶项目，加之又被阿飞他们带了一个小学生特别多的游戏，所以书读的少了。基本就是晚上加班回去和出差的路上零星读了几本书，然后也没记录到我的<a href="https://github.com/Jiezhi/Jiezhi-Life/blob/master/2016/book2016.md" target="_blank" rel="noopener">书单</a>上了。</p><p>此外，也在去年年中的时候加入了Google字幕组，帮忙翻译一些Google的开发教学视频的字幕，去年翻的时长差不多80分钟吧。但实在是被我的懒癌整的这阶段又不是太想去接视频翻字幕了，还是等今年I/O大会结束再去接点视频翻吧。所幸，读书荒废之外，还保持着每天学英语的习惯，背几十个单词或读几篇新闻亦或几条听力，时多时少，最重要的是我坚持下来了。</p><p>年后过来项目算是轻松点了，除了沉迷游戏外还是能挤出点时间的。最近一直看国外的<a href="https://medium.com" target="_blank" rel="noopener">medium</a>博客上有不少优秀的技术文章，心又痒了，想平时没事也可以翻译一点。遂捡起老早前注册但没发过文章的公众号，于昨天打响了文章第一枪。</p><p>今天想干脆一不做二不休，把这hexo博客再拿起来维护着吧，不管看的人多少，起码是自己风流倜傥的过往！</p><p>之前域名过期了，也懒得续费了，还是直接用github的地址吧：<a href="http://jiezhi.github.io">http://jiezhi.github.io</a> 欢迎打赏丢香蕉给我。</p>]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;似乎我的2017来的有点迟啊。&lt;/p&gt;
-    
-    </summary>
-    
     
   </entry>
   

@@ -1,6 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title><![CDATA[通过 ssh 远程代理，访问远程资源]]></title>
+    <url>%2F2019%2F03%2F29%2Ftunnel-server-socket-over-ssh%2F</url>
+    <content type="text"><![CDATA[平时我们使用SSH大多用来，登录远程服务器来进行远程操作。 但是 SSH 强大的功能远远不止登录远程服务器，比如说我在服务器上部署了一个服务，但是端口号并没有对外开放怎么办？又或者生产环境的数据库本地无法连接，而只能通过线上环境连接怎么办？ SSHSSH 访问远程页面在 Shadowsocks 之前，很多人是使用 SSH 来跨过长城的。现在遇到的问题，生产环境部署了 Flink，虽说 Flink 提供了 REST Api 来查看信息的，但是查看页面还是更方便点。但是又没办法连接生产环境怎么办？其实可以通过 SSH 建立本地和服务器的通道，进而可以访问远程服务器的资源。比如，flink 页面默认端口号为8081，在终端里执行这个命令后，即可通过访问本地的 localhost:8081 访问服务器上的 flink 页面。ssh -L 8081:localhost:8081 user@flinkserver SSH 代理访问数据库其实道理和上面的一样，一般生产环境数据库我们是没法直接连接的。不过只要有可以访问该数据库的其他服务器 SSH 配置就行了，同一个原理，但实现方式就很多了。 直接登录服务器，通过 mysql 命令来访问。简单粗暴，但比较繁琐。 使用支持 SSH tunnel 的客户端来连接数据库，比如 DataGrip 同样，使用 ssh 命令来建立通道，本地就可以访问了。比如数据库地址为：192.168.100.100:3306，远程服务器为：root@192.168.10.200，使用本地3307端口来映射（其他端口也行，我因为本地3306被用了，所以用3307了）ssh -L 3307:192.168.100.100:3306 root@192.168.10.200 执行过后，只需要连接 localhost:3307 就可以访问数据库了。 SSH 还有很多强大的功能，下次有空再写一下配置的优化。]]></content>
+      <categories>
+        <category>Linux</category>
+      </categories>
+      <tags>
+        <tag>ssh</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[Flink 流处理——窗口]]></title>
+    <url>%2F2019%2F03%2F22%2Fflink-stream-operators-windows%2F</url>
+    <content type="text"><![CDATA[WindowsWindows是处理无限流的核心，其将流拆分为有限大小的『桶』，然后我们可以基于『桶』进行计算。 本文档重点介绍如何在Flink中执行窗口化以及程序员如何从其提供的功能中获得最大益处。 Flink 的窗口程序的一般结构如下所示。 第一个片段指的是keyes stream，而第二个片段指的是non-keyed stream。 可以看出，唯一的区别是键控流的keyBy（…）调用和窗口（…）成为非键控流的windowAll（…）。 这也将作为页面其余部分的路线图。 Keyed vs Non-Keyed WindowsWindow AssignersTumbling WindowsSliding WindowsSession WindowsGlobal WindowsWindow FunctionsReduceFunctionAggregateFunctionFoldFunctionProcessWindowFunctionProcessWindowFunction with Incremental AggregationUsing per-window state in ProcessWindowFunctionWindowFunction (Legacy)Evictors The evictor has the ability to remove elements from a window after the trigger fires and before and/or after the window function is applied.]]></content>
+      <categories>
+        <category>default</category>
+      </categories>
+  </entry>
+  <entry>
     <title><![CDATA[Flink 分布式运行时环境（Distributed Runtime Environment）]]></title>
     <url>%2F2019%2F03%2F08%2Fflink-distributed-runtime-environment%2F</url>
     <content type="text"><![CDATA[本篇文章介绍 Flink 的分布式运行时环境相关的概念。 本文译自Flink官网 任务和操作链对于分布式的执行，Flink将操作子任务链接(chain)到任务(task)中。每个任务由一个线程执行。将操作链接到任务是一项有用的优化：它可以减少线程到线程切换和缓冲的开销，并在降低延迟的同时提高整体吞吐量。链接行为可以配置;有关详细信息，请参阅链接文档。 下图中的示例数据流由五个子任务执行，因此具有五个并行线程。 操作链接导任务 作业管理器，任务管理器和客户端Flink运行时包含两种类型的进程： 作业管理器（JobManagers，也称为master）协调分布式执行。他们安排任务，协调检查点，协调故障恢复等。 至少有一个Job Manager。设置高可用（HA, High-Availability）的话将具有多个JobManagers，其中一个始终是领导者(leader)，其它的处于待机状态(standby)。 任务管理器（TaskManagers，也称为worker）执行数据流的任务（或更具体地说，子任务），并缓冲和交换数据流。 必须始终至少有一个TaskManager。 JobManagers和TaskManagers可以通过多种方式启动：独立集群直接在机器里启动，或在容器中，或由YARN或Mesos等资源框架来管理。 TaskManagers连接到JobManagers，通知自己可用，然后被分配任务。 客户端不是运行时和程序执行的一部分，而是被用于准备数据流并将数据流发送到JobManager。之后，客户端可以断开连接或保持连接以接收进度报告。客户端要么作为触发执行的Java / Scala程序的一部分运行，要么是在命令行进程中运行 ./bin/flink run …. 执行Flink数据流所涉及的过程 任务槽和资源每个worker（TaskManager）都是一个JVM进程，可以在不同的线程中执行一个或多个子任务。为了控制worker接受的任务数量，worker中有任务槽（task slots）（至少一个）。 每个任务槽代表TaskManager的固定资源子集。例如，具有三个任务槽的TaskManager会将其1/3的托管内存分配到每个插槽。切换资源意味着子任务不会与来自其他作业的子任务竞争托管内存，而是竞争具有一定量的保留托管内存。请注意，这里没有CPU隔离;当前任务槽只分离任务的托管内存。 通过调整任务槽的数量，用户可以定义子任务之间如何相互隔离。每个TaskManager有一个插槽意味着每个任务组在一个单独的JVM中运行（例如，可以在一个单独的容器中启动）。拥有多个插槽意味着更多子任务共享同一个JVM。同一JVM中的任务共享TCP连接（通过多路复用）和心跳消息。它们还可以共享数据集和数据结构，从而减少每任务开销。 具有任务槽和任务的TaskManager 默认情况下，Flink允许子任务共享插槽，即使它们是不同任务的子任务，只要它们来自同一个作业。结果就是，一个槽可以保存作业的整个管道。允许此插槽共享有两个主要好处： Flink集群需要的任务槽数量与作业中使用的最高并行度的任务槽一样多。无需计算程序总共包含多少任务（具有不同的并行性）。 更容易获得更好的资源利用率。没有插槽共享，非密集的source/ map()子任务将占用与资源密集型窗口子任务一样多的资源。通过插槽共享，将示例中的基本并行性从2增加到6可以充分利用时隙资源，同时确保繁重的子任务在TaskManagers之间公平分配。 具有共享任务槽的TaskManagers API还包括资源组机制，可用于防止意外的插槽共享。 根据经验，一个很好的默认任务槽数就是CPU核心数。使用超线程，每个插槽然后需要2个或更多硬件线程。 State Backends(状态后端?)存储键/值索引的确切数据结构取决于所选的state backend。一个state backend将数据存储在内存中的哈希映射中，另一个state backend使用RocksDB作为键/值存储。除了定义保存状态的数据结构之外，state backend还实现了获取键/值状态的时间点快照，并将该快照存储为检查点的一部分的逻辑。 检查点和快照 保存点（Savepoints）用Data Stream API编写的程序可以从保存点中恢复执行。保存点允许更新程序和Flink群集，而不会丢失任何状态。 保存点是手动触发的检查点，它可以生成一个程序的快照并把它写到state backend。 他们依靠常规的检查点机制。 在执行期间，程序会定期在工作节点上创建快照并生成检查点。 对于程序恢复，仅需要最后完成的检查点，并且一旦完成新检查点，就可以安全地丢弃旧检查点。 保存点与这些定期检查点类似，不同之处在于它们由用户触发，并且在较新的检查点完成时不会自动过期。 可以从命令行创建保存点，也可以通过REST API取消作业。]]></content>
@@ -116,8 +135,8 @@
         <category>Life</category>
       </categories>
       <tags>
-        <tag>总结</tag>
         <tag>2017</tag>
+        <tag>总结</tag>
       </tags>
   </entry>
   <entry>

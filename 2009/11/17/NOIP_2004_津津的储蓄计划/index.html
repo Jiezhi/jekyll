@@ -98,18 +98,18 @@
 
 
 
-  <meta name="description" content="可以说超简单的一道题，学过数组的人都应会做1234567891011121314151617181920212223program save;var a:array[0..12]of integer;    i,x,p:integer;beginassign(input,&amp;apos;save.in&amp;apos;);reset(input);assign(output,&amp;apos;&amp;apos;);re">
+  <meta name="description" content="可以说超简单的一道题，学过数组的人都应会做1234567891011121314151617181920212223program save;var a:array[0..12]of integer;    i,x,p:integer;beginassign(input,&amp;apos;save.in&amp;apos;);reset(input);assign(output,&amp;apos;&amp;apos;);r">
 <meta name="keywords" content="noip,pascal">
 <meta property="og:type" content="article">
 <meta property="og:title" content="NOIP 2004 津津的储蓄计划">
 <meta property="og:url" content="http://jiezhi.github.io/2009/11/17/NOIP_2004_津津的储蓄计划/index.html">
 <meta property="og:site_name" content="介之的博客">
-<meta property="og:description" content="可以说超简单的一道题，学过数组的人都应会做1234567891011121314151617181920212223program save;var a:array[0..12]of integer;    i,x,p:integer;beginassign(input,&amp;apos;save.in&amp;apos;);reset(input);assign(output,&amp;apos;&amp;apos;);re">
+<meta property="og:description" content="可以说超简单的一道题，学过数组的人都应会做1234567891011121314151617181920212223program save;var a:array[0..12]of integer;    i,x,p:integer;beginassign(input,&amp;apos;save.in&amp;apos;);reset(input);assign(output,&amp;apos;&amp;apos;);r">
 <meta property="og:locale" content="zh-cn">
-<meta property="og:updated_time" content="2019-02-19T08:40:41.048Z">
+<meta property="og:updated_time" content="2019-03-22T08:13:17.935Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="NOIP 2004 津津的储蓄计划">
-<meta name="twitter:description" content="可以说超简单的一道题，学过数组的人都应会做1234567891011121314151617181920212223program save;var a:array[0..12]of integer;    i,x,p:integer;beginassign(input,&amp;apos;save.in&amp;apos;);reset(input);assign(output,&amp;apos;&amp;apos;);re">
+<meta name="twitter:description" content="可以说超简单的一道题，学过数组的人都应会做1234567891011121314151617181920212223program save;var a:array[0..12]of integer;    i,x,p:integer;beginassign(input,&amp;apos;save.in&amp;apos;);reset(input);assign(output,&amp;apos;&amp;apos;);r">
 
 
 
@@ -249,7 +249,7 @@
       
     
 
-    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>Tags<span class="badge">86</span></a>
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>Tags<span class="badge">87</span></a>
 
   </li>
         
@@ -268,7 +268,7 @@
       
     
 
-    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>Categories<span class="badge">28</span></a>
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>Categories<span class="badge">29</span></a>
 
   </li>
         
@@ -287,7 +287,7 @@
       
     
 
-    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives<span class="badge">69</span></a>
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives<span class="badge">71</span></a>
 
   </li>
 
@@ -408,7 +408,7 @@
                 
                   <span class="post-meta-item-text">Edited on</span>
                 
-                <time title="Modified: 2019-02-19 16:40:41" itemprop="dateModified" datetime="2019-02-19T16:40:41+08:00">2019-02-19</time>
+                <time title="Modified: 2019-03-22 16:13:17" itemprop="dateModified" datetime="2019-03-22T16:13:17+08:00">2019-03-22</time>
               
             
           </span>
@@ -473,7 +473,8 @@
       
 
       
-        <p>可以说超简单的一道题，学过数组的人都应会做<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">program save;</span><br><span class="line">var a:array[0..12]of integer;</span><br><span class="line">    i,x,p:integer;</span><br><span class="line">begin</span><br><span class="line">assign(input,&apos;save.in&apos;);reset(input);</span><br><span class="line">assign(output,&apos;&apos;);rewrite(output);</span><br><span class="line">for i:=1 to 12 do a[i]:=300;</span><br><span class="line">a[0]:=0;p:=0;</span><br><span class="line">for i:=1 to 12 do begin</span><br><span class="line">readln(x);inc(a[i],a[i-1]);dec(a[i],x);</span><br><span class="line">     if a[i]&lt;0 then begin</span><br><span class="line">   writeln(&apos;-&apos;,i);</span><br><span class="line">      close(input);close(output);exit;</span><br><span class="line">end else &#123;if a[i]&gt;=100 then&#125; begin</span><br><span class="line">   p:=(a[i]div 100)*100;</span><br><span class="line">   inc(a[0],p);</span><br><span class="line">      a[i]:=a[i]-p;</span><br><span class="line">end;</span><br><span class="line">end;</span><br><span class="line">a[0]:=a[0]*6 div 5;</span><br><span class="line">writeln(a[0]+a[12]);</span><br><span class="line">close(input);close(output);</span><br><span class="line">end.</span><br></pre></td></tr></table></figure></p>
+        <a id="more"></a>
+<p>可以说超简单的一道题，学过数组的人都应会做<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">program save;</span><br><span class="line">var a:array[0..12]of integer;</span><br><span class="line">    i,x,p:integer;</span><br><span class="line">begin</span><br><span class="line">assign(input,&apos;save.in&apos;);reset(input);</span><br><span class="line">assign(output,&apos;&apos;);rewrite(output);</span><br><span class="line">for i:=1 to 12 do a[i]:=300;</span><br><span class="line">a[0]:=0;p:=0;</span><br><span class="line">for i:=1 to 12 do begin</span><br><span class="line">readln(x);inc(a[i],a[i-1]);dec(a[i],x);</span><br><span class="line">     if a[i]&lt;0 then begin</span><br><span class="line">   writeln(&apos;-&apos;,i);</span><br><span class="line">      close(input);close(output);exit;</span><br><span class="line">end else &#123;if a[i]&gt;=100 then&#125; begin</span><br><span class="line">   p:=(a[i]div 100)*100;</span><br><span class="line">   inc(a[0],p);</span><br><span class="line">      a[i]:=a[i]-p;</span><br><span class="line">end;</span><br><span class="line">end;</span><br><span class="line">a[0]:=a[0]*6 div 5;</span><br><span class="line">writeln(a[0]+a[12]);</span><br><span class="line">close(input);close(output);</span><br><span class="line">end.</span><br></pre></td></tr></table></figure></p>
 
       
     </div>
@@ -617,7 +618,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">69</span>
+                    <span class="site-state-item-count">71</span>
                     <span class="site-state-item-name">posts</span>
                   </a>
                 </div>
@@ -690,7 +691,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">27</span>
+                      
+                    
+                    <span class="site-state-item-count">28</span>
                     <span class="site-state-item-name">categories</span>
                   </a>
                 </div>
@@ -879,7 +882,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">85</span>
+                      
+                    
+                    <span class="site-state-item-count">86</span>
                     <span class="site-state-item-name">tags</span>
                   </a>
                 </div>
