@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://jiezhi.github.io/"/>
-  <updated>2019-03-29T02:49:25.530Z</updated>
+  <updated>2019-07-23T02:44:30.492Z</updated>
   <id>http://jiezhi.github.io/</id>
   
   <author>
@@ -15,6 +15,30 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>linux-watch</title>
+    <link href="http://jiezhi.github.io/2019/07/23/linux-watch/"/>
+    <id>http://jiezhi.github.io/2019/07/23/linux-watch/</id>
+    <published>2019-07-23T02:44:30.000Z</published>
+    <updated>2019-07-23T02:44:30.492Z</updated>
+    
+    <content type="html"><![CDATA[<a id="more"></a>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
+
+      
+    
+    </summary>
+    
+      <category term="default" scheme="http://jiezhi.github.io/categories/default/"/>
+    
+    
+  </entry>
   
   <entry>
     <title>通过 ssh 远程代理，访问远程资源</title>
@@ -463,24 +487,6 @@
       <category term="android" scheme="http://jiezhi.github.io/tags/android/"/>
     
       <category term="translate" scheme="http://jiezhi.github.io/tags/translate/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>6行脚本获取Google Voice</title>
-    <link href="http://jiezhi.github.io/2017/03/12/get-google-voice/"/>
-    <id>http://jiezhi.github.io/2017/03/12/get-google-voice/</id>
-    <published>2017-03-12T13:14:41.000Z</published>
-    <updated>2019-02-19T08:38:45.744Z</updated>
-    
-    <content type="html"><![CDATA[<p>Google Voice（简称GV）在程序员的圈子里也不算太陌生了，尤其是经常混V站的人应该经常见到这货的出现。不清楚的可以关掉或者先自行Google了。</p><a id="more"></a><p>如果你上网查教程，其实很简单无非使用类似TextNow/TextMe等先申请个美国的号码，然后绑定Google账号，再从Google申请个Voice号码即可。步骤也不多，但很多人Google Voice号码都选好了，可就是点击申请会一直出现『请求错误』的提示。据报道称，解决这个问题的唯一途径就是『狂点大法』——不停地点，运气好5分钟或半小时就能申请到好，也有运气不好，需要一天甚至更多的时间来点击申请。所以有的人就放弃了，或者直接去马云家直接花几十块钱买了。</p><p>目前实现这个『狂点大法』的无非两种途径，模拟鼠标点击和模拟网络请求。</p><p>模拟鼠标点击：<br>顾名思义就是不停地让鼠标在申请按钮上点击，直到你收到Google 邮件恭喜你获得了号码为止。这种很多人会使用『按键精灵』类似的软件来实现不停地点击。但是我选择了自己写python脚本来模拟点击，毕竟自己写的代码才放心。<a href="https://gist.github.com/Jiezhi/aad8a37114825b0ce1a5bc48bf5f3cac" target="_blank" rel="noopener">代码</a>如下：</p><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pymouse <span class="keyword">import</span> PyMouse</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"></span><br><span class="line">m = PyMouse()</span><br><span class="line"></span><br><span class="line"><span class="keyword">while</span> <span class="keyword">True</span>:</span><br><span class="line">    m.click(<span class="number">528</span>, <span class="number">800</span><span class="number">-196</span>, <span class="number">1</span>)</span><br><span class="line">    time.sleep(<span class="number">3</span>)</span><br></pre></td></tr></table></figure><p>其中点击的坐标要改成你自己的，可使用截屏工具来获得按钮的坐标。</p><p>模拟网络请求：<br>这个方法就是直接跳过点击事件，毕竟你点击了也是通过网络请求来实现的。这样子更彻底点，这里粗略地介绍个思路：</p><p>打开浏览器的开发模式（F12）<br>点击网页上的申请按钮<br>找到本次post请求，然后右键复制cURL<br>把cURL请求扔到脚本里，找个服务器或者自己电脑终端里在后台运行即可<br>这个我也放出个<a href="https://gist.github.com/Jiezhi/d02c46449dda06ed0866757bc7ea92c2" target="_blank" rel="noopener">shell 脚本</a>吧：</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (( i=1; i&gt;0; i++ ))</span><br><span class="line"><span class="keyword">do</span></span><br><span class="line">    curl <span class="string">'https://www.google.com/voice/b/0/service/post'</span> ... --compressed</span><br><span class="line"></span><br><span class="line">    sleep 3s</span><br><span class="line"><span class="keyword">done</span></span><br></pre></td></tr></table></figure><p>如果你需要帮助可以在博客下方留言即可。</p>]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;Google Voice（简称GV）在程序员的圈子里也不算太陌生了，尤其是经常混V站的人应该经常见到这货的出现。不清楚的可以关掉或者先自行Google了。&lt;/p&gt;
-    
-    </summary>
-    
     
   </entry>
   
