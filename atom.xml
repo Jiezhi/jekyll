@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://jiezhi.github.io/"/>
-  <updated>2019-07-23T02:44:30.492Z</updated>
+  <updated>2019-08-30T01:55:46.470Z</updated>
   <id>http://jiezhi.github.io/</id>
   
   <author>
@@ -17,25 +17,21 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
-    <title>linux-watch</title>
-    <link href="http://jiezhi.github.io/2019/07/23/linux-watch/"/>
-    <id>http://jiezhi.github.io/2019/07/23/linux-watch/</id>
-    <published>2019-07-23T02:44:30.000Z</published>
-    <updated>2019-07-23T02:44:30.492Z</updated>
+    <title>设置 idea 中的 Vim（同样适用于jetbrains 家其他产品）</title>
+    <link href="http://jiezhi.github.io/2019/08/30/set-vim-in-idea/"/>
+    <id>http://jiezhi.github.io/2019/08/30/set-vim-in-idea/</id>
+    <published>2019-08-30T01:33:38.000Z</published>
+    <updated>2019-08-30T01:55:46.470Z</updated>
     
-    <content type="html"><![CDATA[<a id="more"></a>]]></content>
+    <content type="html"><![CDATA[<p>之前每次启动 idea 或 pycharm 后都要单独设置下才开始工作，那么怎么才能像设置 vimrc 一样设置 idea 中的 vim 呢？<br><a id="more"></a></p><p>可能很多人.vimrc 文件中都有这个设置：<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">set relativenumber</span><br><span class="line">set number</span><br></pre></td></tr></table></figure></p><img src="/2019/08/30/set-vim-in-idea/vim-rnu.png"><p>这个设置使得上下跳转（j/k）再也不用去计算行数了.</p><p>idea 中的 vim 设置也像.vimrc一样，只不过设置在<code>.ideavimrc</code>文件中。</p><p>所以只要在在~/.ideavimrc 文件中加上以下配置即可（有其他vim设置也可以加入到这里）:<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">set relativenumber</span><br><span class="line">set number</span><br></pre></td></tr></table></figure></p>]]></content>
     
     <summary type="html">
     
-      
-      
-        &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
-
-      
+      &lt;p&gt;之前每次启动 idea 或 pycharm 后都要单独设置下才开始工作，那么怎么才能像设置 vimrc 一样设置 idea 中的 vim 呢？&lt;br&gt;
     
     </summary>
     
-      <category term="default" scheme="http://jiezhi.github.io/categories/default/"/>
+      <category term="Tools" scheme="http://jiezhi.github.io/categories/Tools/"/>
     
     
   </entry>
