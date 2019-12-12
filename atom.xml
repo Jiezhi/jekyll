@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://jiezhi.github.io/"/>
-  <updated>2019-08-30T01:55:46.470Z</updated>
+  <updated>2019-12-12T08:52:01.808Z</updated>
   <id>http://jiezhi.github.io/</id>
   
   <author>
@@ -15,6 +15,67 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>sqoop 常见问题</title>
+    <link href="http://jiezhi.github.io/2019/12/12/sqoop-issues/"/>
+    <id>http://jiezhi.github.io/2019/12/12/sqoop-issues/</id>
+    <published>2019-12-12T02:48:05.000Z</published>
+    <updated>2019-12-12T08:52:01.808Z</updated>
+    
+    <content type="html"><![CDATA[<p>记录 Sqoop 使用过程中常见问题及解决方案。<br><a id="more"></a></p><h2 id="1-表名为数据库的保留字段"><a href="#1-表名为数据库的保留字段" class="headerlink" title="1.表名为数据库的保留字段"></a>1.表名为数据库的保留字段</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">INFO manager.SqlManager: Executing SQL statement: SELECT t.* FROM order AS t WHERE 1=0</span><br><span class="line">ERROR manager.SqlManager: Error executing statement: com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException: You have an error <span class="keyword">in</span> your SQL syntax; check the manual that corresponds to your MySQL server version <span class="keyword">for</span> the right syntax to use near <span class="string">'order AS t WHERE 1=0'</span> at line 1</span><br><span class="line">com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException: You have an error <span class="keyword">in</span> your SQL syntax; check the manual that corresponds to your MySQL server version <span class="keyword">for</span> the right syntax to use near <span class="string">'order AS t WHERE 1=0'</span> at line 1</span><br></pre></td></tr></table></figure><p>Sqoop 在执行任务前，会执行类似的语句来判断源表是否有问题：<br><code>SELECT t.* FROM TABLE_NAME AS t WHERE 1=0</code><br>然而这里报的错表示这句语句有错误，无法执行。仔细一看原来业务库那边的表名为 <strong>order</strong>，显然这个订单表名使用了 MySQL 中的保留关键字了。在 MySQL 中，使用 <em><code></code></em> 将含关键字的名称引起来即可正常执行，如：<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> t.* <span class="keyword">FROM</span> <span class="string">`order`</span> <span class="keyword">AS</span> t <span class="keyword">WHERE</span> <span class="number">1</span>=<span class="number">0</span>。</span><br></pre></td></tr></table></figure></p><p>如果在 Sqoop 命令中直接使用 <em><code>order</code></em> 却无法正常执行，<strong>order</strong> 会被 shell 当成独立的命令来执行，也会直接报错。（经过测试使用单引号<code>&#39;&#39;</code>、双引号<code>&quot;&quot;</code>及转义字符都无法执行 Sqoop 任务。）</p><p>那可以考虑<br>1.用 <code>--query</code>  来解决</p><p>可参考<a href="http://sqoop.apache.org/docs/1.4.7/SqoopUserGuide.html#_free_form_query_imports" target="_blank" rel="noopener">Free-form Query Imports</a></p><p>2.将 sqoop 语句放到文件中，然后使用<code>sqoop --options-file</code>来执行对应的文件<br>可参考<a href="http://sqoop.apache.org/docs/1.4.7/SqoopUserGuide.html#_using_options_files_to_pass_arguments" target="_blank" rel="noopener">Using Options Files to Pass Arguments</a></p><h2 id="2-MySQL-中-Time-类型错误"><a href="#2-MySQL-中-Time-类型错误" class="headerlink" title="2.MySQL 中 Time 类型错误"></a>2.MySQL 中 Time 类型错误</h2><p>在数据库中，比如门店营业时间有的会填写<code>24:00:00</code>，但是在 sqoop 导入过程中会出现如下错误：</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">Error: java.io.IOException: SQLException <span class="keyword">in</span> nextKeyValue</span><br><span class="line">        at org.apache.sqoop.mapreduce.db.DBRecordReader.nextKeyValue(DBRecordReader.java:275)</span><br><span class="line">        at org.apache.hadoop.mapred.MapTask<span class="variable">$NewTrackingRecordReader</span>.nextKeyValue(MapTask.java:568)</span><br><span class="line">        at org.apache.hadoop.mapreduce.task.MapContextImpl.nextKeyValue(MapContextImpl.java:80)</span><br><span class="line">        at org.apache.hadoop.mapreduce.lib.map.WrappedMapper<span class="variable">$Context</span>.nextKeyValue(WrappedMapper.java:91)</span><br><span class="line">        at org.apache.hadoop.mapreduce.Mapper.run(Mapper.java:145)</span><br><span class="line">        at org.apache.sqoop.mapreduce.AutoProgressMapper.run(AutoProgressMapper.java:64)</span><br><span class="line">        at org.apache.hadoop.mapred.MapTask.runNewMapper(MapTask.java:799)</span><br><span class="line">        at org.apache.hadoop.mapred.MapTask.run(MapTask.java:347)</span><br><span class="line">        at org.apache.hadoop.mapred.YarnChild<span class="variable">$2</span>.run(YarnChild.java:174)</span><br><span class="line">        at java.security.AccessController.doPrivileged(Native Method)</span><br><span class="line">        at javax.security.auth.Subject.doAs(Subject.java:422)</span><br><span class="line">        at org.apache.hadoop.security.UserGroupInformation.doAs(UserGroupInformation.java:1875)</span><br><span class="line">        at org.apache.hadoop.mapred.YarnChild.main(YarnChild.java:168)</span><br><span class="line">Caused by: java.sql.SQLException: java.sql.SQLException: Illegal hour value <span class="string">'24'</span> <span class="keyword">for</span> java.sql.Time <span class="built_in">type</span> <span class="keyword">in</span> value <span class="string">'24:00:00.</span></span><br><span class="line"><span class="string">        at com.mysql.jdbc.SQLError.createSQLException(SQLError.java:1056)</span></span><br><span class="line"><span class="string">        at com.mysql.jdbc.SQLError.createSQLException(SQLError.java:957)</span></span><br><span class="line"><span class="string">        at com.mysql.jdbc.SQLError.createSQLException(SQLError.java:927)</span></span><br><span class="line"><span class="string">        at com.mysql.jdbc.ResultSet.getTimeFromString(ResultSet.java:6096)</span></span><br><span class="line"><span class="string">        at com.mysql.jdbc.ResultSet.getStringInternal(ResultSet.java:5819)</span></span><br><span class="line"><span class="string">        at com.mysql.jdbc.ResultSet.getString(ResultSet.java:5645)</span></span><br><span class="line"><span class="string">        at org.apache.sqoop.lib.JdbcWritableBridge.readString(JdbcWritableBridge.java:68)</span></span><br><span class="line"><span class="string">        at partner_stores.readFields(partner_stores.java:505)</span></span><br><span class="line"><span class="string">        at org.apache.sqoop.mapreduce.db.DBRecordReader.nextKeyValue(DBRecordReader.java:242)</span></span><br><span class="line"><span class="string">        ... 12 more</span></span><br></pre></td></tr></table></figure><p>这是因为 sqoop 导入 MySQL 用的是 JDBC，然而 JDBC 的驱动中对 Time 类型最大支持到”23:59:59”，所以当 Time 类型数据出现超过”23:59:59”数据就会报这个错。</p><p>尝试过使用<code>--map-column-java</code>，但依然会报错<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">--map-column-java</span><br><span class="line">endTime=String</span><br></pre></td></tr></table></figure></p><p>解决办法：<br>1.让业务人员修改数据库，要么把类型改成 Varchar 类型，要么把数据刷成最大”23:59:59”<br>2.自己动手, 使用<code>--query</code>，在 select 操作中进行类型转换：<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="keyword">id</span>, <span class="keyword">CAST</span>(startTime <span class="keyword">AS</span> <span class="built_in">CHAR</span>) startTime, <span class="keyword">CAST</span>(endTime <span class="keyword">AS</span> <span class="built_in">CHAR</span>) endTime</span><br><span class="line"><span class="keyword">FROM</span> shop.stores</span><br></pre></td></tr></table></figure></p>]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;记录 Sqoop 使用过程中常见问题及解决方案。&lt;br&gt;
+    
+    </summary>
+    
+      <category term="BigData" scheme="http://jiezhi.github.io/categories/BigData/"/>
+    
+    
+      <category term="Sqoop" scheme="http://jiezhi.github.io/tags/Sqoop/"/>
+    
+      <category term="HDFS" scheme="http://jiezhi.github.io/tags/HDFS/"/>
+    
+      <category term="Hive" scheme="http://jiezhi.github.io/tags/Hive/"/>
+    
+      <category term="MySQ" scheme="http://jiezhi.github.io/tags/MySQ/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Sqoop 增量更新</title>
+    <link href="http://jiezhi.github.io/2019/09/05/sqoop-incremental/"/>
+    <id>http://jiezhi.github.io/2019/09/05/sqoop-incremental/</id>
+    <published>2019-09-05T02:18:58.000Z</published>
+    <updated>2019-09-05T02:25:11.819Z</updated>
+    
+    <content type="html"><![CDATA[<a id="more"></a><p>Sqoop 增量更新数据一般有两种方式：</p><h2 id="append-模式"><a href="#append-模式" class="headerlink" title="append 模式"></a>append 模式</h2><p>该模式适用于表中只有新数据添加的情况</p><h2 id="lastmodified-模式"><a href="#lastmodified-模式" class="headerlink" title="lastmodified 模式"></a>lastmodified 模式</h2><p>该模式适用于现有数据可能被修改的情况</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
+&lt;p&gt;Sqoop 增量更新数据一般有两种方式：&lt;/p&gt;
+&lt;h2 id=&quot;append-模式&quot;&gt;&lt;a href=&quot;#append-模式&quot; class=&quot;headerlink&quot; title=&quot;append 模式&quot;&gt;&lt;/a&gt;append 模式&lt;/h2
+      
+    
+    </summary>
+    
+      <category term="BigData" scheme="http://jiezhi.github.io/categories/BigData/"/>
+    
+    
+      <category term="MySQL" scheme="http://jiezhi.github.io/tags/MySQL/"/>
+    
+      <category term="Sqoop" scheme="http://jiezhi.github.io/tags/Sqoop/"/>
+    
+      <category term="HDFS" scheme="http://jiezhi.github.io/tags/HDFS/"/>
+    
+      <category term="Hive" scheme="http://jiezhi.github.io/tags/Hive/"/>
+    
+  </entry>
   
   <entry>
     <title>设置 idea 中的 Vim（同样适用于jetbrains 家其他产品）</title>
@@ -207,9 +268,9 @@
     
       <category term="Note" scheme="http://jiezhi.github.io/tags/Note/"/>
     
-      <category term="Big Data" scheme="http://jiezhi.github.io/tags/Big-Data/"/>
-    
       <category term="Hive" scheme="http://jiezhi.github.io/tags/Hive/"/>
+    
+      <category term="Big Data" scheme="http://jiezhi.github.io/tags/Big-Data/"/>
     
   </entry>
   
@@ -426,54 +487,6 @@
     <summary type="html">
     
       &lt;p&gt;最后，我决定开始我自己的技术博客。首先发布一系列的帖子来描述一些我每天开发都在使用的Android Studio插件。&lt;/p&gt;
-    
-    </summary>
-    
-      <category term="Android" scheme="http://jiezhi.github.io/categories/Android/"/>
-    
-    
-      <category term="android" scheme="http://jiezhi.github.io/tags/android/"/>
-    
-      <category term="translate" scheme="http://jiezhi.github.io/tags/translate/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>【译】Android Studio 技巧2——资源和图标</title>
-    <link href="http://jiezhi.github.io/2017/03/19/android-studio-tip2/"/>
-    <id>http://jiezhi.github.io/2017/03/19/android-studio-tip2/</id>
-    <published>2017-03-19T06:16:21.000Z</published>
-    <updated>2019-03-08T10:08:37.752Z</updated>
-    
-    <content type="html"><![CDATA[<p>这是我的第二篇帖子。 今天我要讨论一下资源，特别是图标这块。</p><a id="more"></a><hr><h3 id="Android-Drawable-Importer"><a href="#Android-Drawable-Importer" class="headerlink" title="Android Drawable Importer"></a><a href="https://plugins.jetbrains.com/idea/plugin/7658-android-drawable-importer" target="_blank" rel="noopener">Android Drawable Importer</a></h3><p>作为Android开发人员，你应该在drawable文件夹中手动地导入过很多图标了。</p><p>有些聪明的设计师给你的资源已经按照正确的命名放在了正确的文件夹中了，这会简化你很多的工作。但有时候你可能要重命名和手动移动每个PNG文件到相关的drawable文件夹中。 这会花费你一些时间，些许苦恼。 我非常想把这时间用在别的事情上，那我们如何改进它并停止浪费时间呢？</p><p>“Android Drawable Importer”这款插件将会帮助到你。 它主要有4个主要特点：</p><ul><li>批量导入资源</li><li>导入图标资源包</li><li>导入矢量资源</li><li>多分辨率（Multisource）资源</li></ul><hr><h3 id="批量导入资源"><a href="#批量导入资源" class="headerlink" title="批量导入资源"></a><strong>批量导入资源</strong></h3><p>这是个非常有用的特性，顾名思义，就是导入一批drawable。 假设你有5个只有一种分辨率的不同的图标，你可以一次把他们导入到指定分辨率的文件夹中。 如果你想的话，它还创建其他的png的drawable文件夹。<br><img src="https://cdn-images-1.medium.com/max/800/1*ZKrIWeTY5cSM04u74chx6w.gif" alt></p><h3 id="导入图标资源包"><a href="#导入图标资源包" class="headerlink" title="导入图标资源包"></a><strong>导入图标资源包</strong></h3><p><em>导入图标资源包</em>允许你从预定义资源集合中导入图标，而且你还可以指定其大小，颜色，格式和尺寸。<br><img src="https://cdn-images-1.medium.com/max/800/1*7CAEuZjGeDRuYcUy8iBx0A.gif" alt></p><p>这已经不是特别有用了，因为Android Studio集成了一个名为<a href="https://developer.android.com/studio/write/image-asset-studio.html" target="_blank" rel="noopener">Image Asset Studio</a>的功能，通过官方的这个插件你可以做同样或更多的事。 例如，你可以将文本作为资源导出，或者你可以用来处理图片。<br><img src="https://cdn-images-1.medium.com/max/800/1*Qb-T5WtUcvMDlo2v7zfefg.gif" alt></p><h3 id="导入矢量资源"><a href="#导入矢量资源" class="headerlink" title="导入矢量资源"></a><strong>导入矢量资源</strong></h3><p><em>导入矢量资源</em>使你能够从给定的集合导入矢量资源。 Android Studio已经集成了一个名为<a href="https://developer.android.com/studio/write/vector-asset-studio.html" target="_blank" rel="noopener">Vector Asset Studio</a>的类似工具。 此外，它还允许你从给定的SVG或PSD导入向量。 我建议在这种情况下使用集成工具而不是插件。</p><h3 id="多分辨率资源"><a href="#多分辨率资源" class="headerlink" title="多分辨率资源"></a><strong>多分辨率资源</strong></h3><p>最后但同样重要的是，<em>多分辨率资源</em>。 你可以为每个导入的资源的不同分辨率指定为不同图标。 如果你需要根据屏幕分辨率使用不同的图标，或者如果你在不同的文件夹中有同样的图标，并且想要立即导入所有图标，这个可能非常有用。<br><img src="https://cdn-images-1.medium.com/max/800/1*kisvCgiv-_DgO85mntwWNw.gif" alt></p><hr><p>本文到此结束。 如果有想法请留下你的评论！</p>]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;这是我的第二篇帖子。 今天我要讨论一下资源，特别是图标这块。&lt;/p&gt;
-    
-    </summary>
-    
-      <category term="Android" scheme="http://jiezhi.github.io/categories/Android/"/>
-    
-    
-      <category term="android" scheme="http://jiezhi.github.io/tags/android/"/>
-    
-      <category term="translate" scheme="http://jiezhi.github.io/tags/translate/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>【译】Android Studio 贴士 3— FindViewById</title>
-    <link href="http://jiezhi.github.io/2017/03/16/android-studio-findviewbyid/"/>
-    <id>http://jiezhi.github.io/2017/03/16/android-studio-findviewbyid/</id>
-    <published>2017-03-16T12:52:38.000Z</published>
-    <updated>2019-03-08T10:08:19.709Z</updated>
-    
-    <content type="html"><![CDATA[<p>今天，我们讨论一下View。让我们谈谈如何快速地从xml布局文件中获取到定义好的View实例。<br><a id="more"></a></p><p>本文翻译自<a href="https://android.jlelse.eu/@fedestylah?source=post_header_lockup" target="_blank" rel="noopener">Federico Palmieri</a> 的<a href="https://android.jlelse.eu/android-studio-tips-for-productivity-3-a87e84ca6f62" target="_blank" rel="noopener">文章</a>。</p><hr><p>我很确定每个Android开发人员都会很快就开始厌烦，为layout文件中的View编写findviewbyid的重复动作。如果你不厌烦它，那么让我们尝试另一种方式，来避免浪费时间！</p><p>有些人可能使用<a href="http://jakewharton.github.io/butterknife/" target="_blank" rel="noopener">ButterKnife</a>来避免findviewbyid后的转换（可能还有其他一些原因）。即使这样，它也不会减轻给每个的id加注解的痛苦。</p><p>有多少次你从xml布局和你的java代码来回切换，只是因为你忘了一个view的id？让我们放弃这种方式吧！</p><p>我们有两种不同的方式可以使用，无论你使用简单的findviewbyid还是使用ButterKnife。</p><hr><p>使用ButterKnife<br>如果你是ButterKnife的用户，那么你可能要学习下Android ButterKnife Zelezny。</p><p><a href="https://plugins.jetbrains.com/idea/plugin/7369-android-butterknife-zelezny" target="_blank" rel="noopener">Android ButterKnife Zelezny</a></p><p>这个插件将允许你简单地生成ButterKnife注解，而对于Activity和Fragment，它也将添加ButterKnife.bind(…)方法的调用。在View中，则需要你自己添加该调用。</p><ul><li><p>Activity<br><img src="https://cdn-images-1.medium.com/max/1600/1*u1c9R8_uDr75A8QO3FdSbQ.gif" alt></p></li><li><p>Fragment<br><img src="https://cdn-images-1.medium.com/max/1600/1*XyXCOv5S-sFrejQPfgaVaw.gif" alt></p></li><li><p>View<br><img src="https://cdn-images-1.medium.com/max/1600/1*7JNg8td1MVHzTuzH6EVF6w.gif" alt></p></li></ul><hr><p>不使用ButterKnife<br>如果你不使用ButterKnife，那么你可能需要考虑使用FindViewByMe。</p><p><a href="https://plugins.jetbrains.com/idea/plugin/8261-findviewbyme" target="_blank" rel="noopener">FindViewByMe</a></p><p>编辑：我之前向该仓库中推送对Fragment和自定义View的支持，如今，开发人员发布了解决下面提到的问题的插件的v1.3.5。 我将相应地更新GIF。</p><p>这个很棒的插件仍然在开发中，目前还不能很好地支持Fragment和自定义view。 在Activity中，它将为你执行一切，而无需手动定义和赋值布局文件中的view。 在Fragment和自定义view中，您将需要稍微更多的努力。</p><ul><li>Activity<br><img src="https://cdn-images-1.medium.com/max/1600/1*BTURA408x-3YQzxL-KWbZQ.gif" alt></li></ul><p>如前所述，它不能很好地与Fragment工作，但我们任然可以使它工作。 你需要重写onCreate，因为插件只能在onCreate方法中调用生成代码来工作。</p><ul><li>Fragment (Hexo插入视频可能有问题，可以点击链接查看)<br><a href="https://youtu.be/fppaDGgpScc" target="_blank" rel="noopener">油管视频</a></li></ul><video src="https://youtu.be/xSgrrmBugZc" type="video/mp4" controls="controls" width="100%" height="100%"></video><p>在视图中，它的工作原理与Fragment中的几乎相同。 你不能重写onCreate，但你可以通过创建一个假的onCreate()方法来作弊。</p><ul><li>View<br><a href="https://youtu.be/fppaDGgpScc" target="_blank" rel="noopener">油管视频</a><video src="https://youtu.be/fppaDGgpScc" type="video/mp4" controls="controls" width="100%" height="100%"></video></li></ul><p>你可以帮助这个插件的开发者继续改进它，并通过fork该<a href="https://github.com/laobie/FindViewByMe" target="_blank" rel="noopener">仓库</a>来解决上述问题。</p><hr><p>感谢，和往常一样，请让我知道你的意见！</p>]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;今天，我们讨论一下View。让我们谈谈如何快速地从xml布局文件中获取到定义好的View实例。&lt;br&gt;
     
     </summary>
     
