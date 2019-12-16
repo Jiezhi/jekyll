@@ -106,7 +106,7 @@
 <meta property="og:site_name" content="介之的博客">
 <meta property="og:description" content="记录 Sqoop 使用过程中常见问题及解决方案。">
 <meta property="og:locale" content="zh-cn">
-<meta property="og:updated_time" content="2019-12-12T08:52:01.808Z">
+<meta property="og:updated_time" content="2019-12-16T07:33:48.903Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="sqoop 常见问题">
 <meta name="twitter:description" content="记录 Sqoop 使用过程中常见问题及解决方案。">
@@ -353,7 +353,7 @@
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Jiezhi.G">
       <meta itemprop="description" content="努力地成为一个大牛">
-      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="image" content="/images/avatar.gif">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
@@ -391,12 +391,24 @@
                 
               
 
-              <time title="Created: 2019-12-12 10:48:05 / Modified: 16:52:01" itemprop="dateCreated datePublished" datetime="2019-12-12T10:48:05+08:00">2019-12-12</time>
+              <time title="Created: 2019-12-12 10:48:05" itemprop="dateCreated datePublished" datetime="2019-12-12T10:48:05+08:00">2019-12-12</time>
             
 
             
               
 
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Edited on</span>
+                
+                <time title="Modified: 2019-12-16 15:33:48" itemprop="dateModified" datetime="2019-12-16T15:33:48+08:00">2019-12-16</time>
               
             
           </span>
@@ -464,7 +476,9 @@
         <p>记录 Sqoop 使用过程中常见问题及解决方案。<br><a id="more"></a></p>
 <h2 id="1-表名为数据库的保留字段"><a href="#1-表名为数据库的保留字段" class="headerlink" title="1.表名为数据库的保留字段"></a>1.表名为数据库的保留字段</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">INFO manager.SqlManager: Executing SQL statement: SELECT t.* FROM order AS t WHERE 1=0</span><br><span class="line">ERROR manager.SqlManager: Error executing statement: com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException: You have an error <span class="keyword">in</span> your SQL syntax; check the manual that corresponds to your MySQL server version <span class="keyword">for</span> the right syntax to use near <span class="string">'order AS t WHERE 1=0'</span> at line 1</span><br><span class="line">com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException: You have an error <span class="keyword">in</span> your SQL syntax; check the manual that corresponds to your MySQL server version <span class="keyword">for</span> the right syntax to use near <span class="string">'order AS t WHERE 1=0'</span> at line 1</span><br></pre></td></tr></table></figure>
 <p>Sqoop 在执行任务前，会执行类似的语句来判断源表是否有问题：<br><code>SELECT t.* FROM TABLE_NAME AS t WHERE 1=0</code><br>然而这里报的错表示这句语句有错误，无法执行。仔细一看原来业务库那边的表名为 <strong>order</strong>，显然这个订单表名使用了 MySQL 中的保留关键字了。在 MySQL 中，使用 <em><code></code></em> 将含关键字的名称引起来即可正常执行，如：<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> t.* <span class="keyword">FROM</span> <span class="string">`order`</span> <span class="keyword">AS</span> t <span class="keyword">WHERE</span> <span class="number">1</span>=<span class="number">0</span>。</span><br></pre></td></tr></table></figure></p>
-<p>如果在 Sqoop 命令中直接使用 <em><code>order</code></em> 却无法正常执行，<strong>order</strong> 会被 shell 当成独立的命令来执行，也会直接报错。（经过测试使用单引号<code>&#39;&#39;</code>、双引号<code>&quot;&quot;</code>及转义字符都无法执行 Sqoop 任务。）</p>
+<p>如果在 Sqoop 命令中直接使用 <em><code>order</code></em> 却无法正常执行，<strong>order</strong> 会被 shell 当成独立的命令来执行，也会直接报错。（经过测试使用单引号<code>&#39;&#39;</code>、双引号<code>&quot;&quot;</code>及转义字符都无法执行 Sqoop 任务。)</p>
+<p>Updated: 可以试下方式<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">--table \`order\`</span><br></pre></td></tr></table></figure></p>
+<p>但 sqoop 在找主键时似乎会出错，所以最好通过<code>--split-by</code>指定主键）</p>
 <p>那可以考虑<br>1.用 <code>--query</code>  来解决</p>
 <p>可参考<a href="http://sqoop.apache.org/docs/1.4.7/SqoopUserGuide.html#_free_form_query_imports" target="_blank" rel="noopener">Free-form Query Imports</a></p>
 <p>2.将 sqoop 语句放到文件中，然后使用<code>sqoop --options-file</code>来执行对应的文件<br>可参考<a href="http://sqoop.apache.org/docs/1.4.7/SqoopUserGuide.html#_using_options_files_to_pass_arguments" target="_blank" rel="noopener">Using Options Files to Pass Arguments</a></p>
@@ -611,8 +625,6 @@
       <div class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
-            
-              <img class="site-author-image" itemprop="image" src="/images/avatar.jpeg" alt="Jiezhi.G">
             
               <p class="site-author-name" itemprop="name">Jiezhi.G</p>
               <div class="site-description motion-element" itemprop="description">努力地成为一个大牛</div>
