@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://jiezhi.github.io/"/>
-  <updated>2019-12-16T07:33:48.903Z</updated>
+  <updated>2020-01-16T08:51:00.872Z</updated>
   <id>http://jiezhi.github.io/</id>
   
   <author>
@@ -15,6 +15,28 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Supervisord介绍与使用</title>
+    <link href="http://jiezhi.github.io/2020/01/16/supervisord/"/>
+    <id>http://jiezhi.github.io/2020/01/16/supervisord/</id>
+    <published>2020-01-16T07:19:46.000Z</published>
+    <updated>2020-01-16T08:51:00.872Z</updated>
+    
+    <content type="html"><![CDATA[<p>有时候我们希望有些进程能时刻运行，并能在出错后自动重启。除了用系统带的 systemd 之外，你还可以用supervisord。<br>这里简单介绍 supervisord 的安装和使用。<br><a id="more"></a><br><a href="http://supervisord.org/index.html" target="_blank" rel="noopener">项目地址</a></p><h1 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h1><p>安装比较简单：<br><code>pip install supervisor</code></p><h1 id="创建配置文件"><a href="#创建配置文件" class="headerlink" title="创建配置文件"></a>创建配置文件</h1><p>使用<code>echo_supervisord_conf</code>命令可以创建一份配置文件模板，比如要把配置文件放在<code>/etc/supervisord.conf</code>，则执行：<br><code>echo_supervisord_conf &gt; /etc/supervisord.conf</code><br>另外如果你想把配置文件放在其他地方，则可以自己指定地址，只是在启动 supervisord 时加<code>-c</code>显式指定配置文件地址<code>supervisord -c supervisord.conf</code> </p><h1 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h1><h2 id="配置任务"><a href="#配置任务" class="headerlink" title="配置任务"></a>配置任务</h2><p>修改<code>supervisord.conf</code>文件，在84行左右位置加入你想要执行的进程，按如下格式：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[program:theprogramname]</span><br><span class="line"><span class="built_in">command</span>=/bin/cat              ; the program (relative uses PATH, can take args)</span><br></pre></td></tr></table></figure></p><p>比如我想用命令通过 ssh 来代理远程的一个 web 页面：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[program:cm]</span><br><span class="line"><span class="built_in">command</span>=ssh -N -L *:7180:localhost:7180 214</span><br></pre></td></tr></table></figure></p><h2 id="配置-http-服务"><a href="#配置-http-服务" class="headerlink" title="配置 http 服务"></a>配置 http 服务</h2><p>supervisord 可以开启 http 服务，通过 web 页面来查看和管理任务。<br>如果需要开启，可以打开<code>inet_http_server</code>配置，大概在39行。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[inet_http_server]         ; inet (TCP) server disabled by default</span><br><span class="line">port=0.0.0.0:9001          ; ip_address:port specifier, *:port <span class="keyword">for</span> all iface</span><br><span class="line">username=admin             ; default is no username (open server)</span><br><span class="line">password=thepassword       ; default is no password (open server)</span><br></pre></td></tr></table></figure></p><h1 id="启动"><a href="#启动" class="headerlink" title="启动"></a>启动</h1><p>直接执行<code>supervisord</code>即可启动，如果需要指定配置文件位置则使用<code>-c</code>参数。</p><h1 id="管理"><a href="#管理" class="headerlink" title="管理"></a>管理</h1><h2 id="Web-页面管理"><a href="#Web-页面管理" class="headerlink" title="Web 页面管理"></a>Web 页面管理</h2><p>如果在配置中开启了 http 服务，则可以直接访问 http 地址，输入账户密码后即可。<br><img src="https://i.loli.net/2020/01/16/c9oIUnOE4KTMJFf.png" alt></p><h2 id="通过-supervisorctl-管理"><a href="#通过-supervisorctl-管理" class="headerlink" title="通过 supervisorctl 管理"></a>通过 supervisorctl 管理</h2><p>比如要查看所有任务状态：<br><code>supervisorctl status all</code><br>或者重启所有服务：<br><code>supervisorctl restart all</code></p><p>更多命令可参见：<br><a href="http://supervisord.org/running.html#supervisorctl-command-line-options" target="_blank" rel="noopener">supervisorctl-command-line-options</a></p>]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;有时候我们希望有些进程能时刻运行，并能在出错后自动重启。除了用系统带的 systemd 之外，你还可以用supervisord。&lt;br&gt;这里简单介绍 supervisord 的安装和使用。&lt;br&gt;
+    
+    </summary>
+    
+      <category term="Linux" scheme="http://jiezhi.github.io/categories/Linux/"/>
+    
+    
+      <category term="tools" scheme="http://jiezhi.github.io/tags/tools/"/>
+    
+  </entry>
   
   <entry>
     <title>sqoop 常见问题</title>
@@ -472,30 +494,6 @@
       <category term="translate" scheme="http://jiezhi.github.io/tags/translate/"/>
     
       <category term="plugin" scheme="http://jiezhi.github.io/tags/plugin/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>【译】android studio 技巧1——Parcelable</title>
-    <link href="http://jiezhi.github.io/2017/03/19/android-studio-tip1/"/>
-    <id>http://jiezhi.github.io/2017/03/19/android-studio-tip1/</id>
-    <published>2017-03-19T07:49:25.000Z</published>
-    <updated>2019-03-08T10:08:28.023Z</updated>
-    
-    <content type="html"><![CDATA[<p>最后，我决定开始我自己的技术博客。首先发布一系列的帖子来描述一些我每天开发都在使用的Android Studio插件。</p><a id="more"></a><p>如果你不知道如何在Android Studio中安装插件，请点击此<a href="http://stackoverflow.com/a/30617737/2855514" target="_blank" rel="noopener">链接</a>。</p><h3 id="Android-Parcelable代码生成器"><a href="#Android-Parcelable代码生成器" class="headerlink" title="Android Parcelable代码生成器"></a><a href="https://plugins.jetbrains.com/idea/plugin/7332-android-parcelable-code-generator" target="_blank" rel="noopener">Android Parcelable代码生成器</a></h3><p>你是否有过必须在两个Activity/Fragment之间转发数据情况？</p><p>如果是的话，你应该熟悉Bundle类的用法，你也知道你只能在其中放置一个特定类型的项目。</p><p>但是如果我想转发整个对象呢？ 那么，该对象将需要实现Serializable或Parcelable接口。 第一种方式对于开发人员还算简单，在第一个实例中，我们似乎要用这种方式。 但是，正如这个<a href="http://www.developerphil.com/parcelable-vs-serializable/" target="_blank" rel="noopener">帖子</a>解释的，使用Parcelable接口是更有效率的。 不过它的缺点是需要写一点代码，而且可能不是那么直观。<br><img src="https://cdn-images-1.medium.com/max/1600/1*VCvqU-RYvueGkL8G9Btc7w.png" alt><br>这是“Android Parcelable代码生成器”插件所做的。 你可以让这个插件生成实现Parcelable接口所需的代码。</p><p>具体怎么做呢，请往下看：<br><img src="https://cdn-images-1.medium.com/max/1600/1*hN7MZbTTNY8ZUYwVSsqEbQ.gif" alt></p><h2 id="如果有人使用Kotliin的话，这里也有一款插件可以使用：Parcelable-Code-Generator-for-kotlin"><a href="#如果有人使用Kotliin的话，这里也有一款插件可以使用：Parcelable-Code-Generator-for-kotlin" class="headerlink" title="如果有人使用Kotliin的话，这里也有一款插件可以使用：Parcelable Code Generator(for kotlin)"></a>如果有人使用Kotliin的话，这里也有一款插件可以使用：<a href="https://plugins.jetbrains.com/idea/plugin/8086-parcelable-code-generator-for-kotlin-" target="_blank" rel="noopener">Parcelable Code Generator(for kotlin)</a></h2><p>敬请关注下一篇文章！</p>]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;最后，我决定开始我自己的技术博客。首先发布一系列的帖子来描述一些我每天开发都在使用的Android Studio插件。&lt;/p&gt;
-    
-    </summary>
-    
-      <category term="Android" scheme="http://jiezhi.github.io/categories/Android/"/>
-    
-    
-      <category term="android" scheme="http://jiezhi.github.io/tags/android/"/>
-    
-      <category term="translate" scheme="http://jiezhi.github.io/tags/translate/"/>
     
   </entry>
   
