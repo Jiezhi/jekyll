@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://jiezhi.github.io/"/>
-  <updated>2020-01-16T08:51:00.872Z</updated>
+  <updated>2020-01-17T10:24:19.694Z</updated>
   <id>http://jiezhi.github.io/</id>
   
   <author>
@@ -15,6 +15,34 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>CDH中sqoop无法在 hue 中正确执行的问题</title>
+    <link href="http://jiezhi.github.io/2020/01/17/run-sqoop-with-oozie-in-hue/"/>
+    <id>http://jiezhi.github.io/2020/01/17/run-sqoop-with-oozie-in-hue/</id>
+    <published>2020-01-17T09:38:36.000Z</published>
+    <updated>2020-01-17T10:24:19.694Z</updated>
+    
+    <content type="html"><![CDATA[<p>JDBC的配置给你带来多少的麻烦？</p><a id="more"></a><p>安装好 CDH 后，添加完 sqoop 1服务后，去 hue 中执行直接报错。</p><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">No child hadoop job is executed.</span><br><span class="line">java.lang.reflect.InvocationTargetException</span><br><span class="line">  ...</span><br><span class="line">at org.apache.hadoop.security.UserGroupInformation.doAs(UserGroupInformation.java:<span class="number">1875</span>)</span><br><span class="line">at org.apache.oozie.action.hadoop.LauncherAM.main(LauncherAM.java:<span class="number">141</span>)</span><br><span class="line">Caused by: java.lang.SecurityException: Intercepted System.exit(<span class="number">1</span>)</span><br><span class="line">at org.apache.oozie.action.hadoop.security.LauncherSecurityManager.checkExit(LauncherSecurityManager.java:<span class="number">57</span>)</span><br><span class="line">at java.lang.Runtime.exit(Runtime.java:<span class="number">107</span>)</span><br><span class="line">at java.lang.System.exit(System.java:<span class="number">971</span>)</span><br><span class="line">at org.apache.sqoop.Sqoop.main(Sqoop.java:<span class="number">252</span>)</span><br><span class="line">at org.apache.oozie.action.hadoop.SqoopMain.runSqoopJob(SqoopMain.java:<span class="number">214</span>)</span><br><span class="line">at org.apache.oozie.action.hadoop.SqoopMain.run(SqoopMain.java:<span class="number">199</span>)</span><br><span class="line">at org.apache.oozie.action.hadoop.LauncherMain.run(LauncherMain.java:<span class="number">104</span>)</span><br><span class="line">at org.apache.oozie.action.hadoop.SqoopMain.main(SqoopMain.java:<span class="number">51</span>)</span><br><span class="line">... <span class="number">16</span> more</span><br><span class="line">Intercepting System.exit(<span class="number">1</span>)</span><br><span class="line">Failing Oozie Launcher, Main Class [org.apache.oozie.action.hadoop.SqoopMain], exit code [<span class="number">1</span>]</span><br></pre></td></tr></table></figure><p>围绕这个问题找了很久的都无法找到对应的问题，之前都是直接去 YARN 里看的 Log。这两天去看了 stderr 里的错误才发现是 JDBC 驱动造成的问题（吐槽下某骨文公司）很多程序本可以开箱即用或者一键安装的，结果老是因为 JDBC 驱动要去手动下载而浪费很多时间。<br>再看下真正的错误：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">java.lang.RuntimeException: Could not load db driver class: com.mysql.jdbc.Driver</span><br><span class="line">at org.apache.sqoop.manager.SqlManager.makeConnection(SqlManager.java:<span class="number">874</span>)</span><br><span class="line">at org.apache.sqoop.manager.GenericJdbcManager.getConnection(GenericJdbcManager.java:<span class="number">59</span>)</span><br><span class="line">at org.apache.sqoop.manager.CatalogQueryManager.listTables(CatalogQueryManager.java:<span class="number">102</span>)</span><br><span class="line">at org.apache.sqoop.tool.ListTablesTool.run(ListTablesTool.java:<span class="number">49</span>)</span><br><span class="line">at org.apache.sqoop.Sqoop.run(Sqoop.java:<span class="number">146</span>)</span><br></pre></td></tr></table></figure></p><p>然后以为是 sqoop JDBC 驱动没安装好，不过在节点上却可以直接用 sqoop 命令来导入导出数据。那说明 sqoop 的驱动没问题呀，我们知道 sqoop 最终是落在 oozie 上执行的，那么是不是有可能 oozie 找不到对应的驱动造成的呢。</p><p>我们去 oozie 所在的节点上执行命令：</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> oozie admin -shareliblist</span><br><span class="line">[Available ShareLib]</span><br><span class="line">hive</span><br><span class="line">distcp</span><br><span class="line">git</span><br><span class="line">mapreduce-streaming</span><br><span class="line">spark</span><br><span class="line">oozie</span><br><span class="line">hcatalog</span><br><span class="line">hive2</span><br><span class="line">sqoop</span><br><span class="line">pig</span><br></pre></td></tr></table></figure><p>看一下 sqoop 相关的 jar 包：<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> oozie admin -shareliblist sqoop</span><br><span class="line">[Available ShareLib]</span><br><span class="line">sqoop</span><br><span class="line">hdfs://yournodename:8020/user/oozie/share/lib/lib_20200108192149/sqoop/HikariCP-2.6.1.jar</span><br><span class="line">hdfs://yournodename:8020/user/oozie/share/lib/lib_20200108192149/sqoop/HikariCP-java7-2.4.12.jar</span><br><span class="line">hdfs://yournodename:8020/user/oozie/share/lib/lib_20200108192149/sqoop/ST4-4.0.4.jar</span><br><span class="line">hdfs://yournodename:8020/user/oozie/share/lib/lib_20200108192149/sqoop/aggdesigner-algorithm-6.0.jar</span><br><span class="line">hdfs://yournodename:8020/user/oozie/share/lib/lib_20200108192149/sqoop/ant-1.9.1.jar</span><br><span class="line">hdfs://yournodename:8020/user/oozie/share/lib/lib_20200108192149/sqoop/ant-launcher-1.9.1.jar</span><br><span class="line">hdfs://yournodename:8020/user/oozie/share/lib/lib_20200108192149/sqoop/antlr-2.7.7.jar</span><br><span class="line">hdfs://yournodename:8020/user/oozie/share/lib/lib_20200108192149/sqoop/antlr-runtime-3.4.jar</span><br><span class="line">hdfs://yournodename:8020/user/oozie/share/lib/lib_20200108192149/sqoop/aopalliance-1.0.jar</span><br><span class="line">hdfs://yournodename:8020/user/oozie/share/lib/lib_20200108192149/sqoop/aopalliance-repackaged-2.5.0-b32.jar</span><br><span class="line">  ...</span><br></pre></td></tr></table></figure></p><p> grep 一下，发现并没有 JDBC 驱动，那么需要将 sqoop 目录下（一般为/var/lib/sqoop/）的 jdbc 驱动放到 oozie 目录下（具体在 HDFS 上的目录看上面的输出结果就知道了）。如果 sqoop 的 jdbc 还没配好，直接按照<a href="https://docs.cloudera.com/documentation/enterprise/latest/topics/cm_mc_sqoop1_client.html#topic_13_7" target="_blank" rel="noopener">CDH 文档</a>安装即可。</p><p>最后执行下更新即可：<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> oozie admin -sharelibupdate</span><br><span class="line">[ShareLib update status]</span><br><span class="line">sharelibDirOld = hdfs://yournodename:8020/user/oozie/share/lib/lib_20200108192149</span><br><span class="line">host = http://yournodename:11000/oozie</span><br><span class="line">sharelibDirNew = hdfs://yournodename:8020/user/oozie/share/lib/lib_20200108192149</span><br><span class="line">status = Successful</span><br></pre></td></tr></table></figure></p>]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;JDBC的配置给你带来多少的麻烦？&lt;/p&gt;
+    
+    </summary>
+    
+      <category term="BigData" scheme="http://jiezhi.github.io/categories/BigData/"/>
+    
+    
+      <category term="Sqoop" scheme="http://jiezhi.github.io/tags/Sqoop/"/>
+    
+      <category term="CDH" scheme="http://jiezhi.github.io/tags/CDH/"/>
+    
+      <category term="Hue" scheme="http://jiezhi.github.io/tags/Hue/"/>
+    
+      <category term="Ooozie" scheme="http://jiezhi.github.io/tags/Ooozie/"/>
+    
+  </entry>
   
   <entry>
     <title>Supervisord介绍与使用</title>
@@ -387,9 +415,9 @@
       <category term="Life" scheme="http://jiezhi.github.io/categories/Life/"/>
     
     
-      <category term="2017" scheme="http://jiezhi.github.io/tags/2017/"/>
-    
       <category term="总结" scheme="http://jiezhi.github.io/tags/%E6%80%BB%E7%BB%93/"/>
+    
+      <category term="2017" scheme="http://jiezhi.github.io/tags/2017/"/>
     
   </entry>
   
@@ -466,34 +494,6 @@
     
     
       <category term="android" scheme="http://jiezhi.github.io/tags/android/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>【译】Android Studio 技巧8 —— Json模型</title>
-    <link href="http://jiezhi.github.io/2017/03/21/android-studio-tip8/"/>
-    <id>http://jiezhi.github.io/2017/03/21/android-studio-tip8/</id>
-    <published>2017-03-21T12:58:31.000Z</published>
-    <updated>2019-03-08T10:08:50.885Z</updated>
-    
-    <content type="html"><![CDATA[<p>最近JSON对象非常受欢迎。那让我们看看如何对他们建模。<br><a id="more"></a></p><p>试想一下，你的后端团队给了你一个你期望的JSON示例。 分析过后，你尝试建立POJO模型，所以你通过众多的第三方库简单地进行注入（例如<a href="https://github.com/google/gson" target="_blank" rel="noopener">gson</a>）。 你花了很多时间来创建表示json的每个单个实体的POJO。 这非常无聊而且浪费了大量的时间。 部分人可能会使用<a href="http://www.jsonschema2pojo.org/" target="_blank" rel="noopener">json2pojo</a>网站，但你仍然必须手动将生成的类放入到你的包，而且可能变得很混乱。</p><p>让我们看一个不错的插件，可以更高效地处理这个过程。</p><hr><h3 id="RoboPOJOGenerator"><a href="#RoboPOJOGenerator" class="headerlink" title="RoboPOJOGenerator"></a><a href="https://plugins.jetbrains.com/plugin/8634-robopojogenerator" target="_blank" rel="noopener">RoboPOJOGenerator</a></h3><p>它支持从模式(schema)或从实际的JSON数据中生成POJO模型。 它还可以生成支持gson，Jackson，LoganSquare和AutoValueGson方案的对象，因此您可以使用任何种类的库来解析。 它还支持<em>Kotlin</em>，这是一个非常好的功能。它还会问你是否要生成<em>toString</em>和<em>getters＆setters</em>方法。<br><img src="https://cdn-images-1.medium.com/max/800/1*YoEqqnUgEcJDyFgu6_KLgw.gif" alt></p><hr><p>我希望这将帮助你加快开发过程，并且减少无聊的工作量！ 敬请关注下一篇文章！</p>]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;最近JSON对象非常受欢迎。那让我们看看如何对他们建模。&lt;br&gt;
-    
-    </summary>
-    
-      <category term="Android" scheme="http://jiezhi.github.io/categories/Android/"/>
-    
-    
-      <category term="android" scheme="http://jiezhi.github.io/tags/android/"/>
-    
-      <category term="json" scheme="http://jiezhi.github.io/tags/json/"/>
-    
-      <category term="translate" scheme="http://jiezhi.github.io/tags/translate/"/>
-    
-      <category term="plugin" scheme="http://jiezhi.github.io/tags/plugin/"/>
     
   </entry>
   
