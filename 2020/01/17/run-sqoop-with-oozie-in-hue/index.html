@@ -99,7 +99,7 @@
 
 
   <meta name="description" content="JDBC的配置给你带来多少的麻烦？">
-<meta name="keywords" content="Sqoop,CDH,Hue,Ooozie">
+<meta name="keywords" content="CDH,Sqoop,Hue,Ooozie">
 <meta property="og:type" content="article">
 <meta property="og:title" content="CDH中sqoop无法在 hue 中正确执行的问题">
 <meta property="og:url" content="http://jiezhi.github.io/2020/01/17/run-sqoop-with-oozie-in-hue/index.html">
@@ -249,7 +249,7 @@
       
     
 
-    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>Tags<span class="badge">94</span></a>
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>Tags<span class="badge">95</span></a>
 
   </li>
         
@@ -287,7 +287,7 @@
       
     
 
-    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives<span class="badge">75</span></a>
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives<span class="badge">77</span></a>
 
   </li>
 
@@ -468,10 +468,10 @@
 <p>围绕这个问题找了很久的都无法找到对应的问题，之前都是直接去 YARN 里看的 Log。这两天去看了 stderr 里的错误才发现是 JDBC 驱动造成的问题（吐槽下某骨文公司）很多程序本可以开箱即用或者一键安装的，结果老是因为 JDBC 驱动要去手动下载而浪费很多时间。<br>再看下真正的错误：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">java.lang.RuntimeException: Could not load db driver class: com.mysql.jdbc.Driver</span><br><span class="line">	at org.apache.sqoop.manager.SqlManager.makeConnection(SqlManager.java:<span class="number">874</span>)</span><br><span class="line">	at org.apache.sqoop.manager.GenericJdbcManager.getConnection(GenericJdbcManager.java:<span class="number">59</span>)</span><br><span class="line">	at org.apache.sqoop.manager.CatalogQueryManager.listTables(CatalogQueryManager.java:<span class="number">102</span>)</span><br><span class="line">	at org.apache.sqoop.tool.ListTablesTool.run(ListTablesTool.java:<span class="number">49</span>)</span><br><span class="line">	at org.apache.sqoop.Sqoop.run(Sqoop.java:<span class="number">146</span>)</span><br></pre></td></tr></table></figure></p>
 <p>然后以为是 sqoop JDBC 驱动没安装好，不过在节点上却可以直接用 sqoop 命令来导入导出数据。那说明 sqoop 的驱动没问题呀，我们知道 sqoop 最终是落在 oozie 上执行的，那么是不是有可能 oozie 找不到对应的驱动造成的呢。</p>
 <p>我们去 oozie 所在的节点上执行命令：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> oozie admin -shareliblist</span><br><span class="line">[Available ShareLib]</span><br><span class="line">hive</span><br><span class="line">distcp</span><br><span class="line">git</span><br><span class="line">mapreduce-streaming</span><br><span class="line">spark</span><br><span class="line">oozie</span><br><span class="line">hcatalog</span><br><span class="line">hive2</span><br><span class="line">sqoop</span><br><span class="line">pig</span><br></pre></td></tr></table></figure>
-<p>看一下 sqoop 相关的 jar 包：<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> oozie admin -shareliblist sqoop</span><br><span class="line">[Available ShareLib]</span><br><span class="line">sqoop</span><br><span class="line">	hdfs://yournodename:8020/user/oozie/share/lib/lib_20200108192149/sqoop/HikariCP-2.6.1.jar</span><br><span class="line">	hdfs://yournodename:8020/user/oozie/share/lib/lib_20200108192149/sqoop/HikariCP-java7-2.4.12.jar</span><br><span class="line">	hdfs://yournodename:8020/user/oozie/share/lib/lib_20200108192149/sqoop/ST4-4.0.4.jar</span><br><span class="line">	hdfs://yournodename:8020/user/oozie/share/lib/lib_20200108192149/sqoop/aggdesigner-algorithm-6.0.jar</span><br><span class="line">	hdfs://yournodename:8020/user/oozie/share/lib/lib_20200108192149/sqoop/ant-1.9.1.jar</span><br><span class="line">	hdfs://yournodename:8020/user/oozie/share/lib/lib_20200108192149/sqoop/ant-launcher-1.9.1.jar</span><br><span class="line">	hdfs://yournodename:8020/user/oozie/share/lib/lib_20200108192149/sqoop/antlr-2.7.7.jar</span><br><span class="line">	hdfs://yournodename:8020/user/oozie/share/lib/lib_20200108192149/sqoop/antlr-runtime-3.4.jar</span><br><span class="line">	hdfs://yournodename:8020/user/oozie/share/lib/lib_20200108192149/sqoop/aopalliance-1.0.jar</span><br><span class="line">	hdfs://yournodename:8020/user/oozie/share/lib/lib_20200108192149/sqoop/aopalliance-repackaged-2.5.0-b32.jar</span><br><span class="line">  ...</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> oozie admin -shareliblist</span></span><br><span class="line">[Available ShareLib]</span><br><span class="line">hive</span><br><span class="line">distcp</span><br><span class="line">git</span><br><span class="line">mapreduce-streaming</span><br><span class="line">spark</span><br><span class="line">oozie</span><br><span class="line">hcatalog</span><br><span class="line">hive2</span><br><span class="line">sqoop</span><br><span class="line">pig</span><br></pre></td></tr></table></figure>
+<p>看一下 sqoop 相关的 jar 包：<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> oozie admin -shareliblist sqoop</span></span><br><span class="line">[Available ShareLib]</span><br><span class="line">sqoop</span><br><span class="line">	hdfs://yournodename:8020/user/oozie/share/lib/lib_20200108192149/sqoop/HikariCP-2.6.1.jar</span><br><span class="line">	hdfs://yournodename:8020/user/oozie/share/lib/lib_20200108192149/sqoop/HikariCP-java7-2.4.12.jar</span><br><span class="line">	hdfs://yournodename:8020/user/oozie/share/lib/lib_20200108192149/sqoop/ST4-4.0.4.jar</span><br><span class="line">	hdfs://yournodename:8020/user/oozie/share/lib/lib_20200108192149/sqoop/aggdesigner-algorithm-6.0.jar</span><br><span class="line">	hdfs://yournodename:8020/user/oozie/share/lib/lib_20200108192149/sqoop/ant-1.9.1.jar</span><br><span class="line">	hdfs://yournodename:8020/user/oozie/share/lib/lib_20200108192149/sqoop/ant-launcher-1.9.1.jar</span><br><span class="line">	hdfs://yournodename:8020/user/oozie/share/lib/lib_20200108192149/sqoop/antlr-2.7.7.jar</span><br><span class="line">	hdfs://yournodename:8020/user/oozie/share/lib/lib_20200108192149/sqoop/antlr-runtime-3.4.jar</span><br><span class="line">	hdfs://yournodename:8020/user/oozie/share/lib/lib_20200108192149/sqoop/aopalliance-1.0.jar</span><br><span class="line">	hdfs://yournodename:8020/user/oozie/share/lib/lib_20200108192149/sqoop/aopalliance-repackaged-2.5.0-b32.jar</span><br><span class="line">  ...</span><br></pre></td></tr></table></figure></p>
 <p> grep 一下，发现并没有 JDBC 驱动，那么需要将 sqoop 目录下（一般为/var/lib/sqoop/）的 jdbc 驱动放到 oozie 目录下（具体在 HDFS 上的目录看上面的输出结果就知道了）。如果 sqoop 的 jdbc 还没配好，直接按照<a href="https://docs.cloudera.com/documentation/enterprise/latest/topics/cm_mc_sqoop1_client.html#topic_13_7" target="_blank" rel="noopener">CDH 文档</a>安装即可。</p>
-<p>最后执行下更新即可：<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> oozie admin -sharelibupdate</span><br><span class="line">[ShareLib update status]</span><br><span class="line">	sharelibDirOld = hdfs://yournodename:8020/user/oozie/share/lib/lib_20200108192149</span><br><span class="line">	host = http://yournodename:11000/oozie</span><br><span class="line">	sharelibDirNew = hdfs://yournodename:8020/user/oozie/share/lib/lib_20200108192149</span><br><span class="line">	status = Successful</span><br></pre></td></tr></table></figure></p>
+<p>最后执行下更新即可：<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> oozie admin -sharelibupdate</span></span><br><span class="line">[ShareLib update status]</span><br><span class="line">	sharelibDirOld = hdfs://yournodename:8020/user/oozie/share/lib/lib_20200108192149</span><br><span class="line">	host = http://yournodename:11000/oozie</span><br><span class="line">	sharelibDirNew = hdfs://yournodename:8020/user/oozie/share/lib/lib_20200108192149</span><br><span class="line">	status = Successful</span><br></pre></td></tr></table></figure></p>
 
       
     </div>
@@ -519,9 +519,9 @@
       
         <div class="post-tags">
           
-            <a href="/tags/Sqoop/" rel="tag"># Sqoop</a>
-          
             <a href="/tags/CDH/" rel="tag"># CDH</a>
+          
+            <a href="/tags/Sqoop/" rel="tag"># Sqoop</a>
           
             <a href="/tags/Hue/" rel="tag"># Hue</a>
           
@@ -547,6 +547,10 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/02/13/canal1-1-4/" rel="prev" title="Canal1.1.4配置使用">
+                Canal1.1.4配置使用 <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -613,7 +617,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">75</span>
+                    <span class="site-state-item-count">77</span>
                     <span class="site-state-item-name">posts</span>
                   </a>
                 </div>
@@ -895,7 +899,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">93</span>
+                      
+                    
+                    <span class="site-state-item-count">94</span>
                     <span class="site-state-item-name">tags</span>
                   </a>
                 </div>
