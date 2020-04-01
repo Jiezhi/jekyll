@@ -43,27 +43,6 @@
   </entry>
   
   <entry>
-    <title>Canal1.1.4配置使用</title>
-    <link href="http://jiezhi.github.io/2020/02/13/canal1-1-4/"/>
-    <id>http://jiezhi.github.io/2020/02/13/canal1-1-4/</id>
-    <published>2020-02-13T03:08:45.000Z</published>
-    <updated>2020-02-13T05:54:00.027Z</updated>
-    
-    <content type="html"><![CDATA[<p>由阿里开源的Canal从1.1.3升级到1.1.4后配置有了很大的变化。这里简单记录下配置流程。</p><p>目前公司使用 Canal 的流程：Canal–&gt;Kafka–&gt;Flink–&gt;TiDB。<br><a id="more"></a></p><h1 id="Canal-下载"><a href="#Canal-下载" class="headerlink" title="Canal 下载"></a>Canal 下载</h1><blockquote><p>工作目录切换到<code>/opt/canal1.1.4</code><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">wget -c https://github.com/alibaba/canal/releases/download/canal-1.1.4/canal.deployer-1.1.4.tar.gz</span><br><span class="line">wget -c https://github.com/alibaba/canal/releases/download/canal-1.1.4/canal.admin-1.1.4.tar.gz</span><br><span class="line">wget -c https://github.com/alibaba/canal/releases/download/canal-1.1.4/canal.adapter-1.1.4.tar.gz</span><br></pre></td></tr></table></figure></p></blockquote><p>解压到各自文件夹中。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ll</span></span><br><span class="line">drwxr-xr-x. 7 root root        66 Feb 13 13:44 adapter</span><br><span class="line">drwxr-xr-x. 6 root root        52 Feb 13 13:44 admin</span><br><span class="line">drwxr-xr-x. 6 root root        52 Feb 13 13:44 deployer</span><br><span class="line">drwxr-xr-x. 6 root root        52 Feb 13 13:45 example</span><br></pre></td></tr></table></figure></p><h1 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h1>]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;由阿里开源的Canal从1.1.3升级到1.1.4后配置有了很大的变化。这里简单记录下配置流程。&lt;/p&gt;
-&lt;p&gt;目前公司使用 Canal 的流程：Canal–&amp;gt;Kafka–&amp;gt;Flink–&amp;gt;TiDB。&lt;br&gt;
-    
-    </summary>
-    
-      <category term="Tools" scheme="http://jiezhi.github.io/categories/Tools/"/>
-    
-    
-  </entry>
-  
-  <entry>
     <title>CDH中sqoop无法在 hue 中正确执行的问题</title>
     <link href="http://jiezhi.github.io/2020/01/17/run-sqoop-with-oozie-in-hue/"/>
     <id>http://jiezhi.github.io/2020/01/17/run-sqoop-with-oozie-in-hue/</id>
@@ -498,6 +477,24 @@
     <summary type="html">
     
       &lt;p&gt;备份一下项目中的app.build文件&lt;br&gt;
+    
+    </summary>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>使用注解改进Android代码</title>
+    <link href="http://jiezhi.github.io/2017/05/07/annotations/"/>
+    <id>http://jiezhi.github.io/2017/05/07/annotations/</id>
+    <published>2017-05-07T12:38:31.000Z</published>
+    <updated>2019-02-19T08:37:08.573Z</updated>
+    
+    <content type="html"><![CDATA[<p>注解有很多用途。 但是，在这里我们将讨论如何使用注解来改进我们的android编码。<br><a id="more"></a><br><img src="https://cdn-images-1.medium.com/max/800/1*gxjdLI-WsXSPWPvAyBAMaQ.png" alt></p><h2 id="注解即元数据"><a href="#注解即元数据" class="headerlink" title="注解即元数据"></a>注解即元数据</h2><p>而元数据是提供有关其他数据的信息的一组数据。</p><p>注解有很多用途。 但是，在这里我们将讨论如何使用注解来改进我们的android编码。</p><p>官方Android已经提供了支持注解，你可以添加如下依赖关系来导入注解：</p><blockquote><p>compile ‘com.android.support:support-annotations:x.x.x’</p></blockquote><p>每个人都想成为一个好的程序员，每天我也在努力地提高自己。</p><blockquote><p>任何人都可以编写计算机可以理解的代码，而好的程序员编写人可以理解的代码。 - Martin Fowler</p></blockquote><h2 id="让我们一起探索下一些有用的注解"><a href="#让我们一起探索下一些有用的注解" class="headerlink" title="让我们一起探索下一些有用的注解"></a>让我们一起探索下一些有用的注解</h2><h3 id="空类型注解"><a href="#空类型注解" class="headerlink" title="空类型注解"></a>空类型注解</h3><p><strong>@Nullable</strong>和<strong>@NonNull</strong>注解用于检查给定的变量、参数甚至是返回值是否为空。</p><p><strong>@Nullable</strong>：它表示一个变量、参数或返回值可以为空。</p><p><strong>@NonNUll</strong>：它表示不能为空的变量、参数或返回值。</p><p>例如：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@NonNull</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> View <span class="title">getView</span><span class="params">(@Nullable String s1, @NonNull String s2)</span> </span>&#123;</span><br><span class="line">  <span class="comment">// s1 可以为空</span></span><br><span class="line">  <span class="comment">// s2 不可以为空</span></span><br><span class="line">  <span class="comment">// 该方法必须返回一个不为空的view</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p><p>所以当我们尝试这样调用该方法时：</p><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">View view = getView(<span class="string">"Amit"</span>, <span class="keyword">null</span>);</span><br></pre></td></tr></table></figure><p>在代码检测期间，Android Studio会警告你s2的值不能为空。</p><h2 id="资源注解"><a href="#资源注解" class="headerlink" title="资源注解"></a>资源注解</h2><p>我们都知道，Android对资源的引用（如drawable和string资源）都是传递int类型的，因此我们必须验证资源类型。假设代码中希望传入特定类型的资源（例如Drawables），这里可以传入引用类型的<strong>int</strong>值，但实际上却传入了另外类型的资源，例如R.string资源：</p><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setText</span><span class="params">(@StringRes <span class="keyword">int</span> resId)</span> </span>&#123;</span><br><span class="line">  <span class="comment">// resId 必须为string类型的id</span></span><br><span class="line">  <span class="comment">// resId 不能为常规的int值</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><p>所以，当你像如下方式调用该方法时：</p><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">textView.setText(<span class="number">56</span>);</span><br></pre></td></tr></table></figure><p>在代码检测过程中，当传入非string资源的参数时，注解将会生成一个警告。</p><h2 id="线程注解"><a href="#线程注解" class="headerlink" title="线程注解"></a>线程注解</h2><p>线程注解检查方法是否在其期望的线程被调用。</p><p>支持的注解有：</p><p><strong>@MainThread</strong><br><strong>@UiThread</strong><br><strong>@WorkerThread</strong><br><strong>@BinderThread</strong><br><strong>@AnyThread</strong></p><p>如果你添加如下的注解：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@WorkerThread</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">doSomething</span><span class="params">()</span></span>&#123;</span><br><span class="line">  <span class="comment">// 该方法一定要从worker线程调用</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p><p>如果你从非worker线程调用该方法时，你将会得到一个警告。</p><h2 id="值限定注解"><a href="#值限定注解" class="headerlink" title="值限定注解"></a>值限定注解</h2><p>有时候，我们必须对参数做一些约束，所以使用<strong>@IntRange</strong>，<strong>@FloatRange</strong>和<strong>@Size</strong>注解来验证传入参数的值。</p><p>当调用该方法的人可能会传递错误的值（超出指定的范围）时，该注解是非常有用的。</p><p>在下面的例子中，@IntRange注解确保传递的整数值必须在0到255之间。</p><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setAlpha</span><span class="params">(@IntRange(from=<span class="number">0</span>,to=<span class="number">255</span>)</span> <span class="keyword">int</span> alpha) </span>&#123;&#125;</span><br></pre></td></tr></table></figure><h2 id="权限注解"><a href="#权限注解" class="headerlink" title="权限注解"></a>权限注解</h2><p>使用<strong>@RequiresPermission</strong>注解来验证调用者的权限。</p><p>以下示例注解<strong>setWallpaper()</strong>方法来确保方法的调用者具有<strong>permission.SET_WALLPAPERS</strong>权限：</p><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RequiresPermission</span>(Manifest.permission.SET_WALLPAPER)</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">void</span> <span class="title">setWallpaper</span><span class="params">(Bitmap bitmap)</span> <span class="keyword">throws</span> IOException</span>;</span><br></pre></td></tr></table></figure><p>如果在调用该方法时没有在manifest文件中添加需要的权限，代码检测器将会给你一个警告。</p>]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;注解有很多用途。 但是，在这里我们将讨论如何使用注解来改进我们的android编码。&lt;br&gt;
     
     </summary>
     
