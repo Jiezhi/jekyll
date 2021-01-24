@@ -106,7 +106,7 @@
 <meta property="og:site_name" content="介之的博客">
 <meta property="og:description" content="『旧山松竹老，阻归程。』—— 岳飞 《小重山》">
 <meta property="og:locale" content="zh-cn">
-<meta property="og:updated_time" content="2020-08-18T08:34:58.618Z">
+<meta property="og:updated_time" content="2020-08-18T08:37:48.384Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Atlas升级2.1.0出错修复（CDH 6.3.1）">
 <meta name="twitter:description" content="『旧山松竹老，阻归程。』—— 岳飞 《小重山》">
@@ -287,7 +287,7 @@
       
     
 
-    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives<span class="badge">78</span></a>
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives<span class="badge">80</span></a>
 
   </li>
 
@@ -391,7 +391,7 @@
                 
               
 
-              <time title="Created: 2020-08-18 11:40:40 / Modified: 16:34:58" itemprop="dateCreated datePublished" datetime="2020-08-18T11:40:40+08:00">2020-08-18</time>
+              <time title="Created: 2020-08-18 11:40:40 / Modified: 16:37:48" itemprop="dateCreated datePublished" datetime="2020-08-18T11:40:40+08:00">2020-08-18</time>
             
 
             
@@ -467,7 +467,7 @@
 <p>所以修改<code>addons/hive-bridge/src/main/java/org/apache/atlas/hive/bridge/HiveMetaStoreBridge.java</code>中的<code>getDatabaseName()</code>方法即可。</p>
 <p>修改前：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">getDatabaseName</span><span class="params">(Database hiveDB)</span> </span>&#123;</span><br><span class="line">    String dbName      = hiveDB.getName().toLowerCase();</span><br><span class="line">    String catalogName = hiveDB.getCatalogName() != <span class="keyword">null</span> ? hiveDB.getCatalogName().toLowerCase() : <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (StringUtils.isNotEmpty(catalogName) &amp;&amp; !StringUtils.equals(catalogName, DEFAULT_METASTORE_CATALOG)) &#123;</span><br><span class="line">        dbName = catalogName + SEP + dbName;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> dbName;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
 <p>修改后：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">getDatabaseName</span><span class="params">(Database hiveDB)</span> </span>&#123;</span><br><span class="line">    String dbName      = hiveDB.getName().toLowerCase();</span><br><span class="line">    <span class="comment">/*</span></span><br><span class="line"><span class="comment">    String catalogName = hiveDB.getCatalogName() != null ? hiveDB.getCatalogName().toLowerCase() : null;</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">    if (StringUtils.isNotEmpty(catalogName) &amp;&amp; !StringUtils.equals(catalogName, DEFAULT_METASTORE_CATALOG)) &#123;</span></span><br><span class="line"><span class="comment">        dbName = catalogName + SEP + dbName;</span></span><br><span class="line"><span class="comment">    &#125;</span></span><br><span class="line"><span class="comment">    */</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> dbName;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>然后重新进<code>addons/hive-bridge</code>目录下打包除 hive-bridge-2.1.0.jar 即可。</p>
+<p>然后重新进<code>addons/hive-bridge</code>目录下打包出 hive-bridge-2.1.0.jar。</p>
 <p>最后用这个新的包替换<code>atlas-hive-plugin-impl</code>目录下的文件，重启 HiveServer2 即可。</p>
 
       
@@ -543,6 +543,10 @@
 
           <div class="post-nav-prev post-nav-item">
             
+              <a href="/2020/08/28/mongo-on-hive/" rel="prev" title="mongo-on-hive">
+                mongo-on-hive <i class="fa fa-chevron-right"></i>
+              </a>
+            
           </div>
         </div>
       
@@ -608,7 +612,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">78</span>
+                    <span class="site-state-item-count">80</span>
                     <span class="site-state-item-name">posts</span>
                   </a>
                 </div>
@@ -685,7 +689,7 @@
                     
                       
                     
-                    <span class="site-state-item-count">28</span>
+                    <span class="site-state-item-count">29</span>
                     <span class="site-state-item-name">categories</span>
                   </a>
                 </div>
@@ -1013,7 +1017,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2021</span>
   <span class="with-love" id="animate">
     <i class="fa fa-user"></i>
   </span>
